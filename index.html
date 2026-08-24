@@ -3,107 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TAPE — peel prototype</title>
+<title>TAPE — peel prototype v2</title>
 <style>
-  :root{
-    --bg:#0d1320;
-    --panel:#151d2b;
-    --board:#efe9dc;
-    --ink:#18202b;
-    --muted:#7e8795;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;height:100%;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
-  body{display:flex;align-items:center;justify-content:center;color:white}
-  #app{width:min(100vw,520px);height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
-  header{
-    height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;
-  }
-  .brand{font-weight:800;letter-spacing:.22em;font-size:14px}
-  .sub{font-size:12px;color:#9fa8b7;margin-top:5px;letter-spacing:.02em}
-  button{
-    appearance:none;border:0;border-radius:14px;background:#202b3d;color:#eef3fb;
-    font:inherit;font-weight:700;padding:10px 14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)
-  }
-  #boardWrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-  #board{
-    position:relative;width:100%;aspect-ratio:0.78;max-height:100%;
-    background:
-      radial-gradient(circle at 30% 20%,rgba(255,255,255,.45),transparent 36%),
-      linear-gradient(145deg,#f5f0e5,#e5decf);
-    border-radius:26px;overflow:hidden;
-    box-shadow:0 24px 60px rgba(0,0,0,.38),inset 0 0 0 1px rgba(0,0,0,.06);
-    touch-action:none;
-  }
-  #board:after{
-    content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;mix-blend-mode:multiply;
-    background-image:
-      repeating-linear-gradient(0deg,transparent 0 7px,rgba(50,40,25,.025) 8px 9px),
-      repeating-linear-gradient(90deg,transparent 0 11px,rgba(255,255,255,.05) 12px 13px);
-  }
-  .tape-piece{
-    position:absolute;transform-origin:left center;border-radius:3px;
-    box-shadow:0 3px 6px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.22);
-    will-change:transform,width,left,top,opacity;
-  }
-  .tape-piece::after{
-    content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
-    background:
-      repeating-linear-gradient(90deg,transparent 0 10px,rgba(255,255,255,.18) 11px 12px,transparent 13px 21px),
-      linear-gradient(180deg,rgba(255,255,255,.12),transparent 55%,rgba(0,0,0,.08));
-  }
-  .end{
-    position:absolute;width:34px;height:34px;border-radius:50%;z-index:1000;
-    transform:translate(-50%,-50%);
-    touch-action:none;
-  }
-  .end::before{
-    content:"";position:absolute;inset:7px;border-radius:50%;
-    background:rgba(255,255,255,.9);
-    box-shadow:0 2px 9px rgba(0,0,0,.18),0 0 0 4px rgba(255,255,255,.18);
-    transition:transform .12s ease,box-shadow .12s ease;
-  }
-  .end.active::before{transform:scale(1.18);box-shadow:0 4px 14px rgba(0,0,0,.28),0 0 0 6px rgba(255,255,255,.22)}
-  .curl{
-    position:absolute;z-index:900;pointer-events:none;transform:translate(-50%,-50%);
-    width:28px;height:18px;border-radius:50%;
-    box-shadow:inset -5px 0 8px rgba(0,0,0,.22),0 3px 5px rgba(0,0,0,.18);
-    opacity:.96;
-  }
-  .hint{
-    position:absolute;z-index:1200;pointer-events:none;width:14px;height:14px;border-radius:50%;
-    background:rgba(255,255,255,.82);transform:translate(-50%,-50%);
-    animation:pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse{0%,100%{opacity:.18;transform:translate(-50%,-50%) scale(.8)}50%{opacity:.72;transform:translate(-50%,-50%) scale(1.25)}}
-  footer{
-    height:78px;display:flex;align-items:center;justify-content:space-between;padding:4px 3px 0;
-    gap:10px;
-  }
-  #status{font-size:13px;color:#aeb7c5;line-height:1.35}
-  #status b{color:#fff}
-  #toast{
-    position:absolute;left:50%;top:18px;transform:translateX(-50%) translateY(-12px);
-    background:rgba(16,21,30,.88);color:white;padding:9px 13px;border-radius:999px;
-    font-size:12px;font-weight:700;letter-spacing:.02em;opacity:0;transition:.2s;z-index:2000;
-    pointer-events:none;backdrop-filter:blur(8px)
-  }
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .finish{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3000;
-    background:rgba(236,230,216,.72);backdrop-filter:blur(8px);
-    opacity:0;pointer-events:none;transition:.35s;
-  }
-  .finish.show{opacity:1;pointer-events:auto}
-  .finishCard{background:rgba(20,27,39,.92);color:white;padding:22px 24px;border-radius:22px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.28)}
-  .finishCard .big{font-size:30px;margin-bottom:6px}
-  .finishCard .small{font-size:13px;color:#bac3d0;margin-bottom:14px}
-  .finishCard button{background:white;color:#18202b}
-  @media (max-height:700px){
-    header{height:56px}
-    footer{height:62px}
-    .sub{display:none}
-  }
+:root{
+  --bg:#0f1623;
+  --text:#eef3fb;
+  --muted:#9aa6b8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;height:100%;overflow:hidden;
+  background:var(--bg);color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body{display:flex;justify-content:center}
+#app{
+  width:min(100vw,560px);height:100dvh;
+  display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+}
+header{
+  height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 3px;
+}
+.brand{font-size:14px;font-weight:800;letter-spacing:.22em}
+.sub{font-size:12px;color:var(--muted);margin-top:4px}
+button{
+  border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;
+  padding:10px 14px;font:inherit;font-weight:700;
+}
+#stageWrap{flex:1;min-height:0;display:flex;align-items:stretch}
+#stage{
+  position:relative;flex:1;overflow:hidden;touch-action:none;
+  border-radius:22px;
+  background:var(--bg);
+}
+.tape{
+  position:absolute;transform-origin:left center;
+  border-radius:2px;
+  box-shadow:0 3px 7px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
+  will-change:left,top,width,transform,opacity;
+}
+.tape:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.16),transparent 45%,rgba(0,0,0,.08)),
+    repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,255,255,.08) 13px 14px,transparent 15px 26px);
+  opacity:.7;
+}
+.hit{
+  position:absolute;width:58px;height:58px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:transparent;z-index:5000;touch-action:none;
+}
+.curl{
+  position:absolute;width:30px;height:20px;border-radius:50%;
+  transform:translate(-50%,-50%);pointer-events:none;z-index:4900;
+  box-shadow:inset -6px 0 9px rgba(0,0,0,.28),0 4px 7px rgba(0,0,0,.25);
+}
+#toast{
+  position:absolute;left:50%;top:14px;transform:translateX(-50%) translateY(-8px);
+  padding:8px 12px;border-radius:999px;background:rgba(20,29,43,.9);
+  font-size:12px;font-weight:700;opacity:0;transition:.18s;pointer-events:none;z-index:9000;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#finish{
+  position:absolute;inset:0;background:rgba(15,22,35,.76);backdrop-filter:blur(7px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:.28s;z-index:10000;
+}
+#finish.show{opacity:1;pointer-events:auto}
+.card{
+  text-align:center;padding:22px 24px;border-radius:22px;background:#182235;
+  box-shadow:0 20px 50px rgba(0,0,0,.3)
+}
+.card .big{font-size:30px;font-weight:800;margin-bottom:5px}
+.card .small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
+footer{
+  height:74px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px
+}
+#status{font-size:13px;line-height:1.35;color:#aeb8c7}
+#status b{color:#fff}
+@media(max-height:700px){
+  header{height:54px}.sub{display:none}footer{height:60px}
+}
 </style>
 </head>
 <body>
@@ -111,18 +93,18 @@
   <header>
     <div>
       <div class="brand">TAPE</div>
-      <div class="sub">peel the crosshatch clean</div>
+      <div class="sub">drag a loose end and peel</div>
     </div>
     <button id="newBtn">New board</button>
   </header>
 
-  <div id="boardWrap">
-    <div id="board">
+  <div id="stageWrap">
+    <div id="stage">
       <div id="toast"></div>
-      <div id="finish" class="finish">
-        <div class="finishCard">
+      <div id="finish">
+        <div class="card">
           <div class="big">clean.</div>
-          <div class="small">Every strip is off.</div>
+          <div class="small">all tape removed</div>
           <button id="againBtn">Again</button>
         </div>
       </div>
@@ -130,14 +112,14 @@
   </div>
 
   <footer>
-    <div id="status"><b>Drag a white tab.</b><br>Peel until another strip pins it down.</div>
+    <div id="status"><b>Drag a tape end.</b><br>It stops when a higher layer pins it.</div>
     <button id="undoBtn">Undo</button>
   </footer>
 </div>
 
 <script>
 (() => {
-  const board = document.getElementById('board');
+  const stage = document.getElementById('stage');
   const status = document.getElementById('status');
   const toast = document.getElementById('toast');
   const finish = document.getElementById('finish');
@@ -145,195 +127,188 @@
   const againBtn = document.getElementById('againBtn');
   const undoBtn = document.getElementById('undoBtn');
 
-  const COLORS = ['#f05a5b','#f7c34a','#4aa4e0','#64c58a','#a576d7','#ef8ac2','#f28e50','#52c8c3'];
+  const COLORS = ['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
   let strips = [];
   let crossings = [];
-  let drag = null;
   let history = [];
-  let resizeTimer = null;
+  let drag = null;
 
-  function rand(a,b){return a+Math.random()*(b-a)}
-  function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
-  function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-  function hypot(x,y){return Math.hypot(x,y)}
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const hypot=Math.hypot;
 
-  function geom(strip){
-    const w=board.clientWidth,h=board.clientHeight;
-    const x1=strip.ax*w, y1=strip.ay*h, x2=strip.bx*w, y2=strip.by*h;
-    const dx=x2-x1,dy=y2-y1,L=hypot(dx,dy),ux=dx/L,uy=dy/L;
-    return {x1,y1,x2,y2,dx,dy,L,ux,uy,angle:Math.atan2(dy,dx)*180/Math.PI};
+  function geom(s){
+    const w=stage.clientWidth,h=stage.clientHeight;
+    const x1=s.ax*w,y1=s.ay*h,x2=s.bx*w,y2=s.by*h;
+    const dx=x2-x1,dy=y2-y1,L=hypot(dx,dy);
+    return {x1,y1,x2,y2,dx,dy,L,ux:dx/L,uy:dy/L};
+  }
+  function pointOn(s,t){
+    const g=geom(s);
+    return {x:g.x1+g.dx*t,y:g.y1+g.dy*t};
   }
 
-  function pointOn(strip,t){
-    const g=geom(strip);return {x:g.x1+g.dx*t,y:g.y1+g.dy*t}
-  }
-
-  function intersection(a,b){
+  function lineIntersection(a,b){
     const p={x:a.ax,y:a.ay}, r={x:a.bx-a.ax,y:a.by-a.ay};
     const q={x:b.ax,y:b.ay}, s={x:b.bx-b.ax,y:b.by-b.ay};
     const cross=(u,v)=>u.x*v.y-u.y*v.x;
-    const rxs=cross(r,s);
-    if(Math.abs(rxs)<1e-6)return null;
+    const d=cross(r,s);
+    if(Math.abs(d)<1e-8)return null;
     const qp={x:q.x-p.x,y:q.y-p.y};
-    const t=cross(qp,s)/rxs, u=cross(qp,r)/rxs;
-    if(t>.045&&t<.955&&u>.045&&u<.955)return {ta:t,tb:u};
+    const ta=cross(qp,s)/d, tb=cross(qp,r)/d;
+    if(ta>.04&&ta<.96&&tb>.04&&tb<.96)return {ta,tb};
     return null;
   }
 
-  function makeBoard(){
+  function build(){
     finish.classList.remove('show');
-    history=[];
+    history=[];drag=null;
+    [...stage.querySelectorAll('.tape,.hit,.curl')].forEach(el=>el.remove());
     strips=[];crossings=[];
-    [...board.querySelectorAll('.tape-piece,.end,.curl,.hint')].forEach(e=>e.remove());
 
-    const w=board.clientWidth,h=board.clientHeight;
-    const count = w<420 ? 15 : 18;
+    const count = stage.clientWidth < 420 ? 14 : 17;
     const horiz = Math.round(count*.52);
 
+    // Each strip receives ONE true physical layer.
+    // Higher layer value = visually and mechanically on top everywhere.
+    const layers=[...Array(count).keys()];
+    for(let i=layers.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [layers[i],layers[j]]=[layers[j],layers[i]];
+    }
+
     for(let i=0;i<count;i++){
-      const isH=i<horiz;
-      const wig=rand(-.06,.06);
+      const horizontal=i<horiz;
       let ax,ay,bx,by;
-      if(isH){
-        ay=rand(.09,.91); by=clamp(ay+wig,.05,.95);
-        ax=rand(-.06,.03); bx=rand(.97,1.06);
+      if(horizontal){
+        ay=rand(.06,.94); by=clamp(ay+rand(-.035,.035),.03,.97);
+        ax=rand(-.09,-.015); bx=rand(1.015,1.09);
       }else{
-        ax=rand(.08,.92); bx=clamp(ax+wig,.04,.96);
-        ay=rand(-.05,.04); by=rand(.96,1.05);
+        ax=rand(.05,.95); bx=clamp(ax+rand(-.035,.035),.03,.97);
+        ay=rand(-.08,-.01); by=rand(1.01,1.08);
       }
-      strips.push({
-        id:i,ax,ay,bx,by,color:COLORS[i%COLORS.length],
-        width:rand(19,30), leftPeel:0, rightPeel:0,
-        removed:false, el:null, leftEnd:null,rightEnd:null,leftCurl:null,rightCurl:null
-      });
+
+      const s={
+        id:i,layer:layers[i],
+        ax,ay,bx,by,
+        width:rand(21,31),
+        color:COLORS[i%COLORS.length],
+        leftPeel:0,rightPeel:0,removed:false
+      };
+      strips.push(s);
     }
 
-    // intersections with randomized over/under relation.
-    for(let i=0;i<strips.length;i++){
-      for(let j=i+1;j<strips.length;j++){
-        const hit=intersection(strips[i],strips[j]);
+    for(let i=0;i<count;i++){
+      for(let j=i+1;j<count;j++){
+        const hit=lineIntersection(strips[i],strips[j]);
         if(hit){
-          crossings.push({
-            a:i,b:j,ta:hit.ta,tb:hit.tb,
-            top:Math.random()<.5?i:j
-          });
+          crossings.push({a:i,b:j,ta:hit.ta,tb:hit.tb});
         }
       }
     }
 
-    // ensure a few obvious long-peel wins by biasing some crossing tops.
-    const special=[0,2,5];
-    special.forEach(id=>{
-      crossings.forEach(c=>{
-        if((c.a===id||c.b===id) && Math.random()<.48){
-          c.top=id;
-        }
-      });
-    });
-
-    strips.forEach(createStripEl);
+    strips.forEach(createEls);
     render();
   }
 
-  function createStripEl(s){
-    const el=document.createElement('div');
-    el.className='tape-piece'; el.dataset.id=s.id;
-    board.appendChild(el); s.el=el;
+  function createEls(s){
+    const tape=document.createElement('div');
+    tape.className='tape';
+    tape.style.background=s.color;
+    tape.style.zIndex=100+s.layer;
+    stage.appendChild(tape);
+    s.el=tape;
 
-    const le=document.createElement('div');
-    le.className='end';le.dataset.id=s.id;le.dataset.side='left';
-    const re=document.createElement('div');
-    re.className='end';re.dataset.id=s.id;re.dataset.side='right';
-    board.appendChild(le);board.appendChild(re);
-    s.leftEnd=le;s.rightEnd=re;
+    const lh=document.createElement('div'), rh=document.createElement('div');
+    lh.className=rh.className='hit';
+    lh.dataset.id=rh.dataset.id=s.id;
+    lh.dataset.side='left';rh.dataset.side='right';
+    stage.appendChild(lh);stage.appendChild(rh);
+    s.lh=lh;s.rh=rh;
 
-    const lc=document.createElement('div');lc.className='curl';board.appendChild(lc);s.leftCurl=lc;
-    const rc=document.createElement('div');rc.className='curl';board.appendChild(rc);s.rightCurl=rc;
+    const lc=document.createElement('div'),rc=document.createElement('div');
+    lc.className=rc.className='curl';
+    stage.appendChild(lc);stage.appendChild(rc);
+    s.lc=lc;s.rc=rc;
 
-    [le,re].forEach(end=>{
-      end.addEventListener('pointerdown',startDrag,{passive:false});
-    });
+    [lh,rh].forEach(el=>el.addEventListener('pointerdown',startDrag,{passive:false}));
   }
 
-  function crossingBlocks(stripId, t){
-    const c = crossings.find(c => {
-      if(c.a===stripId && Math.abs(c.ta-t)<1e-6) return true;
-      if(c.b===stripId && Math.abs(c.tb-t)<1e-6) return true;
-      return false;
-    });
-    if(!c)return false;
-    const other = c.a===stripId?c.b:c.a;
-    const os = strips[other];
-    if(os.removed)return false;
-    const ot = c.a===stripId?c.tb:c.ta;
-    // If other strip has been peeled past the crossing from either side, it no longer blocks.
-    const otherPresent = ot > os.leftPeel + .002 && ot < 1-os.rightPeel-.002;
-    return otherPresent && c.top===other;
+  function isOtherPresent(otherId,t){
+    const o=strips[otherId];
+    if(o.removed)return false;
+    return t > o.leftPeel+.002 && t < 1-o.rightPeel-.002;
   }
 
-  function peelLimit(s, side){
-    if(s.removed)return side==='left'?s.leftPeel:s.rightPeel;
-    const current = side==='left'?s.leftPeel:1-s.rightPeel;
-    let limit = side==='left' ? 1-s.rightPeel : s.leftPeel;
+  function blockingCrossings(s){
+    const out=[];
+    for(const c of crossings){
+      let selfT=null, otherId=null, otherT=null;
+      if(c.a===s.id){selfT=c.ta;otherId=c.b;otherT=c.tb}
+      else if(c.b===s.id){selfT=c.tb;otherId=c.a;otherT=c.ta}
+      else continue;
 
-    const hits=[];
-    crossings.forEach(c=>{
-      let t=null;
-      if(c.a===s.id)t=c.ta; else if(c.b===s.id)t=c.tb;
-      if(t==null)return;
-      if(side==='left'){
-        if(t>current+.002 && t<limit-.002 && crossingBlocks(s.id,t)) hits.push(t);
-      }else{
-        if(t<current-.002 && t>limit+.002 && crossingBlocks(s.id,t)) hits.push(t);
+      const o=strips[otherId];
+
+      // Mechanical rule exactly matches visual rule:
+      // only a strip on a higher global layer can pin this strip.
+      if(o.layer > s.layer && isOtherPresent(otherId,otherT)){
+        out.push(selfT);
       }
-    });
-    if(hits.length){
-      limit = side==='left' ? Math.min(...hits) : Math.max(...hits);
     }
-    return limit;
+    return out;
   }
 
-  function availableDistance(s,side){
-    const lim=peelLimit(s,side);
+  function peelLimit(s,side){
+    const curL=s.leftPeel;
+    const curR=1-s.rightPeel;
+    const blockers=blockingCrossings(s);
+
+    if(side==='left'){
+      const ahead=blockers.filter(t=>t>curL+.002 && t<curR-.002);
+      return ahead.length ? Math.min(...ahead) : curR;
+    }else{
+      const ahead=blockers.filter(t=>t<curR-.002 && t>curL+.002);
+      return ahead.length ? Math.max(...ahead) : curL;
+    }
+  }
+
+  function available(s,side){
     const cur=side==='left'?s.leftPeel:1-s.rightPeel;
-    return Math.abs(lim-cur);
+    return Math.abs(peelLimit(s,side)-cur)>.004;
   }
 
   function snapshot(){
     return strips.map(s=>({leftPeel:s.leftPeel,rightPeel:s.rightPeel,removed:s.removed}));
   }
-  function restore(snap){
-    strips.forEach((s,i)=>Object.assign(s,snap[i]));
-    finish.classList.remove('show');
-    render();
-  }
 
   function startDrag(e){
     e.preventDefault();
-    const end=e.currentTarget;
-    const s=strips[+end.dataset.id];
-    if(s.removed)return;
-    const side=end.dataset.side;
-    if(availableDistance(s,side)<.004)return;
+    const el=e.currentTarget;
+    const s=strips[+el.dataset.id];
+    const side=el.dataset.side;
+    if(s.removed||!available(s,side))return;
+
     history.push(snapshot());
-    if(history.length>30)history.shift();
+    if(history.length>40)history.shift();
 
     const g=geom(s);
     const startT=side==='left'?s.leftPeel:1-s.rightPeel;
     const limit=peelLimit(s,side);
-    drag={pid:e.pointerId,s,side,g,startX:e.clientX,startY:e.clientY,startT,limit,lastT:startT};
-    end.classList.add('active');
-    end.setPointerCapture?.(e.pointerId);
-    end.addEventListener('pointermove',moveDrag,{passive:false});
-    end.addEventListener('pointerup',endDrag,{passive:false,once:true});
-    end.addEventListener('pointercancel',endDrag,{passive:false,once:true});
+
+    drag={pid:e.pointerId,s,side,g,startT,limit,lastT:startT};
+    el.setPointerCapture?.(e.pointerId);
+    el.addEventListener('pointermove',moveDrag,{passive:false});
+    el.addEventListener('pointerup',endDrag,{passive:false,once:true});
+    el.addEventListener('pointercancel',endDrag,{passive:false,once:true});
   }
 
   function moveDrag(e){
     if(!drag||e.pointerId!==drag.pid)return;
     e.preventDefault();
-    const rect=board.getBoundingClientRect();
-    const x=e.clientX-rect.left,y=e.clientY-rect.top;
+
+    const r=stage.getBoundingClientRect();
+    const x=e.clientX-r.left,y=e.clientY-r.top;
     const g=drag.g;
     const proj=((x-g.x1)*g.dx+(y-g.y1)*g.dy)/(g.L*g.L);
 
@@ -351,131 +326,106 @@
 
   function endDrag(e){
     if(!drag)return;
-    const {s,side,limit,startT,lastT}=drag;
-    s.leftEnd.classList.remove('active');s.rightEnd.classList.remove('active');
-    s.leftEnd.removeEventListener('pointermove',moveDrag);
-    s.rightEnd.removeEventListener('pointermove',moveDrag);
-
+    const {s,side,startT,limit,lastT}=drag;
     const moved=Math.abs(lastT-startT);
-    const reached=Math.abs(lastT-limit)<.025;
+    const reached=Math.abs(lastT-limit)<.02;
 
-    if(moved<.02){
-      // tap gives a short "helpful" peel, still tactile and non-punitive
-      if(side==='left')s.leftPeel=Math.min(limit,s.leftPeel+.11);
-      else s.rightPeel=Math.min(1-limit,s.rightPeel+.11);
+    if(moved<.015){
+      if(side==='left') s.leftPeel=Math.min(limit,s.leftPeel+.08);
+      else s.rightPeel=Math.min(1-limit,s.rightPeel+.08);
     }else if(reached){
       if(side==='left')s.leftPeel=limit;
       else s.rightPeel=1-limit;
     }
 
-    if(s.leftPeel+s.rightPeel>=.985){
-      s.leftPeel=Math.min(1,s.leftPeel);
-      s.rightPeel=Math.min(1,s.rightPeel);
+    if(s.leftPeel+s.rightPeel>=.992){
       s.removed=true;
-      showToast('strip free');
-      if(navigator.vibrate) navigator.vibrate(14);
-    }else if(reached && Math.abs(limit-(side==='left'?1-s.rightPeel:s.leftPeel))>.01){
-      showToast('pinned here');
-      if(navigator.vibrate) navigator.vibrate(8);
+      if(navigator.vibrate)navigator.vibrate(12);
+      showToast('free');
+    }else if(reached){
+      if(navigator.vibrate)navigator.vibrate(6);
     }
+
     drag=null;
     render();
     checkFinish();
   }
 
-  function showToast(txt){
-    toast.textContent=txt;toast.classList.add('show');
-    clearTimeout(showToast.t);
-    showToast.t=setTimeout(()=>toast.classList.remove('show'),650);
-  }
-
   function render(){
-    strips.forEach(s=>{
-      const g=geom(s);
+    for(const s of strips){
       if(s.removed){
         s.el.style.opacity='0';
-        s.leftEnd.style.display=s.rightEnd.style.display='none';
-        s.leftCurl.style.display=s.rightCurl.style.display='none';
-        return;
+        s.lh.style.display=s.rh.style.display=s.lc.style.display=s.rc.style.display='none';
+        continue;
       }
+
       const t0=s.leftPeel,t1=1-s.rightPeel;
       const p0=pointOn(s,t0),p1=pointOn(s,t1);
-      const length=Math.max(0,hypot(p1.x-p0.x,p1.y-p0.y));
+      const len=hypot(p1.x-p0.x,p1.y-p0.y);
       const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
 
       s.el.style.opacity='1';
       s.el.style.left=p0.x+'px';
       s.el.style.top=(p0.y-s.width/2)+'px';
-      s.el.style.width=length+'px';
+      s.el.style.width=Math.max(0,len)+'px';
       s.el.style.height=s.width+'px';
       s.el.style.transform=`rotate(${ang}deg)`;
-      s.el.style.background=s.color;
 
-      const lp=pointOn(s,t0),rp=pointOn(s,t1);
-      placeEnd(s.leftEnd,lp,s.leftPeel<.985);
-      placeEnd(s.rightEnd,rp,s.rightPeel<.985);
+      placeHit(s.lh,p0,available(s,'left'));
+      placeHit(s.rh,p1,available(s,'right'));
 
-      styleCurl(s.leftCurl,lp,s,s.leftPeel>0.01);
-      styleCurl(s.rightCurl,rp,s,s.rightPeel>0.01);
-
-      // z-index per local over/under cannot be represented by one DOM layer,
-      // so use average crossing dominance plus id as a visual approximation.
-      let score=20+s.id;
-      crossings.forEach(c=>{
-        if(c.a===s.id||c.b===s.id){
-          score += c.top===s.id?3:-2;
-        }
-      });
-      s.el.style.zIndex=score;
-    });
-
-    // Tabs & curls stay above tape; visibility hints only when peel is possible.
-    strips.forEach(s=>{
-      if(s.removed)return;
-      const la=availableDistance(s,'left')>.004, ra=availableDistance(s,'right')>.004;
-      s.leftEnd.style.opacity=la?'1':'.18';
-      s.rightEnd.style.opacity=ra?'1':'.18';
-      s.leftEnd.style.pointerEvents=la?'auto':'none';
-      s.rightEnd.style.pointerEvents=ra?'auto':'none';
-    });
+      placeCurl(s.lc,p0,s,s.leftPeel>.01);
+      placeCurl(s.rc,p1,s,s.rightPeel>.01);
+    }
 
     const remaining=strips.filter(s=>!s.removed).length;
     const partial=strips.filter(s=>!s.removed&&(s.leftPeel>.015||s.rightPeel>.015)).length;
-    status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Pull any bright white tab'}`;
-    undoBtn.disabled=history.length===0;
+    status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Drag any exposed end'}`;
+    undoBtn.disabled=!history.length;
     undoBtn.style.opacity=history.length?1:.4;
   }
 
-  function placeEnd(el,p,show){
-    el.style.display=show?'block':'none';
-    el.style.left=p.x+'px';el.style.top=p.y+'px';
+  function placeHit(el,p,on){
+    el.style.display=on?'block':'none';
+    el.style.left=p.x+'px';
+    el.style.top=p.y+'px';
   }
-  function styleCurl(el,p,s,show){
-    el.style.display=show?'block':'none';
-    el.style.left=p.x+'px';el.style.top=p.y+'px';
-    el.style.background=`radial-gradient(circle at 35% 50%,rgba(255,255,255,.5) 0 12%,${s.color} 20% 58%,rgba(40,40,40,.28) 60% 68%,${s.color} 70%)`;
+
+  function placeCurl(el,p,s,on){
+    el.style.display=on?'block':'none';
+    el.style.left=p.x+'px';
+    el.style.top=p.y+'px';
+    el.style.background=`radial-gradient(circle at 35% 50%,rgba(255,255,255,.46) 0 12%,${s.color} 20% 58%,rgba(25,25,25,.3) 60% 69%,${s.color} 71%)`;
+  }
+
+  function restore(snap){
+    strips.forEach((s,i)=>Object.assign(s,snap[i]));
+    finish.classList.remove('show');
+    render();
+  }
+
+  function showToast(txt){
+    toast.textContent=txt;
+    toast.classList.add('show');
+    clearTimeout(showToast.t);
+    showToast.t=setTimeout(()=>toast.classList.remove('show'),500);
   }
 
   function checkFinish(){
     if(strips.every(s=>s.removed)){
-      setTimeout(()=>finish.classList.add('show'),280);
-      if(navigator.vibrate) navigator.vibrate([20,45,20]);
+      setTimeout(()=>finish.classList.add('show'),220);
+      if(navigator.vibrate)navigator.vibrate([16,36,16]);
     }
   }
 
+  newBtn.addEventListener('click',build);
+  againBtn.addEventListener('click',build);
   undoBtn.addEventListener('click',()=>{
-    if(!history.length)return;
-    restore(history.pop());
+    if(history.length)restore(history.pop());
   });
-  newBtn.addEventListener('click',makeBoard);
-  againBtn.addEventListener('click',makeBoard);
+  window.addEventListener('resize',()=>render());
 
-  window.addEventListener('resize',()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer=setTimeout(render,80);
-  });
-
-  requestAnimationFrame(makeBoard);
+  requestAnimationFrame(build);
 })();
 </script>
 </body>
