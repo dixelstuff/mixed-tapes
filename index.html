@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11H</div><div class="sub">dense crosshatch · hidden locked cycles · instant taps</div></div>
+  <div><div class="brand">TAPE · V11I</div><div class="sub">dense crosshatch · hidden locked cycles · runtime-fixed</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -563,13 +563,13 @@ function queueTap(target){
 
 function makeGhostPeel(s,access){
  const ghost=document.createElement('div');
- ghost.className='tape-seg';
+ ghost.className='tape';
  ghost.style.background=s.color;
  ghost.style.zIndex=5000;
  world.appendChild(ghost);
 
  const roll=document.createElement('div');
- roll.className='peel-roll';
+ roll.className='roll';
  roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.48) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.3) 60% 69%,${s.color} 71%)`;
  roll.style.opacity='1';
  world.appendChild(roll);
@@ -642,7 +642,7 @@ function performImmediateTap(s,t,iv){
  tapCount++;
 
  // Physics/game-state update happens NOW.
- applyPeelInterval(s,access);
+ commitPeel(s,access);
 
  // Render committed state immediately so next tap sees the new grid.
  render();
