@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TAPE — peel prototype v3</title>
+<title>TAPE — tap peel prototype</title>
 <style>
 :root{
   --bg:#0f1623;
@@ -36,25 +36,24 @@ button{
 #world{
   position:absolute;left:0;top:0;width:1100px;height:1500px;transform-origin:0 0;
 }
-.tape{
+.tape-seg{
   position:absolute;transform-origin:left center;border-radius:3px;
   box-shadow:0 3px 7px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
+  pointer-events:none;
 }
-.tape:after{
+.tape-seg:after{
   content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;
   background:
     linear-gradient(180deg,rgba(255,255,255,.16),transparent 45%,rgba(0,0,0,.09)),
     repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.08) 14px 15px,transparent 16px 28px);
 }
-.endpoint{
-  position:absolute;width:46px;height:46px;border-radius:50%;
-  transform:translate(-50%,-50%);z-index:7000;background:transparent;
-  touch-action:none;
-}
-.curl{
-  position:absolute;width:32px;height:21px;border-radius:50%;
-  transform:translate(-50%,-50%);pointer-events:none;z-index:6900;
-  box-shadow:inset -6px 0 9px rgba(0,0,0,.28),0 4px 7px rgba(0,0,0,.25);
+.peel-roll{
+  position:absolute;width:34px;height:22px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  box-shadow:inset -7px 0 10px rgba(0,0,0,.3),0 4px 8px rgba(0,0,0,.28);
+  z-index:8000;
+  opacity:0;
 }
 #hud{
   position:absolute;left:12px;top:12px;z-index:9000;
@@ -88,14 +87,14 @@ footer{
   <header>
     <div>
       <div class="brand">TAPE</div>
-      <div class="sub">pinch to zoom · drag background to move</div>
+      <div class="sub">tap topmost tape · pinch to zoom · drag to pan</div>
     </div>
     <button id="newBtn">New board</button>
   </header>
 
   <div id="viewport">
     <div id="world"></div>
-    <div id="hud">pinch / pan · drag tape ends</div>
+    <div id="hud">tap tape to peel it back</div>
     <div id="finish">
       <div class="card">
         <div class="big">clean.</div>
@@ -106,7 +105,7 @@ footer{
   </div>
 
   <footer>
-    <div id="status"><b>Peel from either end.</b><br>A crossing stays locked until the tape above it is gone there.</div>
+    <div id="status"><b>Tap an exposed tape segment.</b><br>Only segments connected to a free end can peel.</div>
     <button id="undoBtn">Undo</button>
   </footer>
 </div>
@@ -128,21 +127,16 @@ footer{
   let view={scale:.6,tx:0,ty:0};
   let pointers=new Map();
   let gesture=null;
-  let peelDrag=null;
+  let tapCandidate=null;
+  let animating=false;
 
   const rand=(a,b)=>a+Math.random()*(b-a);
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const hypot=Math.hypot;
 
-  function screenToWorld(x,y){
-    const r=viewport.getBoundingClientRect();
-    return {x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale};
-  }
-
   function applyView(){
     world.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.scale})`;
   }
-
   function fitWorld(){
     const vw=viewport.clientWidth, vh=viewport.clientHeight;
     const s=Math.min(vw/WORLD_W,vh/WORLD_H)*0.96;
@@ -151,22 +145,26 @@ footer{
     view.ty=(vh-WORLD_H*s)/2;
     applyView();
   }
+  function screenToWorld(x,y){
+    const r=viewport.getBoundingClientRect();
+    return {x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale};
+  }
 
   function makeStrip(i,layer){
-    const horizontal = i%2===0;
-    const margin=120;
+    const horizontal=i%2===0;
+    const margin=110;
     if(horizontal){
       const y=rand(margin,WORLD_H-margin);
       const y2=clamp(y+rand(-55,55),margin,WORLD_H-margin);
-      const x1=rand(margin,240), x2=rand(WORLD_W-240,WORLD_W-margin);
-      return {id:i,layer,ax:x1,ay:y,bx:x2,by:y2,width:rand(28,42),color:COLORS[i%COLORS.length],
-              leftPeel:0,rightPeel:0,removed:false};
+      const x1=rand(margin,240),x2=rand(WORLD_W-240,WORLD_W-margin);
+      return {id:i,layer,ax:x1,ay:y,bx:x2,by:y2,width:rand(30,44),color:COLORS[i%COLORS.length],
+              leftPeel:0,rightPeel:0,removed:false,seg:null,roll:null};
     }else{
       const x=rand(margin,WORLD_W-margin);
       const x2=clamp(x+rand(-55,55),margin,WORLD_W-margin);
-      const y1=rand(margin,240), y2=rand(WORLD_H-240,WORLD_H-margin);
-      return {id:i,layer,ax:x,ay:y1,bx:x2,by:y2,width:rand(28,42),color:COLORS[i%COLORS.length],
-              leftPeel:0,rightPeel:0,removed:false};
+      const y1=rand(margin,240),y2=rand(WORLD_H-240,WORLD_H-margin);
+      return {id:i,layer,ax:x,ay:y1,bx:x2,by:y2,width:rand(30,44),color:COLORS[i%COLORS.length],
+              leftPeel:0,rightPeel:0,removed:false,seg:null,roll:null};
     }
   }
 
@@ -177,19 +175,19 @@ footer{
   function pointOn(s,t){return {x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
 
   function lineIntersection(a,b){
-    const p={x:a.ax,y:a.ay}, r={x:a.bx-a.ax,y:a.by-a.ay};
-    const q={x:b.ax,y:b.ay}, s={x:b.bx-b.ax,y:b.by-b.ay};
+    const p={x:a.ax,y:a.ay},r={x:a.bx-a.ax,y:a.by-a.ay};
+    const q={x:b.ax,y:b.ay},s={x:b.bx-b.ax,y:b.by-b.ay};
     const cross=(u,v)=>u.x*v.y-u.y*v.x;
     const d=cross(r,s);
     if(Math.abs(d)<1e-8)return null;
     const qp={x:q.x-p.x,y:q.y-p.y};
-    const ta=cross(qp,s)/d, tb=cross(qp,r)/d;
+    const ta=cross(qp,s)/d,tb=cross(qp,r)/d;
     if(ta>.04&&ta<.96&&tb>.04&&tb<.96)return {ta,tb};
     return null;
   }
 
   function build(){
-    history=[];strips=[];crossings=[];pointers.clear();gesture=null;peelDrag=null;
+    history=[];strips=[];crossings=[];pointers.clear();gesture=null;tapCandidate=null;animating=false;
     finish.classList.remove('show');
     world.innerHTML='';
 
@@ -215,26 +213,16 @@ footer{
   }
 
   function createEls(s){
-    const tape=document.createElement('div');
-    tape.className='tape';
-    tape.style.background=s.color;
-    tape.style.zIndex=100+s.layer;
-    world.appendChild(tape); s.el=tape;
+    const seg=document.createElement('div');
+    seg.className='tape-seg';
+    seg.style.background=s.color;
+    seg.style.zIndex=100+s.layer;
+    world.appendChild(seg);s.seg=seg;
 
-    const l=document.createElement('div'), r=document.createElement('div');
-    l.className=r.className='endpoint';
-    l.dataset.id=r.dataset.id=s.id;
-    l.dataset.side='left';r.dataset.side='right';
-    world.appendChild(l);world.appendChild(r);
-    s.lh=l;s.rh=r;
-
-    const lc=document.createElement('div'), rc=document.createElement('div');
-    lc.className=rc.className='curl';
-    world.appendChild(lc);world.appendChild(rc);
-    s.lc=lc;s.rc=rc;
-
-    l.addEventListener('pointerdown',startPeel,{passive:false});
-    r.addEventListener('pointerdown',startPeel,{passive:false});
+    const roll=document.createElement('div');
+    roll.className='peel-roll';
+    roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.48) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.3) 60% 69%,${s.color} 71%)`;
+    world.appendChild(roll);s.roll=roll;
   }
 
   function otherPresent(otherId,t){
@@ -258,7 +246,7 @@ footer{
   }
 
   function peelLimit(s,side){
-    const left=s.leftPeel, right=1-s.rightPeel;
+    const left=s.leftPeel,right=1-s.rightPeel;
     const blockers=blockersFor(s);
     if(side==='left'){
       const ahead=blockers.filter(t=>t>left+.001 && t<right-.001);
@@ -271,123 +259,204 @@ footer{
 
   function currentT(s,side){return side==='left'?s.leftPeel:1-s.rightPeel}
 
-  function canPeel(s,side){
-    return Math.abs(peelLimit(s,side)-currentT(s,side))>.002;
-  }
-
   function snapshot(){
     return strips.map(s=>({leftPeel:s.leftPeel,rightPeel:s.rightPeel,removed:s.removed}));
   }
 
-  function startPeel(e){
-    e.preventDefault();e.stopPropagation();
-    if(pointers.size>0)return;
-    const s=strips[+e.currentTarget.dataset.id],side=e.currentTarget.dataset.side;
-    if(s.removed||!canPeel(s,side))return;
-
-    history.push(snapshot());
-    const p=screenToWorld(e.clientX,e.clientY);
-    const startT=currentT(s,side);
-    const limit=peelLimit(s,side);
-    peelDrag={pid:e.pointerId,s,side,startT,limit,lastT:startT};
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    e.currentTarget.addEventListener('pointermove',movePeel,{passive:false});
-    e.currentTarget.addEventListener('pointerup',endPeel,{passive:false,once:true});
-    e.currentTarget.addEventListener('pointercancel',endPeel,{passive:false,once:true});
+  function pointToSegmentDistance(px,py,s){
+    const g=geom(s);
+    const vx=g.dx,vy=g.dy,wx=px-g.x1,wy=py-g.y1;
+    const vv=vx*vx+vy*vy;
+    let t=vv?((wx*vx+wy*vy)/vv):0;
+    t=clamp(t,s.leftPeel,1-s.rightPeel);
+    const qx=g.x1+vx*t,qy=g.y1+vy*t;
+    return {dist:hypot(px-qx,py-qy),t};
   }
 
-  function movePeel(e){
-    if(!peelDrag||e.pointerId!==peelDrag.pid)return;
-    e.preventDefault();
-    const p=screenToWorld(e.clientX,e.clientY);
-    const s=peelDrag.s, g=geom(s);
-    const proj=((p.x-g.x1)*g.dx+(p.y-g.y1)*g.dy)/(g.L*g.L);
+  function actualHitInfo(p,s){
+    const hit=pointToSegmentDistance(p.x,p.y,s);
+    return {
+      ...hit,
+      half:s.width/2,
+      inside:hit.dist<=s.width/2
+    };
+  }
 
-    let t;
-    if(peelDrag.side==='left'){
-      t=clamp(proj,peelDrag.startT,peelDrag.limit);
-      s.leftPeel=t;
-    }else{
-      t=clamp(proj,peelDrag.limit,peelDrag.startT);
-      s.rightPeel=1-t;
+  function localCrossOverlapNear(p,a,b){
+    // Only treat layer as a selection bias where the two tape bodies
+    // genuinely overlap near this point.
+    const ia=actualHitInfo(p,a), ib=actualHitInfo(p,b);
+    return ia.dist <= ia.half+7/view.scale && ib.dist <= ib.half+7/view.scale;
+  }
+
+  function pickTapeAt(p){
+    const visible=strips.filter(s=>!s.removed);
+    const infos=visible.map(s=>({s,...actualHitInfo(p,s)}));
+
+    // First: tapes whose actual painted body contains the tap.
+    const strict=infos.filter(x=>x.inside);
+    if(strict.length===1) return {s:strict[0].s,t:strict[0].t};
+
+    if(strict.length>1){
+      // If actual tape bodies overlap at the tapped point, the upper tape wins.
+      strict.sort((a,b)=>b.s.layer-a.s.layer);
+      return {s:strict[0].s,t:strict[0].t};
     }
-    peelDrag.lastT=t;
-    render();
+
+    // Outside the literal tape body, allow a small finger-friendly slop.
+    // Normally closest tape wins; upper-layer preference is only local
+    // when the slop regions themselves overlap around a true crossing/parallel overlap.
+    const slop=10/view.scale;
+    const near=infos.filter(x=>x.dist<=x.half+slop);
+    if(!near.length)return null;
+    near.sort((a,b)=>a.dist-b.dist);
+
+    let chosen=near[0];
+    for(const other of near.slice(1)){
+      if(localCrossOverlapNear(p,chosen.s,other.s)){
+        if(other.s.layer>chosen.s.layer && other.dist<=other.half+slop*.55){
+          chosen=other;
+        }
+      }
+    }
+    return {s:chosen.s,t:chosen.t};
   }
 
-  function endPeel(e){
-    if(!peelDrag)return;
-    const {s,side,startT,limit,lastT}=peelDrag;
+  function accessibleSegmentAt(s,t){
+    const leftEdge=s.leftPeel;
+    const rightEdge=1-s.rightPeel;
+    const blockers=blockersFor(s)
+      .filter(x=>x>leftEdge+.001 && x<rightEdge-.001)
+      .sort((a,b)=>a-b);
 
-    // Hard lock: snap back to legal segment if released short,
-    // never allow "stop then resume" to jump through a pin.
-    const reached=Math.abs(lastT-limit)<.018;
-    const moved=Math.abs(lastT-startT);
-
-    if(reached){
-      if(side==='left')s.leftPeel=limit;
-      else s.rightPeel=1-limit;
-    }else{
-      if(moved<.01){
-        // no auto-advance on tap; this avoids bypassing the lock
-        if(side==='left')s.leftPeel=startT;
-        else s.rightPeel=1-startT;
+    let leftBlock=null, rightBlock=null;
+    for(const b of blockers){
+      if(b<t-.001) leftBlock=b;
+      else if(b>t+.001){ rightBlock=b; break; }
+      else {
+        // Tapped essentially on a pinned crossing: regard it as blocked.
+        return null;
       }
     }
 
-    if(s.leftPeel+s.rightPeel>=.995){
-      s.removed=true;
-      if(navigator.vibrate)navigator.vibrate(10);
+    // The exposed segment containing t is bounded by the nearest pin on each side,
+    // or by a genuine free end if no pin exists on that side.
+    const segLeft = leftBlock ?? leftEdge;
+    const segRight = rightBlock ?? rightEdge;
+
+    const leftAccessible = leftBlock===null;
+    const rightAccessible = rightBlock===null;
+
+    // Pinned at both ends: this middle segment cannot be peeled at all.
+    if(!leftAccessible && !rightAccessible) return null;
+
+    if(leftAccessible && rightAccessible){
+      // Entire remaining strip is free. Peel from the nearer physical end.
+      const dl=Math.abs(t-leftEdge), dr=Math.abs(rightEdge-t);
+      return {side:dl<=dr?'left':'right',
+              start:dl<=dr?leftEdge:rightEdge,
+              limit:dl<=dr?rightEdge:leftEdge};
     }
 
-    peelDrag=null;
+    if(leftAccessible){
+      return {side:'left',start:leftEdge,limit:segRight};
+    }
+
+    return {side:'right',start:rightEdge,limit:segLeft};
+  }
+
+  async function peelByTap(s,t){
+    if(animating||s.removed)return;
+
+    const access=accessibleSegmentAt(s,t);
+    if(!access){
+      if(navigator.vibrate)navigator.vibrate(4);
+      return;
+    }
+
+    animating=true;
+    history.push(snapshot());
+
+    const side=access.side;
+    const start=access.start;
+    const limit=access.limit;
+
+    if(Math.abs(limit-start)<.002){
+      history.pop();
+      animating=false;
+      return;
+    }
+
+    const duration=360+Math.min(520,Math.abs(limit-start)*800);
+    const t0=performance.now();
+
+    s.roll.style.opacity='1';
+
+    await new Promise(resolve=>{
+      function frame(now){
+        const p=clamp((now-t0)/duration,0,1);
+        const ease=1-Math.pow(1-p,3);
+        const cur=start+(limit-start)*ease;
+
+        if(side==='left')s.leftPeel=cur;
+        else s.rightPeel=1-cur;
+
+        const rp=pointOn(s,cur);
+        s.roll.style.left=rp.x+'px';
+        s.roll.style.top=rp.y+'px';
+        s.roll.style.transform=`translate(-50%,-50%) scale(${1+0.18*Math.sin(p*Math.PI)})`;
+
+        render(false);
+        if(p<1)requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+
+    if(side==='left')s.leftPeel=limit;
+    else s.rightPeel=1-limit;
+
+    if(s.leftPeel+s.rightPeel>=.995){
+      s.removed=true;
+      if(navigator.vibrate)navigator.vibrate(12);
+    }else{
+      if(navigator.vibrate)navigator.vibrate(6);
+    }
+
+    s.roll.style.opacity='0';
+    animating=false;
     render();
     checkFinish();
   }
 
-  function render(){
+  function render(updateStatus=true){
     for(const s of strips){
       if(s.removed){
-        s.el.style.opacity='0';
-        s.lh.style.display=s.rh.style.display=s.lc.style.display=s.rc.style.display='none';
+        s.seg.style.opacity='0';
+        s.roll.style.opacity='0';
         continue;
       }
 
       const t0=s.leftPeel,t1=1-s.rightPeel;
-      const p0=pointOn(s,t0), p1=pointOn(s,t1);
+      const p0=pointOn(s,t0),p1=pointOn(s,t1);
       const len=hypot(p1.x-p0.x,p1.y-p0.y);
       const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
 
-      s.el.style.opacity='1';
-      s.el.style.left=p0.x+'px';
-      s.el.style.top=(p0.y-s.width/2)+'px';
-      s.el.style.width=len+'px';
-      s.el.style.height=s.width+'px';
-      s.el.style.transform=`rotate(${ang}deg)`;
-
-      placeEndpoint(s.lh,p0,canPeel(s,'left'));
-      placeEndpoint(s.rh,p1,canPeel(s,'right'));
-
-      placeCurl(s.lc,p0,s,s.leftPeel>.01);
-      placeCurl(s.rc,p1,s,s.rightPeel>.01);
+      s.seg.style.opacity='1';
+      s.seg.style.left=p0.x+'px';
+      s.seg.style.top=(p0.y-s.width/2)+'px';
+      s.seg.style.width=len+'px';
+      s.seg.style.height=s.width+'px';
+      s.seg.style.transform=`rotate(${ang}deg)`;
     }
 
-    const remaining=strips.filter(s=>!s.removed).length;
-    const partial=strips.filter(s=>!s.removed&&(s.leftPeel>.01||s.rightPeel>.01)).length;
-    status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Pinch to zoom, then drag a loose end'}`;
-    undoBtn.disabled=!history.length;
-    undoBtn.style.opacity=history.length?1:.4;
-  }
-
-  function placeEndpoint(el,p,on){
-    el.style.display=on?'block':'none';
-    el.style.left=p.x+'px';el.style.top=p.y+'px';
-  }
-
-  function placeCurl(el,p,s,on){
-    el.style.display=on?'block':'none';
-    el.style.left=p.x+'px';el.style.top=p.y+'px';
-    el.style.background=`radial-gradient(circle at 35% 50%,rgba(255,255,255,.46) 0 12%,${s.color} 20% 58%,rgba(25,25,25,.3) 60% 69%,${s.color} 71%)`;
+    if(updateStatus){
+      const remaining=strips.filter(s=>!s.removed).length;
+      const partial=strips.filter(s=>!s.removed&&(s.leftPeel>.01||s.rightPeel>.01)).length;
+      status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Tap any visible top-layer tape'}`;
+      undoBtn.disabled=!history.length||animating;
+      undoBtn.style.opacity=history.length&&!animating?1:.4;
+    }
   }
 
   function checkFinish(){
@@ -396,38 +465,45 @@ footer{
     }
   }
 
-  // Pan / pinch zoom on viewport background.
   viewport.addEventListener('pointerdown',e=>{
-    if(e.target!==viewport && e.target!==world && !e.target.classList.contains('tape')) return;
-    if(peelDrag)return;
+    if(animating)return;
     e.preventDefault();
     viewport.setPointerCapture?.(e.pointerId);
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const p=screenToWorld(e.clientX,e.clientY);
 
     if(pointers.size===1){
-      const p=[...pointers.values()][0];
-      gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
+      tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:p,moved:false};
+      const q=[...pointers.values()][0];
+      gesture={type:'pan',startX:q.x,startY:q.y,startTx:view.tx,startTy:view.ty};
     }else if(pointers.size===2){
+      tapCandidate=null;
       const ps=[...pointers.values()];
       const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
       const dist=hypot(dx,dy);
       const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
-      const worldCenter=screenToWorld(cx,cy);
-      gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter};
+      gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
     }
   },{passive:false});
 
   viewport.addEventListener('pointermove',e=>{
-    if(!pointers.has(e.pointerId)||peelDrag)return;
+    if(!pointers.has(e.pointerId)||animating)return;
     e.preventDefault();
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
 
-    if(pointers.size===1 && gesture?.type==='pan'){
+    if(tapCandidate && e.pointerId===tapCandidate.id){
+      if(hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8){
+        tapCandidate.moved=true;
+      }
+    }
+
+    if(pointers.size===1 && gesture?.type==='pan' && tapCandidate?.moved){
       const p=[...pointers.values()][0];
       view.tx=gesture.startTx+(p.x-gesture.startX);
       view.ty=gesture.startTy+(p.y-gesture.startY);
       applyView();
     }else if(pointers.size===2){
+      tapCandidate=null;
       const ps=[...pointers.values()];
       const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
       const dist=hypot(dx,dy);
@@ -437,7 +513,7 @@ footer{
       }
       const ns=clamp(gesture.startScale*(dist/gesture.startDist),0.28,2.4);
       const r=viewport.getBoundingClientRect();
-      const localCx=gesture.cx-r.left, localCy=gesture.cy-r.top;
+      const localCx=gesture.cx-r.left,localCy=gesture.cy-r.top;
       view.scale=ns;
       view.tx=localCx-gesture.worldCenter.x*ns;
       view.ty=localCy-gesture.worldCenter.y*ns;
@@ -445,27 +521,35 @@ footer{
     }
   },{passive:false});
 
-  function endPointer(e){
+  async function finishPointer(e){
+    if(!pointers.has(e.pointerId))return;
+
+    const candidate=tapCandidate && tapCandidate.id===e.pointerId ? {...tapCandidate} : null;
     pointers.delete(e.pointerId);
+
+    if(candidate && !candidate.moved && pointers.size===0 && !animating){
+      const target=pickTapeAt(candidate.world);
+      if(target) await peelByTap(target.s,target.t);
+    }
+
     if(pointers.size===1){
       const p=[...pointers.values()][0];
       gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
     }else if(pointers.size===0){
       gesture=null;
     }
+    tapCandidate=null;
   }
 
-  viewport.addEventListener('pointerup',endPointer);
-  viewport.addEventListener('pointercancel',endPointer);
+  viewport.addEventListener('pointerup',finishPointer);
+  viewport.addEventListener('pointercancel',finishPointer);
 
-  // desktop wheel zoom
   viewport.addEventListener('wheel',e=>{
     e.preventDefault();
     const r=viewport.getBoundingClientRect();
     const localX=e.clientX-r.left,localY=e.clientY-r.top;
     const before={x:(localX-view.tx)/view.scale,y:(localY-view.ty)/view.scale};
-    const factor=e.deltaY<0?1.1:.9;
-    const ns=clamp(view.scale*factor,0.28,2.4);
+    const ns=clamp(view.scale*(e.deltaY<0?1.1:.9),0.28,2.4);
     view.scale=ns;
     view.tx=localX-before.x*ns;
     view.ty=localY-before.y*ns;
@@ -473,7 +557,7 @@ footer{
   },{passive:false});
 
   undoBtn.addEventListener('click',()=>{
-    if(!history.length)return;
+    if(!history.length||animating)return;
     const snap=history.pop();
     strips.forEach((s,i)=>Object.assign(s,snap[i]));
     finish.classList.remove('show');
