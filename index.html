@@ -86,7 +86,7 @@ footer{
 <div id="app">
   <header>
     <div>
-      <div class="brand">TAPE · V8</div>
+      <div class="brand">TAPE · V9</div>
       <div class="sub">tap exposed tape · pinch to zoom · drag to pan</div>
     </div>
     <button id="newBtn">New board</button>
@@ -243,56 +243,102 @@ footer{
     return !!intervalContaining(o,t);
   }
 
-  function pointSegmentDistanceParam(px,py,s,iv){
-    const x1=s.ax+(s.bx-s.ax)*iv[0], y1=s.ay+(s.by-s.ay)*iv[0];
-    const x2=s.ax+(s.bx-s.ax)*iv[1], y2=s.ay+(s.by-s.ay)*iv[1];
-    const vx=x2-x1,vy=y2-y1,wx=px-x1,wy=py-y1;
+  function segmentEndpoints(s,iv){
+    return {
+      ax:s.ax+(s.bx-s.ax)*iv[0],
+      ay:s.ay+(s.by-s.ay)*iv[0],
+      bx:s.ax+(s.bx-s.ax)*iv[1],
+      by:s.ay+(s.by-s.ay)*iv[1]
+    };
+  }
+
+  function pointSegDist(px,py,ax,ay,bx,by){
+    const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay;
     const vv=vx*vx+vy*vy;
     let u=vv?((wx*vx+wy*vy)/vv):0;
     u=clamp(u,0,1);
-    const qx=x1+vx*u,qy=y1+vy*u;
-    return {dist:hypot(px-qx,py-qy),u};
+    const qx=ax+vx*u,qy=ay+vy*u;
+    return {dist:hypot(px-qx,py-qy),u,qx,qy};
   }
 
-  function physicalBlockIntervals(s){
-    // Return parameter intervals along s that are physically covered by any
-    // higher-layer tape. Width matters: edge contact / tip contact counts.
-    const blocked=[];
-    const samples=520; // dense enough for glancing contacts and tape tips
-    const g=geom(s);
+  function segSegDistance(a1,a2,b1,b2){
+    // Robust 2D segment distance by checking endpoint-to-segment distances
+    // plus exact line intersection.
+    const cross=(ux,uy,vx,vy)=>ux*vy-uy*vx;
+    const r={x:a2.x-a1.x,y:a2.y-a1.y};
+    const s={x:b2.x-b1.x,y:b2.y-b1.y};
+    const qp={x:b1.x-a1.x,y:b1.y-a1.y};
+    const den=cross(r.x,r.y,s.x,s.y);
 
-    for(const o of strips){
-      if(o.id===s.id || o.removed || o.layer<=s.layer) continue;
-
-      const threshold=(s.width+o.width)/2;
-
-      for(const oiv of o.intervals){
-        let inRun=false, runStart=0;
-
-        for(let k=0;k<=samples;k++){
-          const t=k/samples;
-          const px=g.x1+g.dx*t, py=g.y1+g.dy*t;
-          const d=pointSegmentDistanceParam(px,py,o,oiv).dist;
-          const inside=d <= threshold;
-
-          if(inside && !inRun){
-            inRun=true;
-            runStart=t;
-          }
-          if((!inside || k===samples) && inRun){
-            const runEnd = inside && k===samples ? t : Math.max(runStart,(k-1)/samples);
-            blocked.push([runStart,runEnd,o.id]);
-            inRun=false;
-          }
-        }
+    if(Math.abs(den)>1e-9){
+      const t=cross(qp.x,qp.y,s.x,s.y)/den;
+      const u=cross(qp.x,qp.y,r.x,r.y)/den;
+      if(t>=0&&t<=1&&u>=0&&u<=1){
+        return {dist:0,ta:t,tb:u};
       }
     }
 
-    // Merge overlapping covered zones. We only need the geometric blocked span.
+    const d1=pointSegDist(a1.x,a1.y,b1.x,b1.y,b2.x,b2.y);
+    const d2=pointSegDist(a2.x,a2.y,b1.x,b1.y,b2.x,b2.y);
+    const d3=pointSegDist(b1.x,b1.y,a1.x,a1.y,a2.x,a2.y);
+    const d4=pointSegDist(b2.x,b2.y,a1.x,a1.y,a2.x,a2.y);
+
+    let best={dist:d1.dist,ta:0,tb:d1.u};
+    if(d2.dist<best.dist)best={dist:d2.dist,ta:1,tb:d2.u};
+    if(d3.dist<best.dist)best={dist:d3.dist,ta:d3.u,tb:0};
+    if(d4.dist<best.dist)best={dist:d4.dist,ta:d4.u,tb:1};
+    return best;
+  }
+
+  function physicalBlockIntervals(s){
+    // Exact hierarchy: only strips with higher immutable layer can block s.
+    // Contact is based on actual tape bodies. No extra tolerance.
+    const blocked=[];
+    const sg=geom(s);
+    const sA={x:sg.x1,y:sg.y1}, sB={x:sg.x2,y:sg.y2};
+
+    for(const o of strips){
+      if(o.id===s.id || o.removed || o.layer<=s.layer)continue;
+
+      for(const oiv of o.intervals){
+        const oe=segmentEndpoints(o,oiv);
+        const oA={x:oe.ax,y:oe.ay}, oB={x:oe.bx,y:oe.by};
+
+        const closest=segSegDistance(sA,sB,oA,oB);
+        const threshold=(s.width+o.width)/2;
+
+        // Strict physical rule: if bodies do not actually touch/overlap, no pin.
+        if(closest.dist >= threshold)continue;
+
+        // Compute the span along s covered by the upper tape capsule.
+        // Project the upper segment endpoints onto s and expand by the
+        // combined half-width projected along s. This yields a stable,
+        // non-fuzzy covered interval for crossings and glancing tip overlaps.
+        const vx=sg.dx,vy=sg.dy,L2=vx*vx+vy*vy;
+        const proj=t=>((t.x-sg.x1)*vx+(t.y-sg.y1)*vy)/L2;
+        const p0=proj(oA),p1=proj(oB);
+        let lo=Math.min(p0,p1), hi=Math.max(p0,p1);
+
+        const L=Math.sqrt(L2);
+        const expand=threshold/L;
+        lo=clamp(lo-expand,0,1);
+        hi=clamp(hi+expand,0,1);
+
+        // Verify the candidate interval contains actual physical overlap,
+        // not merely projection overlap.
+        const mid=(lo+hi)/2;
+        const mp={x:sg.x1+sg.dx*mid,y:sg.y1+sg.dy*mid};
+        const md=pointSegDist(mp.x,mp.y,oA.x,oA.y,oB.x,oB.y).dist;
+        if(md >= threshold)continue;
+
+        blocked.push([lo,hi]);
+      }
+    }
+
     blocked.sort((a,b)=>a[0]-b[0]);
     const merged=[];
     for(const b of blocked){
-      if(!merged.length || b[0]>merged[merged.length-1][1]+.003){
+      if(!merged.length || b[0]>merged[merged.length-1][1]+1e-5){
         merged.push([b[0],b[1]]);
       }else{
         merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],b[1]);
@@ -335,7 +381,8 @@ footer{
 
   function localCrossOverlapNear(p,a,b){
     const ia=actualHitInfo(p,a),ib=actualHitInfo(p,b);
-    return ia.dist<=ia.half+7/view.scale && ib.dist<=ib.half+7/view.scale;
+    // Only a true painted-body overlap counts here.
+    return ia.inside && ib.inside;
   }
 
   function pickTapeAt(p){
@@ -349,7 +396,7 @@ footer{
       return {s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
     }
 
-    const slop=9/view.scale;
+    const slop=6/view.scale;
     const near=infos.filter(x=>x.dist<=x.half+slop);
     if(!near.length)return null;
     near.sort((a,b)=>a.dist-b.dist);
@@ -357,7 +404,7 @@ footer{
     for(const other of near.slice(1)){
       if(localCrossOverlapNear(p,chosen.s,other.s) &&
          other.s.layer>chosen.s.layer &&
-         other.dist<=other.half+slop*.45){
+         other.dist<=other.half+slop*.25){
         chosen=other;
       }
     }
