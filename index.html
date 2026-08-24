@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11C</div><div class="sub">v11 mechanics · exact contact spans · queued taps</div></div>
+  <div><div class="brand">TAPE · V11F</div><div class="sub">v11 mechanics · local fixed contacts · partials required</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -62,6 +62,7 @@ const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a
 let strips=[],contacts=[],history=[],animating=false,animVisual=null;
 let tapCount=0, optimalTaps=null, optimalPartial=0;
 let tapQueue=[];
+let ghostAnimations=[];
 let view={scale:.5,tx:0,ty:0},pointers=new Map(),gesture=null,tapCandidate=null;
 
 const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),hypot=Math.hypot;
@@ -141,31 +142,20 @@ function buildContactMap(){
    const a=strips[i],b=strips[j];
    const inter=clipPolygon(tapePolygon(a),tapePolygon(b));
    if(inter.length<3)continue;
-
    const area=polygonArea(inter);
    if(area<=0)continue;
-
-   const upper=a.layer>b.layer?a:b,lower=a.layer>b.layer?b:a;
-   const upperSpan=projectSpan(inter,upper);
-   const lowerSpan=projectSpan(inter,lower);
-
-   // Ambiguity filter:
-   // The constructed puzzle only accepts substantial overlaps.
-   // Require at least ONE THIRD of tape width penetration across both tapes,
-   // and at least ONE THIRD tape-width extent along both tape axes.
-   const penA=normalExtent(inter,a);
-   const penB=normalExtent(inter,b);
-   if(penA < a.width/3 || penB < b.width/3)continue;
-
-   const lenA=geom(a).L*(projectSpan(inter,a)[1]-projectSpan(inter,a)[0]);
-   const lenB=geom(b).L*(projectSpan(inter,b)[1]-projectSpan(inter,b)[0]);
-   if(lenA < a.width/3 || lenB < b.width/3)continue;
-
+   const spanA=projectSpan(inter,a),spanB=projectSpan(inter,b);
+   const penA=normalExtent(inter,a),penB=normalExtent(inter,b);
+   if(penA<a.width/3||penB<b.width/3)continue;
+   const lenA=geom(a).L*(spanA[1]-spanA[0]),lenB=geom(b).L*(spanB[1]-spanB[0]);
+   if(lenA<a.width/3||lenB<b.width/3)continue;
+   const aTop=Math.random()<.5;
    contacts.push({
-     upper:upper.id,
-     lower:lower.id,
-     upperSpan,
-     lowerSpan
+     a:a.id,b:b.id,
+     upper:aTop?a.id:b.id,lower:aTop?b.id:a.id,
+     upperSpan:aTop?spanA:spanB,
+     lowerSpan:aTop?spanB:spanA,
+     spanA,spanB,patch:null
    });
  }
 }
@@ -177,9 +167,30 @@ function createEls(s){
  world.appendChild(roll);s.roll=roll;
 }
 function ensureSegs(s,n){
- while(s.segs.length<n){const el=document.createElement('div');el.className='tape';el.style.background=s.color;el.style.zIndex=100+s.layer;world.appendChild(el);s.segs.push(el)}
+ while(s.segs.length<n){const el=document.createElement('div');el.className='tape';el.style.background=s.color;el.style.zIndex=100;world.appendChild(el);s.segs.push(el)}
  s.segs.forEach((el,i)=>el.style.display=i<n?'block':'none');
 }
+function createContactPatches(){
+ for(const c of contacts){
+   const p=document.createElement('div');p.className='tape';p.style.background=strips[c.upper].color;p.style.zIndex=2600;p.style.pointerEvents='none';world.appendChild(p);c.patch=p;
+ }
+}
+function renderContactPatches(){
+ for(const c of contacts){
+   const p=c.patch;if(!p)continue;
+   const up=strips[c.upper];
+   if(up.removed||!contactActive(c)){p.style.display='none';continue}
+   let piece=null;
+   for(const iv of up.intervals){
+     const lo=Math.max(iv[0],c.upperSpan[0]),hi=Math.min(iv[1],c.upperSpan[1]);
+     if(hi-lo>1e-6){piece=[lo,hi];break}
+   }
+   if(!piece){p.style.display='none';continue}
+   const p0=pointOn(up,piece[0]),p1=pointOn(up,piece[1]),len=hypot(p1.x-p0.x,p1.y-p0.y),ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+   p.style.display='block';p.style.left=p0.x+'px';p.style.top=(p0.y-up.width/2)+'px';p.style.width=len+'px';p.style.height=up.width+'px';p.style.transform=`rotate(${ang}deg)`;
+ }
+}
+
 function intervalOverlapAmount(a,b){return Math.max(0,Math.min(a[1],b[1])-Math.max(a[0],b[0]))}
 function intervalsOverlap(a,b){return intervalOverlapAmount(a,b)>1e-6}
 function contactActive(c){
@@ -217,17 +228,25 @@ function hitInfo(p,s){
  if(!best)return null;
  return{...best,iv:biv,inside:best.dist<s.width/2,half:s.width/2};
 }
+function tapInsideContact(p,c){
+ if(!contactActive(c))return false;
+ const ia=hitInfo(p,strips[c.a]),ib=hitInfo(p,strips[c.b]);
+ if(!ia||!ib||!ia.inside||!ib.inside)return false;
+ const sa=c.a===c.upper?c.upperSpan:c.lowerSpan;
+ const sb=c.b===c.upper?c.upperSpan:c.lowerSpan;
+ return ia.t>=sa[0]-1e-5&&ia.t<=sa[1]+1e-5&&ib.t>=sb[0]-1e-5&&ib.t<=sb[1]+1e-5;
+}
 function pickTape(p){
  const infos=strips.filter(s=>!s.removed).map(s=>({s,...hitInfo(p,s)})).filter(x=>x.iv);
  const strict=infos.filter(x=>x.inside);
- if(strict.length){
-   // Only when the tap is literally inside more than one painted tape does z-order decide.
-   strict.sort((a,b)=>b.s.layer-a.s.layer);
-   return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
+ if(strict.length===1)return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
+ if(strict.length>1){
+   const here=contacts.filter(c=>tapInsideContact(p,c));
+   for(const c of here){const h=strict.find(x=>x.s.id===c.upper);if(h)return{s:h.s,t:h.t,iv:h.iv}}
+   strict.sort((a,b)=>a.dist-b.dist);const h=strict[0];return{s:h.s,t:h.t,iv:h.iv};
  }
  const slop=5/view.scale,near=infos.filter(x=>x.dist<x.half+slop).sort((a,b)=>a.dist-b.dist);
- if(!near.length)return null;
- return{s:near[0].s,t:near[0].t,iv:near[0].iv};
+ if(!near.length)return null;const h=near[0];return{s:h.s,t:h.t,iv:h.iv};
 }
 
 function peelAccess(s,t,iv){
@@ -479,38 +498,102 @@ function gradeForTaps(actual,opt){
  return 'Completed';
 }
 
-async function processTapQueue(){
- if(animating || !tapQueue.length)return;
- const item=tapQueue.shift();
- if(item && !item.s.removed){
-   await peelByTap(item.s,item.t,item.iv);
- }
- if(tapQueue.length)processTapQueue();
-}
-
 function queueTap(target){
- if(!target)return;
- tapQueue.push(target);
- processTapQueue();
+ if(!target || target.s.removed)return;
+ performImmediateTap(target.s,target.t,target.iv);
 }
 
-async function peelByTap(s,t,iv){
+function makeGhostPeel(s,access){
+ const ghost=document.createElement('div');
+ ghost.className='tape-seg';
+ ghost.style.background=s.color;
+ ghost.style.zIndex=5000;
+ world.appendChild(ghost);
+
+ const roll=document.createElement('div');
+ roll.className='peel-roll';
+ roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.48) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.3) 60% 69%,${s.color} 71%)`;
+ roll.style.opacity='1';
+ world.appendChild(roll);
+
+ const anim={
+   s,
+   side:access.side,
+   from:access.from,
+   to:access.to,
+   bounds:access.ivBounds.slice(),
+   ghost,
+   roll,
+   start:performance.now(),
+   duration:190+Math.min(300,Math.abs(access.to-access.from)*430)
+ };
+ ghostAnimations.push(anim);
+
+ function frame(now){
+   const p=clamp((now-anim.start)/anim.duration,0,1);
+   const ease=1-Math.pow(1-p,3);
+   const cur=anim.from+(anim.to-anim.from)*ease;
+
+   let a,b;
+   if(anim.side==='left'){
+     a=cur;
+     b=anim.bounds[1];
+   }else{
+     a=anim.bounds[0];
+     b=cur;
+   }
+
+   const p0=pointOn(s,a),p1=pointOn(s,b);
+   const len=hypot(p1.x-p0.x,p1.y-p0.y);
+   const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+
+   ghost.style.left=p0.x+'px';
+   ghost.style.top=(p0.y-s.width/2)+'px';
+   ghost.style.width=Math.max(0,len)+'px';
+   ghost.style.height=s.width+'px';
+   ghost.style.transform=`rotate(${ang}deg)`;
+
+   const rp=pointOn(s,cur);
+   roll.style.left=rp.x+'px';
+   roll.style.top=rp.y+'px';
+   roll.style.transform=`translate(-50%,-50%) scale(${1+0.18*Math.sin(p*Math.PI)})`;
+
+   if(p<1){
+     requestAnimationFrame(frame);
+   }else{
+     ghost.remove();
+     roll.remove();
+     ghostAnimations=ghostAnimations.filter(x=>x!==anim);
+   }
+ }
+ requestAnimationFrame(frame);
+}
+
+function performImmediateTap(s,t,iv){
  if(s.removed)return;
- const a=peelAccess(s,t,iv);if(!a){if(navigator.vibrate)navigator.vibrate(4);return}
- if(Math.abs(a.to-a.from)<.002)return;
- animating=true;history.push(snapshot());tapCount++;
- const start=a.from,limit=a.to,duration=300+Math.min(620,Math.abs(limit-start)*900),t0=performance.now();
- s.roll.style.opacity='1';
- await new Promise(resolve=>{
-  function frame(now){
-   const p=clamp((now-t0)/duration,0,1),ease=1-Math.pow(1-p,3),cur=start+(limit-start)*ease,rp=pointOn(s,cur);
-   s.roll.style.left=rp.x+'px';s.roll.style.top=rp.y+'px';s.roll.style.transform=`translate(-50%,-50%) scale(${1+.25*Math.sin(p*Math.PI)})`;
-   animVisual={id:s.id,bounds:a.ivBounds,side:a.side,cur};render(false);
-   if(p<1)requestAnimationFrame(frame);else resolve();
-  }requestAnimationFrame(frame)
- });
- animVisual=null;commitPeel(s,a);s.roll.style.opacity='0';animating=false;
- if(navigator.vibrate)navigator.vibrate(s.removed?12:6);render();checkFinish();
+
+ const access=peelAccess(s,t,iv);
+ if(!access){
+   if(navigator.vibrate)navigator.vibrate(4);
+   return;
+ }
+
+ if(Math.abs(access.to-access.from)<.002)return;
+
+ history.push(snapshot());
+ tapCount++;
+
+ // Physics/game-state update happens NOW.
+ applyPeelInterval(s,access);
+
+ // Render committed state immediately so next tap sees the new grid.
+ render();
+
+ // Purely cosmetic copy animates independently.
+ makeGhostPeel(s,access);
+
+ if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
+ checkFinish();
 }
 
 function render(updateStatus=true){
@@ -527,10 +610,11 @@ function render(updateStatus=true){
    });
    if(s.removed)s.segs.forEach(el=>el.style.display='none');
  }
+ renderContactPatches();
  if(updateStatus){
    const rem=strips.filter(s=>!s.removed).length,active=contacts.filter(contactActive).length;
    status.innerHTML=`<b>${rem} tape${rem===1?'':'s'} still present</b><br>${active} active overlap${active===1?'':'s'} · taps ${tapCount}${optimalTaps?' / best '+optimalTaps:''}`;
-   undoBtn.disabled=!history.length||animating||tapQueue.length;undoBtn.style.opacity=history.length&&!animating&&!tapQueue.length?1:.4;
+   undoBtn.disabled=!history.length;undoBtn.style.opacity=history.length?1:.4;
  }
 }
 function checkFinish(){
@@ -543,44 +627,24 @@ function checkFinish(){
 
 function build(){
  history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;
- tapCount=0;optimalTaps=null;optimalPartial=0;tapQueue=[];finish.classList.remove('show');
-
+ tapCount=0;optimalTaps=null;optimalPartial=0;tapQueue=[];ghostAnimations=[];finish.classList.remove('show');
  let solution=null;
- let attempt=0;
-
- do{
-   attempt++;
-   world.innerHTML='';
-   strips=[];contacts=[];
-
-   const count=34,layers=[...Array(count).keys()];
-   for(let i=layers.length-1;i>0;i--){
-     const j=Math.floor(Math.random()*(i+1));
-     [layers[i],layers[j]]=[layers[j],layers[i]];
-   }
-
-   for(let i=0;i<count;i++)strips.push(makeStrip(i,layers[i]));
+ for(let attempt=1;attempt<=90&&!solution;attempt++){
+   world.innerHTML='';strips=[];contacts=[];
+   const count=34;
+   for(let i=0;i<count;i++)strips.push(makeStrip(i,0));
    buildContactMap();
-
-   // Reject boards that are too sparse to be interesting.
-   if(contacts.length<18){solution=null;continue}
-
-   solution=computeOptimalSolution();
-
-   // Most-efficient play must contain several real partial peels.
-   // This rejects "just keep taking the totally free tape" boards.
- }while((!solution || solution.minPartial<3) && attempt<45);
-
- optimalTaps=solution?solution.taps:null;
- optimalPartial=solution?solution.minPartial:0;
-
- strips.forEach(createEls);
- fitWorld();
- render();
-
- if(optimalTaps){
-   status.innerHTML=`<b>${strips.length} tapes · minimum ${optimalTaps} taps</b><br>Optimal solution includes ${optimalPartial} partial peels`;
+   if(contacts.length<22)continue;
+   const candidate=computeOptimalSolution();
+   if(candidate&&candidate.minPartial>=3)solution=candidate;
  }
+ if(!solution){
+   status.innerHTML='<b>Generating a non-trivial board…</b><br>Rejecting boards with zero-partial optimal routes.';
+   setTimeout(build,0);return;
+ }
+ optimalTaps=solution.taps;optimalPartial=solution.minPartial;
+ strips.forEach(createEls);createContactPatches();fitWorld();render();
+ status.innerHTML=`<b>${strips.length} tapes · minimum ${optimalTaps} taps</b><br>Every optimal route needs at least ${optimalPartial} partial peels`;
 }
 
 viewport.addEventListener('pointerdown',e=>{
@@ -601,7 +665,7 @@ viewport.addEventListener('pointermove',e=>{
 },{passive:false});
 async function endPointer(e){
  if(!pointers.has(e.pointerId))return;const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;pointers.delete(e.pointerId);
- if(cand&&!cand.moved&&pointers.size===0&&!animating){const target=pickTape(cand.world);if(target)queueTap(target)}
+ if(cand&&!cand.moved&&pointers.size===0){const target=pickTape(cand.world);if(target)queueTap(target)}
  if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty}}else if(!pointers.size)gesture=null;
  tapCandidate=null;
 }
@@ -610,7 +674,7 @@ viewport.addEventListener('wheel',e=>{e.preventDefault();const r=viewport.getBou
 view.scale=ns;view.tx=lx-bx*ns;view.ty=ly-by*ns;applyView()},{passive:false});
 
 undoBtn.addEventListener('click',()=>{
- if(!history.length||animating)return;
+ if(!history.length)return;
  const snap=history.pop();
  strips.forEach((s,i)=>{
    s.intervals=snap.strips[i].intervals.map(iv=>iv.slice());
