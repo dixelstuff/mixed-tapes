@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11F</div><div class="sub">v11 mechanics · local fixed contacts · partials required</div></div>
+  <div><div class="brand">TAPE · V11F2</div><div class="sub">v11 mechanics · local fixed contacts · forced partials</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -142,20 +142,26 @@ function buildContactMap(){
    const a=strips[i],b=strips[j];
    const inter=clipPolygon(tapePolygon(a),tapePolygon(b));
    if(inter.length<3)continue;
-   const area=polygonArea(inter);
-   if(area<=0)continue;
+   if(polygonArea(inter)<=0)continue;
+
    const spanA=projectSpan(inter,a),spanB=projectSpan(inter,b);
    const penA=normalExtent(inter,a),penB=normalExtent(inter,b);
-   if(penA<a.width/3||penB<b.width/3)continue;
-   const lenA=geom(a).L*(spanA[1]-spanA[0]),lenB=geom(b).L*(spanB[1]-spanB[0]);
-   if(lenA<a.width/3||lenB<b.width/3)continue;
-   const aTop=Math.random()<.5;
+
+   if(penA<a.width/3 || penB<b.width/3)continue;
+
+   const lenA=geom(a).L*(spanA[1]-spanA[0]);
+   const lenB=geom(b).L*(spanB[1]-spanB[0]);
+   if(lenA<a.width/3 || lenB<b.width/3)continue;
+
+   const aOnTop=Math.random()<0.5;
    contacts.push({
      a:a.id,b:b.id,
-     upper:aTop?a.id:b.id,lower:aTop?b.id:a.id,
-     upperSpan:aTop?spanA:spanB,
-     lowerSpan:aTop?spanB:spanA,
-     spanA,spanB,patch:null
+     upper:aOnTop?a.id:b.id,
+     lower:aOnTop?b.id:a.id,
+     upperSpan:aOnTop?spanA:spanB,
+     lowerSpan:aOnTop?spanB:spanA,
+     spanA,spanB,
+     patch:null
    });
  }
 }
@@ -167,30 +173,28 @@ function createEls(s){
  world.appendChild(roll);s.roll=roll;
 }
 function ensureSegs(s,n){
- while(s.segs.length<n){const el=document.createElement('div');el.className='tape';el.style.background=s.color;el.style.zIndex=100;world.appendChild(el);s.segs.push(el)}
+ while(s.segs.length<n){
+   const el=document.createElement('div');
+   el.className='tape';
+   el.style.background=s.color;
+   el.style.zIndex=100;
+   world.appendChild(el);
+   s.segs.push(el);
+ }
  s.segs.forEach((el,i)=>el.style.display=i<n?'block':'none');
 }
 function createContactPatches(){
  for(const c of contacts){
-   const p=document.createElement('div');p.className='tape';p.style.background=strips[c.upper].color;p.style.zIndex=2600;p.style.pointerEvents='none';world.appendChild(p);c.patch=p;
- }
-}
-function renderContactPatches(){
- for(const c of contacts){
-   const p=c.patch;if(!p)continue;
    const up=strips[c.upper];
-   if(up.removed||!contactActive(c)){p.style.display='none';continue}
-   let piece=null;
-   for(const iv of up.intervals){
-     const lo=Math.max(iv[0],c.upperSpan[0]),hi=Math.min(iv[1],c.upperSpan[1]);
-     if(hi-lo>1e-6){piece=[lo,hi];break}
-   }
-   if(!piece){p.style.display='none';continue}
-   const p0=pointOn(up,piece[0]),p1=pointOn(up,piece[1]),len=hypot(p1.x-p0.x,p1.y-p0.y),ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
-   p.style.display='block';p.style.left=p0.x+'px';p.style.top=(p0.y-up.width/2)+'px';p.style.width=len+'px';p.style.height=up.width+'px';p.style.transform=`rotate(${ang}deg)`;
+   const p=document.createElement('div');
+   p.className='tape';
+   p.style.background=up.color;
+   p.style.zIndex=2500;
+   p.style.pointerEvents='none';
+   world.appendChild(p);
+   c.patch=p;
  }
 }
-
 function intervalOverlapAmount(a,b){return Math.max(0,Math.min(a[1],b[1])-Math.max(a[0],b[0]))}
 function intervalsOverlap(a,b){return intervalOverlapAmount(a,b)>1e-6}
 function contactActive(c){
@@ -232,21 +236,34 @@ function tapInsideContact(p,c){
  if(!contactActive(c))return false;
  const ia=hitInfo(p,strips[c.a]),ib=hitInfo(p,strips[c.b]);
  if(!ia||!ib||!ia.inside||!ib.inside)return false;
- const sa=c.a===c.upper?c.upperSpan:c.lowerSpan;
- const sb=c.b===c.upper?c.upperSpan:c.lowerSpan;
- return ia.t>=sa[0]-1e-5&&ia.t<=sa[1]+1e-5&&ib.t>=sb[0]-1e-5&&ib.t<=sb[1]+1e-5;
+
+ const spanA=c.a===c.upper?c.upperSpan:c.lowerSpan;
+ const spanB=c.b===c.upper?c.upperSpan:c.lowerSpan;
+ return ia.t>=spanA[0]-1e-4&&ia.t<=spanA[1]+1e-4 &&
+        ib.t>=spanB[0]-1e-4&&ib.t<=spanB[1]+1e-4;
 }
 function pickTape(p){
  const infos=strips.filter(s=>!s.removed).map(s=>({s,...hitInfo(p,s)})).filter(x=>x.iv);
  const strict=infos.filter(x=>x.inside);
+
  if(strict.length===1)return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
+
  if(strict.length>1){
    const here=contacts.filter(c=>tapInsideContact(p,c));
-   for(const c of here){const h=strict.find(x=>x.s.id===c.upper);if(h)return{s:h.s,t:h.t,iv:h.iv}}
-   strict.sort((a,b)=>a.dist-b.dist);const h=strict[0];return{s:h.s,t:h.t,iv:h.iv};
+   if(here.length){
+     for(const c of here){
+       const hit=strict.find(x=>x.s.id===c.upper);
+       if(hit)return{s:hit.s,t:hit.t,iv:hit.iv};
+     }
+   }
+   strict.sort((a,b)=>a.dist-b.dist);
+   return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
  }
- const slop=5/view.scale,near=infos.filter(x=>x.dist<x.half+slop).sort((a,b)=>a.dist-b.dist);
- if(!near.length)return null;const h=near[0];return{s:h.s,t:h.t,iv:h.iv};
+
+ const slop=5/view.scale;
+ const near=infos.filter(x=>x.dist<x.half+slop).sort((a,b)=>a.dist-b.dist);
+ if(!near.length)return null;
+ return{s:near[0].s,t:near[0].t,iv:near[0].iv};
 }
 
 function peelAccess(s,t,iv){
@@ -596,6 +613,37 @@ function performImmediateTap(s,t,iv){
  checkFinish();
 }
 
+function renderContactPatches(){
+ for(const c of contacts){
+   if(!c.patch)continue;
+   const up=strips[c.upper];
+   if(up.removed||!contactActive(c)){
+     c.patch.style.display='none';
+     continue;
+   }
+
+   const pieces=up.intervals
+     .map(iv=>[Math.max(iv[0],c.upperSpan[0]),Math.min(iv[1],c.upperSpan[1])])
+     .filter(iv=>iv[1]-iv[0]>1e-5);
+
+   if(!pieces.length){
+     c.patch.style.display='none';
+     continue;
+   }
+
+   const iv=pieces[0],p0=pointOn(up,iv[0]),p1=pointOn(up,iv[1]);
+   const len=hypot(p1.x-p0.x,p1.y-p0.y);
+   const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+
+   c.patch.style.display='block';
+   c.patch.style.left=p0.x+'px';
+   c.patch.style.top=(p0.y-up.width/2)+'px';
+   c.patch.style.width=len+'px';
+   c.patch.style.height=up.width+'px';
+   c.patch.style.transform=`rotate(${ang}deg)`;
+ }
+}
+
 function render(updateStatus=true){
  for(const s of strips){
    let draw=s.intervals.map(iv=>iv.slice());
@@ -628,22 +676,41 @@ function checkFinish(){
 function build(){
  history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;
  tapCount=0;optimalTaps=null;optimalPartial=0;tapQueue=[];ghostAnimations=[];finish.classList.remove('show');
+
  let solution=null;
- for(let attempt=1;attempt<=90&&!solution;attempt++){
-   world.innerHTML='';strips=[];contacts=[];
+ let attempt=0;
+
+ while(!solution && attempt<150){
+   attempt++;
+   world.innerHTML='';
+   strips=[];contacts=[];
+
    const count=34;
    for(let i=0;i<count;i++)strips.push(makeStrip(i,0));
+
    buildContactMap();
-   if(contacts.length<22)continue;
+   if(contacts.length<20)continue;
+
    const candidate=computeOptimalSolution();
-   if(candidate&&candidate.minPartial>=3)solution=candidate;
+   if(candidate && candidate.minPartial>=3){
+     solution=candidate;
+   }
  }
+
  if(!solution){
-   status.innerHTML='<b>Generating a non-trivial board…</b><br>Rejecting boards with zero-partial optimal routes.';
-   setTimeout(build,0);return;
+   status.innerHTML='<b>Regenerating…</b><br>Rejecting any board without forced partial peels.';
+   setTimeout(build,0);
+   return;
  }
- optimalTaps=solution.taps;optimalPartial=solution.minPartial;
- strips.forEach(createEls);createContactPatches();fitWorld();render();
+
+ optimalTaps=solution.taps;
+ optimalPartial=solution.minPartial;
+
+ strips.forEach(createEls);
+ createContactPatches();
+ fitWorld();
+ render();
+
  status.innerHTML=`<b>${strips.length} tapes · minimum ${optimalTaps} taps</b><br>Every optimal route needs at least ${optimalPartial} partial peels`;
 }
 
