@@ -57,8 +57,8 @@ footer{
 <div id="app">
   <header>
     <div>
-      <div class="brand">TAPE · HISTORY TEST 3</div>
-      <div class="sub">continuous phase rendering · flat tape colours</div>
+      <div class="brand">TAPE · HISTORY TEST 6</div>
+      <div class="sub">clean-by-construction lanes · stronger tape texture</div>
     </div>
     <button id="newBtn">New history</button>
   </header>
@@ -143,6 +143,77 @@ function geom(s){
   return{x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L,ux:dx/L,uy:dy/L};
 }
 
+
+function tapePolygon(s){
+  const g=geom(s);
+  const nx=-g.uy*(s.width/2),ny=g.ux*(s.width/2);
+  return[
+    {x:g.x1+nx,y:g.y1+ny},
+    {x:g.x2+nx,y:g.y2+ny},
+    {x:g.x2-nx,y:g.y2-ny},
+    {x:g.x1-nx,y:g.y1-ny}
+  ];
+}
+
+function signedArea(poly){
+  let a=0;
+  for(let i=0;i<poly.length;i++){
+    const p=poly[i],q=poly[(i+1)%poly.length];
+    a+=p.x*q.y-q.x*p.y;
+  }
+  return a/2;
+}
+
+function polygonArea(poly){
+  return Math.abs(signedArea(poly));
+}
+
+function clipPolygon(subject,clip){
+  let output=subject.slice();
+  const sign=signedArea(clip)>=0?1:-1;
+
+  for(let j=0;j<clip.length;j++){
+    const A=clip[j],B=clip[(j+1)%clip.length];
+    const input=output;
+    output=[];
+    if(!input.length)break;
+
+    const inside=P=>sign*((B.x-A.x)*(P.y-A.y)-(B.y-A.y)*(P.x-A.x))>=-1e-8;
+
+    const intersect=(P,Q)=>{
+      const rx=Q.x-P.x,ry=Q.y-P.y;
+      const sx=B.x-A.x,sy=B.y-A.y;
+      const den=rx*sy-ry*sx;
+      if(Math.abs(den)<1e-10)return Q;
+      const t=((A.x-P.x)*sy-(A.y-P.y)*sx)/den;
+      return{x:P.x+t*rx,y:P.y+t*ry};
+    };
+
+    let S=input[input.length-1];
+    for(const E of input){
+      const Ein=inside(E),Sin=inside(S);
+      if(Ein){
+        if(!Sin)output.push(intersect(S,E));
+        output.push(E);
+      }else if(Sin){
+        output.push(intersect(S,E));
+      }
+      S=E;
+    }
+  }
+  return output;
+}
+
+function projectSpan(poly,s){
+  const g=geom(s);
+  const den=g.dx*g.dx+g.dy*g.dy;
+  const ts=poly.map(p=>((p.x-g.x1)*g.dx+(p.y-g.y1)*g.dy)/den);
+  return[
+    clamp(Math.min(...ts),0,1),
+    clamp(Math.max(...ts),0,1)
+  ];
+}
+
 function localStickTime(s,t){
   for(const phase of s.phases){
     if(t>=phase.a-1e-8 && t<=phase.b+1e-8)return phase.time;
@@ -204,47 +275,67 @@ function buildContacts(){
 function generateTapeGeometry(){
   strips=[];
 
-  // Denser field: still broadly crosshatched, but with more varied position,
-  // length and angle so it doesn't feel like a rigid grid.
-  const nH=11,nV=11;
+  // Clean-by-construction layout:
+  // same-direction tapes live in separated lanes, so they can never
+  // create ambiguous near-parallel physical overlaps.
+  const nH=10,nV=10;
   let id=0;
 
+  const hTop=85,hBottom=WORLD_H-85;
+  const hSpacing=(hBottom-hTop)/(nH+1);
+
   for(let i=0;i<nH;i++){
-    const slot=(i+1)/(nH+1);
-    const y=95+slot*(WORLD_H-190)+rand(-48,48);
-    const tilt=rand(-145,145);
-    const insetL=rand(45,150);
-    const insetR=rand(45,150);
+    const laneY=hTop+(i+1)*hSpacing;
+    const y=laneY+rand(-10,10);
+
+    // Keep tilt modest relative to lane spacing so neighbouring
+    // horizontal-ish tapes remain physically separated.
+    const tilt=rand(-32,32);
+
+    const insetL=rand(45,155);
+    const insetR=rand(45,155);
 
     strips.push({
       id:id++,
       ax:insetL,
-      ay:clamp(y-tilt/2,55,WORLD_H-55),
+      ay:y-tilt/2,
       bx:WORLD_W-insetR,
-      by:clamp(y+tilt/2,55,WORLD_H-55),
-      width:rand(56,74),
+      by:y+tilt/2,
+      width:rand(54,66),
       color:COLORS[i%COLORS.length],
+      patternSpacing:rand(36,52),
+      patternOffset:rand(0,42),
+      patternSlant:rand(.18,.52),
       phases:[],
       intervals:[[0,1]],
       removed:false
     });
   }
 
+  const vLeft=75,vRight=WORLD_W-75;
+  const vSpacing=(vRight-vLeft)/(nV+1);
+
   for(let i=0;i<nV;i++){
-    const slot=(i+1)/(nV+1);
-    const x=80+slot*(WORLD_W-160)+rand(-42,42);
-    const tilt=rand(-125,125);
-    const insetT=rand(45,150);
-    const insetB=rand(45,150);
+    const laneX=vLeft+(i+1)*vSpacing;
+    const x=laneX+rand(-8,8);
+
+    // Vertical lanes are closer together, so use an even smaller tilt.
+    const tilt=rand(-22,22);
+
+    const insetT=rand(45,155);
+    const insetB=rand(45,155);
 
     strips.push({
       id:id++,
-      ax:clamp(x-tilt/2,55,WORLD_W-55),
+      ax:x-tilt/2,
       ay:insetT,
-      bx:clamp(x+tilt/2,55,WORLD_W-55),
+      bx:x+tilt/2,
       by:WORLD_H-insetB,
-      width:rand(56,74),
+      width:rand(54,64),
       color:COLORS[(i+3)%COLORS.length],
+      patternSpacing:rand(36,52),
+      patternOffset:rand(0,42),
+      patternSlant:rand(.18,.52),
       phases:[],
       intervals:[[0,1]],
       removed:false
@@ -253,24 +344,28 @@ function generateTapeGeometry(){
 }
 
 function rawCrossingsForStrip(target){
-  const xs=[];
+  const zones=[];
+
   for(const other of strips){
     if(other.id===target.id)continue;
-    const hit=segmentIntersection(target,other);
-    if(!hit)continue;
 
     const gt=geom(target),go=geom(other);
     const dot=Math.abs(gt.ux*go.ux+gt.uy*go.uy);
-
-    // Same contact family used by the puzzle: avoid near-parallel ambiguity.
     if(dot>.42)continue;
 
-    const t=(target.id<other.id)?hit.ta:hit.tb;
-    // Protect enough room for the entire physical contact plus a small buffer.
-    const half=((other.width/2)+8)/gt.L;
-    xs.push([clamp(t-half,0,1),clamp(t+half,0,1)]);
+    const poly=clipPolygon(tapePolygon(target),tapePolygon(other));
+    if(poly.length<3 || polygonArea(poly)<=0)continue;
+
+    const span=projectSpan(poly,target);
+    const pad=12/gt.L;
+
+    zones.push([
+      clamp(span[0]-pad,0,1),
+      clamp(span[1]+pad,0,1)
+    ]);
   }
-  return xs;
+
+  return zones;
 }
 
 function safeSplitForStrip(s){
@@ -416,16 +511,57 @@ function buildPuzzle(){
   history=[];
   peelGhosts=[];
 
-  // Keep regenerating only the history/geometry until the proof actually
-  // demonstrates mixed local depth and at least one dependency cycle.
-  for(let attempt=0;attempt<80;attempt++){
-    generateTapeGeometry();
+  // Geometry itself is already guaranteed clean, so create it once.
+  generateTapeGeometry();
+
+  // Try a few construction histories to get a rich over/under network.
+  // Never loop indefinitely: if the ideal thresholds aren't reached,
+  // accept the best clean history found.
+  let best=null;
+
+  for(let attempt=0;attempt<24;attempt++){
     assignConstructionHistory();
     buildContacts();
 
-    if(contacts.length>=45 && variedDepthCount()>=14 && directedCycleExists()){
-      break;
+    const score=
+      contacts.length +
+      variedDepthCount()*4 +
+      (directedCycleExists()?20:0);
+
+    if(!best || score>best.score){
+      best={
+        score,
+        phases:strips.map(s=>s.phases.map(p=>({...p}))),
+        contacts:contacts.map(c=>({
+          ...c,
+          upperSpan:c.upperSpan.slice(),
+          lowerSpan:c.lowerSpan.slice()
+        }))
+      };
     }
+
+    if(contacts.length>=42 && variedDepthCount()>=12 && directedCycleExists()){
+      requestDraw();
+      updateStatus();
+      return;
+    }
+  }
+
+  // Use the best clean history we found rather than stalling.
+  if(best){
+    strips.forEach((s,i)=>{
+      s.phases=best.phases[i].map(p=>({...p}));
+      s.intervals=[[0,1]];
+      s.removed=false;
+    });
+    contacts=best.contacts.map(c=>({
+      ...c,
+      upperSpan:c.upperSpan.slice(),
+      lowerSpan:c.lowerSpan.slice()
+    }));
+  }else{
+    assignConstructionHistory();
+    buildContacts();
   }
 
   requestDraw();
@@ -664,7 +800,8 @@ function drawRibbonPhase(s,a,b){
   const dx=p1.x-p0.x,dy=p1.y-p0.y,L=hypot(dx,dy);
   if(L<.1)return;
 
-  const nx=-dy/L*(s.width/2),ny=dx/L*(s.width/2);
+  const ux=dx/L,uy=dy/L;
+  const nx=-uy*(s.width/2),ny=ux*(s.width/2);
 
   ctx.beginPath();
   ctx.moveTo(p0.x+nx,p0.y+ny);
@@ -672,12 +809,61 @@ function drawRibbonPhase(s,a,b){
   ctx.lineTo(p1.x-nx,p1.y-ny);
   ctx.lineTo(p0.x-nx,p0.y-ny);
   ctx.closePath();
-
-  // Deliberately flat colour.
-  // No longitudinal shadow/highlight: one tape must read unmistakably
-  // as ONE continuous strip, even beside another strip of the same colour.
   ctx.fillStyle=s.color;
   ctx.fill();
+
+  // Subtle long-edge contour only.
+  ctx.save();
+  ctx.globalAlpha=.12;
+  ctx.strokeStyle='#000';
+  ctx.lineWidth=1.3;
+
+  ctx.beginPath();
+  ctx.moveTo(p0.x+nx,p0.y+ny);
+  ctx.lineTo(p1.x+nx,p1.y+ny);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(p0.x-nx,p0.y-ny);
+  ctx.lineTo(p1.x-nx,p1.y-ny);
+  ctx.stroke();
+  ctx.restore();
+
+  // Sparse diagonal texture, continuous in absolute tape coordinates.
+  const g=geom(s);
+  const absStart=a*g.L;
+  const absEnd=b*g.L;
+  const spacing=s.patternSpacing||56;
+  const offset=s.patternOffset||0;
+
+  let first=Math.ceil((absStart-offset)/spacing)*spacing+offset;
+
+  ctx.save();
+  ctx.globalAlpha=.18;
+  ctx.strokeStyle='#fff';
+  ctx.lineWidth=2.0;
+
+  for(let d=first;d<=absEnd+1e-6;d+=spacing){
+    const t=clamp(d/g.L,0,1);
+    const c=pointOn(s,t);
+
+    const half=s.width*.30;
+    const along=s.width*(s.patternSlant||.3);
+
+    const ex=nx/(s.width/2),ey=ny/(s.width/2);
+
+    const ax=c.x-ex*half-ux*along*.5;
+    const ay=c.y-ey*half-uy*along*.5;
+    const bx=c.x+ex*half+ux*along*.5;
+    const by=c.y+ey*half+uy*along*.5;
+
+    ctx.beginPath();
+    ctx.moveTo(ax,ay);
+    ctx.lineTo(bx,by);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
 
 function visiblePhasePieces(s){
