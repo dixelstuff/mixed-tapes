@@ -86,7 +86,7 @@ footer{
 <div id="app">
   <header>
     <div>
-      <div class="brand">TAPE</div>
+      <div class="brand">TAPE · V8</div>
       <div class="sub">tap exposed tape · pinch to zoom · drag to pan</div>
     </div>
     <button id="newBtn">New board</button>
@@ -94,7 +94,7 @@ footer{
 
   <div id="viewport">
     <div id="world"></div>
-    <div id="hud">tap an end-connected segment to peel</div>
+    <div id="hud">tap tape to peel · physical overlaps pin</div>
     <div id="finish">
       <div class="card">
         <div class="big">clean.</div>
@@ -129,6 +129,7 @@ footer{
   let gesture=null;
   let tapCandidate=null;
   let animating=false;
+  let animVisual=null;
 
   const rand=(a,b)=>a+Math.random()*(b-a);
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -187,7 +188,7 @@ footer{
   }
 
   function build(){
-    history=[];strips=[];crossings=[];pointers.clear();gesture=null;tapCandidate=null;animating=false;
+    history=[];strips=[];crossings=[];pointers.clear();gesture=null;tapCandidate=null;animating=false;animVisual=null;
     finish.classList.remove('show');
     world.innerHTML='';
 
@@ -391,29 +392,41 @@ footer{
       if(dl<=dr){
         // Peel until the near edge of the first covered zone.
         const lim=rightZone ? rightZone[0] : iv[1];
-        return {side:'left',from:iv[0],to:lim,iv,stoppedZone:rightZone};
+        return {side:'left',from:iv[0],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:rightZone};
       }else{
         const lim=leftZone ? leftZone[1] : iv[0];
-        return {side:'right',from:iv[1],to:lim,iv,stoppedZone:leftZone};
+        return {side:'right',from:iv[1],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:leftZone};
       }
     }
 
     if(leftIsPhysicalEnd){
       const lim=rightZone ? rightZone[0] : iv[1];
-      return {side:'left',from:iv[0],to:lim,iv,stoppedZone:rightZone};
+      return {side:'left',from:iv[0],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:rightZone};
     }
 
     const lim=leftZone ? leftZone[1] : iv[0];
-    return {side:'right',from:iv[1],to:lim,iv,stoppedZone:leftZone};
+    return {side:'right',from:iv[1],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:leftZone};
+  }
+
+  function findOriginalIntervalIndex(s,bounds){
+    // Find the still-current interval corresponding to the one that was tapped.
+    // Use numeric bounds rather than object identity.
+    let best=-1, bestErr=Infinity;
+    for(let i=0;i<s.intervals.length;i++){
+      const iv=s.intervals[i];
+      const err=Math.abs(iv[0]-bounds[0])+Math.abs(iv[1]-bounds[1]);
+      if(err<bestErr){bestErr=err;best=i;}
+    }
+    return bestErr<.02 ? best : -1;
   }
 
   function applyPeelInterval(s,access){
-    const iv=access.iv;
-    const idx=s.intervals.indexOf(iv);
+    const bounds=access.ivBounds;
+    const idx=findOriginalIntervalIndex(s,bounds);
     if(idx<0)return;
+    const iv=s.intervals[idx];
 
-    // Keep an unmistakable remnant around the actual covered region.
-    // This makes a pin visible even if the contact is only a glancing edge/tip overlap.
+    // Keep visible tape around the actual covered zone.
     const EXTRA_STUB=0.012;
 
     if(access.side==='left'){
@@ -479,15 +492,15 @@ footer{
         s.roll.style.top=rp.y+'px';
         s.roll.style.transform=`translate(-50%,-50%) scale(${1+0.22*Math.sin(p*Math.PI)})`;
 
-        // temporary visual shortening only
-        const old=s.intervals.map(x=>[x[0],x[1]]);
-        const idx=s.intervals.indexOf(iv);
-        if(idx>=0){
-          if(access.side==='left')s.intervals[idx]=[cur,iv[1]];
-          else s.intervals[idx]=[iv[0],cur];
-        }
+        // IMPORTANT: animate only the rendering. Do not mutate game-state intervals
+        // frame-by-frame; that was the bug in v6/v7.
+        animVisual={
+          stripId:s.id,
+          bounds:access.ivBounds,
+          side:access.side,
+          cur
+        };
         render(false);
-        s.intervals=old;
 
         if(p<1)requestAnimationFrame(frame);
         else resolve();
@@ -495,6 +508,7 @@ footer{
       requestAnimationFrame(frame);
     });
 
+    animVisual=null;
     applyPeelInterval(s,access);
 
     if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
@@ -506,9 +520,28 @@ footer{
 
   function render(updateStatus=true){
     for(const s of strips){
-      ensureSegEls(s,s.intervals.length);
+      let drawIntervals=s.intervals.map(iv=>[iv[0],iv[1]]);
 
-      s.intervals.forEach((iv,i)=>{
+      if(animVisual && animVisual.stripId===s.id){
+        const b=animVisual.bounds;
+        let best=-1,bestErr=Infinity;
+        for(let i=0;i<drawIntervals.length;i++){
+          const iv=drawIntervals[i];
+          const err=Math.abs(iv[0]-b[0])+Math.abs(iv[1]-b[1]);
+          if(err<bestErr){bestErr=err;best=i;}
+        }
+        if(best>=0 && bestErr<.02){
+          if(animVisual.side==='left'){
+            drawIntervals[best]=[animVisual.cur,b[1]];
+          }else{
+            drawIntervals[best]=[b[0],animVisual.cur];
+          }
+        }
+      }
+
+      ensureSegEls(s,drawIntervals.length);
+
+      drawIntervals.forEach((iv,i)=>{
         const el=s.segs[i];
         const p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]);
         const len=hypot(p1.x-p0.x,p1.y-p0.y);
