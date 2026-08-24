@@ -3,713 +3,937 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TAPE — fixed contact map v10</title>
+<title>TAPE — construction history proof</title>
 <style>
-:root{--bg:#0f1623;--text:#eef3fb;--muted:#9aa6b8}
+:root{
+  --bg:#0f1623;
+  --fg:#eef3fb;
+  --muted:#98a5b8;
+  --panel:#1c2839;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
-font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{
+  margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 body{display:flex;justify-content:center}
-#app{width:min(100vw,640px);height:100dvh;display:flex;flex-direction:column;
-padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
-header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 4px}
-.brand{font-size:14px;font-weight:800;letter-spacing:.18em}.sub{font-size:12px;color:var(--muted);margin-top:4px}
-button{border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;padding:10px 14px;font:inherit;font-weight:700}
-#viewport{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:20px;touch-action:none;background:var(--bg)}
-#world{position:absolute;left:0;top:0;width:1200px;height:1600px;transform-origin:0 0}
-.tape{position:absolute;transform-origin:left center;border-radius:3px;pointer-events:none;
-box-shadow:0 4px 9px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.18)}
-.tape:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;
-background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 46%,rgba(0,0,0,.09)),
-repeating-linear-gradient(90deg,transparent 0 15px,rgba(255,255,255,.07) 16px 17px,transparent 18px 31px)}
-.roll{position:absolute;width:44px;height:28px;border-radius:50%;transform:translate(-50%,-50%);
-pointer-events:none;z-index:9000;opacity:0;box-shadow:inset -9px 0 12px rgba(0,0,0,.34),0 5px 10px rgba(0,0,0,.3)}
-#hud{position:absolute;left:12px;top:12px;z-index:9500;background:rgba(18,26,40,.78);backdrop-filter:blur(8px);
-padding:8px 10px;border-radius:12px;font-size:12px;color:#d7deea}
-footer{height:70px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px}
-#status{font-size:13px;line-height:1.35;color:#aeb8c7}#status b{color:white}
-#finish{position:absolute;inset:0;background:rgba(15,22,35,.8);backdrop-filter:blur(7px);display:flex;
-align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.25s;z-index:10000}
-#finish.show{opacity:1;pointer-events:auto}.card{background:#182235;border-radius:22px;padding:22px 24px;text-align:center}
-.big{font-size:30px;font-weight:800;margin-bottom:6px}.small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
-@media(max-height:700px){header{height:52px}.sub{display:none}footer{height:58px}}
+#app{
+  width:min(100vw,680px);height:100dvh;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+}
+header{
+  height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;
+}
+.brand{font-size:14px;font-weight:800;letter-spacing:.17em}
+.sub{font-size:12px;color:var(--muted);margin-top:4px}
+button{
+  border:0;border-radius:14px;background:var(--panel);color:var(--fg);
+  padding:10px 14px;font:inherit;font-weight:700
+}
+#viewport{
+  position:relative;flex:1;min-height:0;overflow:hidden;border-radius:18px;
+  background:var(--bg);touch-action:none;
+}
+canvas{
+  position:absolute;inset:0;width:100%;height:100%;touch-action:none;
+}
+#hud{
+  position:absolute;left:12px;top:12px;z-index:5;padding:8px 10px;border-radius:12px;
+  background:rgba(18,26,40,.76);backdrop-filter:blur(8px);
+  font-size:12px;color:#d9e0eb;pointer-events:none;
+}
+footer{
+  height:72px;display:flex;align-items:center;justify-content:space-between;
+  padding:4px 2px 0;gap:10px
+}
+#status{font-size:13px;line-height:1.35;color:#aeb8c7}
+#status b{color:#fff}
+@media(max-height:700px){
+  header{height:52px}.sub{display:none}footer{height:60px}
+}
 </style>
 </head>
 <body>
 <div id="app">
-<header>
-  <div><div class="brand">TAPE · V11B-P2FIX-P1</div><div class="sub">v11B · parallel-contact fix only</div></div>
-  <button id="newBtn">New board</button>
-</header>
-<div id="viewport">
-  <div id="world"></div>
-  <div id="hud">tap tape to peel as far as physics allows</div>
-  <div id="finish"><div class="card"><div class="big">clean.</div><div class="small" id="finishText">all tape removed</div><button id="againBtn">Again</button></div></div>
+  <header>
+    <div>
+      <div class="brand">TAPE · HISTORY TEST 3</div>
+      <div class="sub">continuous phase rendering · flat tape colours</div>
+    </div>
+    <button id="newBtn">New history</button>
+  </header>
+
+  <div id="viewport">
+    <canvas id="canvas"></canvas>
+    <div id="hud">tap a free end · pinch to zoom · drag to pan</div>
+  </div>
+
+  <footer>
+    <div id="status"><b>Construction-history model</b><br>Building tape stack…</div>
+    <button id="undoBtn">Undo</button>
+  </footer>
 </div>
-<footer>
-  <div id="status"><b>Every overlap is mapped once.</b><br>Layer order never changes.</div>
-  <button id="undoBtn">Undo</button>
-</footer>
-</div>
+
 <script>
 (()=>{
-const viewport=document.getElementById('viewport'),world=document.getElementById('world'),
-status=document.getElementById('status'),finish=document.getElementById('finish'),finishText=document.getElementById('finishText'),
-newBtn=document.getElementById('newBtn'),againBtn=document.getElementById('againBtn'),undoBtn=document.getElementById('undoBtn');
+const viewport=document.getElementById('viewport');
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const status=document.getElementById('status');
+const newBtn=document.getElementById('newBtn');
+const undoBtn=document.getElementById('undoBtn');
 
-const WW=1200,WH=1600;
-const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
-let strips=[],contacts=[],history=[],animating=false,animVisual=null;
-let tapCount=0, optimalTaps=null, optimalPartial=0;
-let view={scale:.5,tx:0,ty:0},pointers=new Map(),gesture=null,tapCandidate=null;
+const WORLD_W=1100;
+const WORLD_H=1450;
+const COLORS=['#ef5d5d','#f2bf4c','#4da2e0','#61bf85','#9b76d5','#e887ba','#ef8d50','#53c5bd'];
 
-const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),hypot=Math.hypot;
+let strips=[];
+let contacts=[];
+let history=[];
+let peelGhosts=[];
+let view={scale:.5,tx:0,ty:0};
+let pointers=new Map();
+let gesture=null;
+let tapCandidate=null;
+let rafPending=false;
 
-function applyView(){world.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.scale})`}
-function fitWorld(){const vw=viewport.clientWidth,vh=viewport.clientHeight,s=Math.min(vw/WW,vh/WH)*.96;
-view.scale=s;view.tx=(vw-WW*s)/2;view.ty=(vh-WH*s)/2;applyView()}
-function screenToWorld(x,y){const r=viewport.getBoundingClientRect();return{x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rand=(a,b)=>a+Math.random()*(b-a);
+const hypot=Math.hypot;
 
-function makeStrip(i,layer){
- const horizontal=i%2===0,margin=105;
- if(horizontal){
-   const y=rand(margin,WH-margin),y2=clamp(y+rand(-65,65),margin,WH-margin);
-   return{id:i,layer,ax:rand(margin,280),ay:y,bx:rand(WW-280,WW-margin),by:y2,width:rand(52,72),
-   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
- }else{
-   const x=rand(margin,WW-margin),x2=clamp(x+rand(-65,65),margin,WW-margin);
-   return{id:i,layer,ax:x,ay:rand(margin,280),bx:x2,by:rand(WH-280,WH-margin),width:rand(52,72),
-   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
- }
-}
-function pointOn(s,t){return{x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
-function geom(s){const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);return{x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L,ux:dx/L,uy:dy/L}}
-
-function tapePolygon(s){
- const g=geom(s),nx=-g.uy*s.width/2,ny=g.ux*s.width/2;
- return[
-  {x:g.x1+nx,y:g.y1+ny},{x:g.x2+nx,y:g.y2+ny},
-  {x:g.x2-nx,y:g.y2-ny},{x:g.x1-nx,y:g.y1-ny}
- ];
-}
-function polygonArea(poly){
- let a=0;for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];a+=p.x*q.y-q.x*p.y}
- return Math.abs(a)/2;
-}
-function signedArea(poly){
- let a=0;for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];a+=p.x*q.y-q.x*p.y}
- return a/2;
-}
-function clipPolygon(subject,clip){
- let output=subject.slice();
- const sign=signedArea(clip)>=0?1:-1;
- for(let j=0;j<clip.length;j++){
-   const A=clip[j],B=clip[(j+1)%clip.length],input=output;output=[];
-   if(!input.length)break;
-   const inside=P=>sign*((B.x-A.x)*(P.y-A.y)-(B.y-A.y)*(P.x-A.x))>=-1e-8;
-   const intersect=(P,Q)=>{
-     const rx=Q.x-P.x,ry=Q.y-P.y,sx=B.x-A.x,sy=B.y-A.y;
-     const den=rx*sy-ry*sx;if(Math.abs(den)<1e-10)return Q;
-     const t=((A.x-P.x)*sy-(A.y-P.y)*sx)/den;
-     return{x:P.x+t*rx,y:P.y+t*ry};
-   };
-   let S=input[input.length-1];
-   for(const E of input){
-     const Ein=inside(E),Sin=inside(S);
-     if(Ein){if(!Sin)output.push(intersect(S,E));output.push(E)}
-     else if(Sin)output.push(intersect(S,E));
-     S=E;
-   }
- }
- return output;
-}
-function projectSpan(poly,s){
- const g=geom(s),den=g.dx*g.dx+g.dy*g.dy;
- const ts=poly.map(p=>((p.x-g.x1)*g.dx+(p.y-g.y1)*g.dy)/den);
- return[clamp(Math.min(...ts),0,1),clamp(Math.max(...ts),0,1)];
+function resizeCanvas(){
+  const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+  const r=viewport.getBoundingClientRect();
+  canvas.width=Math.round(r.width*dpr);
+  canvas.height=Math.round(r.height*dpr);
+  canvas._dpr=dpr;
+  fitWorld();
+  requestDraw();
 }
 
-function normalExtent(poly,s){
- const g=geom(s),nx=-g.uy,ny=g.ux,vals=poly.map(p=>p.x*nx+p.y*ny);
- return Math.max(...vals)-Math.min(...vals);
+function fitWorld(){
+  const r=viewport.getBoundingClientRect();
+  const s=Math.min(r.width/WORLD_W,r.height/WORLD_H)*0.94;
+  view.scale=s;
+  view.tx=(r.width-WORLD_W*s)/2;
+  view.ty=(r.height-WORLD_H*s)/2;
 }
 
-function buildContactMap(){
- contacts=[];
- for(let i=0;i<strips.length;i++)for(let j=i+1;j<strips.length;j++){
-   const a=strips[i],b=strips[j];
-   const inter=clipPolygon(tapePolygon(a),tapePolygon(b));
-   if(inter.length<3)continue;
-
-   const area=polygonArea(inter);
-   if(area<=0)continue;
-
-   const upper=a.layer>b.layer?a:b,lower=a.layer>b.layer?b:a;
-   const upperSpan=projectSpan(inter,upper);
-   const lowerSpan=projectSpan(inter,lower);
-
-   // Ambiguity filter:
-   // The constructed puzzle only accepts substantial overlaps.
-   // Require at least ONE THIRD of tape width penetration across both tapes,
-   // and at least ONE THIRD tape-width extent along both tape axes.
-   const penA=normalExtent(inter,a);
-   const penB=normalExtent(inter,b);
-   if(penA < a.width/3 || penB < b.width/3)continue;
-
-   const lenA=geom(a).L*(projectSpan(inter,a)[1]-projectSpan(inter,a)[0]);
-   const lenB=geom(b).L*(projectSpan(inter,b)[1]-projectSpan(inter,b)[0]);
-   if(lenA < a.width/3 || lenB < b.width/3)continue;
-
-   const gu=geom(upper),gl=geom(lower);
-   const dot=gu.ux*gl.ux+gu.uy*gl.uy;
-   contacts.push({
-     upper:upper.id,
-     lower:lower.id,
-     upperSpan,
-     lowerSpan,
-     parallel:Math.abs(dot)>0.82,
-     sameDir:dot>=0
-   });
- }
+function screenToWorld(x,y){
+  const r=viewport.getBoundingClientRect();
+  return{
+    x:(x-r.left-view.tx)/view.scale,
+    y:(y-r.top-view.ty)/view.scale
+  };
 }
 
-function createEls(s){
- s.segs=[];
- const roll=document.createElement('div');roll.className='roll';
- roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.5) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.32) 60% 69%,${s.color} 71%)`;
- world.appendChild(roll);s.roll=roll;
+function worldToScreen(p){
+  return{x:view.tx+p.x*view.scale,y:view.ty+p.y*view.scale};
 }
-function ensureSegs(s,n){
- while(s.segs.length<n){const el=document.createElement('div');el.className='tape';el.style.background=s.color;el.style.zIndex=100+s.layer;world.appendChild(el);s.segs.push(el)}
- s.segs.forEach((el,i)=>el.style.display=i<n?'block':'none');
+
+function pointOn(s,t){
+  return{
+    x:s.ax+(s.bx-s.ax)*t,
+    y:s.ay+(s.by-s.ay)*t
+  };
 }
-function intervalOverlapAmount(a,b){return Math.max(0,Math.min(a[1],b[1])-Math.max(a[0],b[0]))}
-function intervalsOverlap(a,b){return intervalOverlapAmount(a,b)>1e-6}
+
+function geom(s){
+  const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);
+  return{x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L,ux:dx/L,uy:dy/L};
+}
+
+function localStickTime(s,t){
+  for(const phase of s.phases){
+    if(t>=phase.a-1e-8 && t<=phase.b+1e-8)return phase.time;
+  }
+  return -Infinity;
+}
+
+function segmentIntersection(a,b){
+  const ax=a.ax,ay=a.ay,arx=a.bx-a.ax,ary=a.by-a.ay;
+  const bx=b.ax,by=b.ay,brx=b.bx-b.ax,bry=b.by-b.ay;
+  const cross=(x1,y1,x2,y2)=>x1*y2-y1*x2;
+  const den=cross(arx,ary,brx,bry);
+  if(Math.abs(den)<1e-8)return null;
+  const qx=bx-ax,qy=by-ay;
+  const ta=cross(qx,qy,brx,bry)/den;
+  const tb=cross(qx,qy,arx,ary)/den;
+  if(ta<=.025||ta>=.975||tb<=.025||tb>=.975)return null;
+  return{ta,tb};
+}
+
+function buildContacts(){
+  contacts=[];
+  for(let i=0;i<strips.length;i++){
+    for(let j=i+1;j<strips.length;j++){
+      const a=strips[i],b=strips[j];
+      const hit=segmentIntersection(a,b);
+      if(!hit)continue;
+
+      const ga=geom(a),gb=geom(b);
+      const dot=Math.abs(ga.ux*gb.ux+ga.uy*gb.uy);
+      if(dot>.42)continue; // avoid ambiguous near-parallel contacts
+
+      // substantial overlap is guaranteed by center-line crossing and wide ribbons.
+      const ta=hit.ta,tb=hit.tb;
+      const timeA=localStickTime(a,ta);
+      const timeB=localStickTime(b,tb);
+
+      const upper=timeA>timeB?a:b;
+      const lower=upper===a?b:a;
+      const tUpper=upper===a?ta:tb;
+      const tLower=upper===a?tb:ta;
+
+      // width projected to each tape as a local contact span.
+      const spanUpper=(lower.width/2)/geom(upper).L;
+      const spanLower=(upper.width/2)/geom(lower).L;
+
+      contacts.push({
+        a:a.id,b:b.id,
+        ta,tb,
+        upper:upper.id,
+        lower:lower.id,
+        upperSpan:[clamp(tUpper-spanUpper,0,1),clamp(tUpper+spanUpper,0,1)],
+        lowerSpan:[clamp(tLower-spanLower,0,1),clamp(tLower+spanLower,0,1)]
+      });
+    }
+  }
+}
+
+function generateTapeGeometry(){
+  strips=[];
+
+  // Denser field: still broadly crosshatched, but with more varied position,
+  // length and angle so it doesn't feel like a rigid grid.
+  const nH=11,nV=11;
+  let id=0;
+
+  for(let i=0;i<nH;i++){
+    const slot=(i+1)/(nH+1);
+    const y=95+slot*(WORLD_H-190)+rand(-48,48);
+    const tilt=rand(-145,145);
+    const insetL=rand(45,150);
+    const insetR=rand(45,150);
+
+    strips.push({
+      id:id++,
+      ax:insetL,
+      ay:clamp(y-tilt/2,55,WORLD_H-55),
+      bx:WORLD_W-insetR,
+      by:clamp(y+tilt/2,55,WORLD_H-55),
+      width:rand(56,74),
+      color:COLORS[i%COLORS.length],
+      phases:[],
+      intervals:[[0,1]],
+      removed:false
+    });
+  }
+
+  for(let i=0;i<nV;i++){
+    const slot=(i+1)/(nV+1);
+    const x=80+slot*(WORLD_W-160)+rand(-42,42);
+    const tilt=rand(-125,125);
+    const insetT=rand(45,150);
+    const insetB=rand(45,150);
+
+    strips.push({
+      id:id++,
+      ax:clamp(x-tilt/2,55,WORLD_W-55),
+      ay:insetT,
+      bx:clamp(x+tilt/2,55,WORLD_W-55),
+      by:WORLD_H-insetB,
+      width:rand(56,74),
+      color:COLORS[(i+3)%COLORS.length],
+      phases:[],
+      intervals:[[0,1]],
+      removed:false
+    });
+  }
+}
+
+function rawCrossingsForStrip(target){
+  const xs=[];
+  for(const other of strips){
+    if(other.id===target.id)continue;
+    const hit=segmentIntersection(target,other);
+    if(!hit)continue;
+
+    const gt=geom(target),go=geom(other);
+    const dot=Math.abs(gt.ux*go.ux+gt.uy*go.uy);
+
+    // Same contact family used by the puzzle: avoid near-parallel ambiguity.
+    if(dot>.42)continue;
+
+    const t=(target.id<other.id)?hit.ta:hit.tb;
+    // Protect enough room for the entire physical contact plus a small buffer.
+    const half=((other.width/2)+8)/gt.L;
+    xs.push([clamp(t-half,0,1),clamp(t+half,0,1)]);
+  }
+  return xs;
+}
+
+function safeSplitForStrip(s){
+  const forbidden=rawCrossingsForStrip(s);
+
+  // Try natural-looking central split locations first.
+  const candidates=[];
+  for(let i=0;i<40;i++)candidates.push(rand(.30,.70));
+
+  // Pick the first split comfortably outside every physical crossing.
+  for(const split of candidates){
+    const bad=forbidden.some(z=>split>=z[0]&&split<=z[1]);
+    if(!bad)return split;
+  }
+
+  // Fall back to the point in .25-.75 with greatest clearance.
+  let best=.5,bestGap=-1;
+  for(let k=0;k<=100;k++){
+    const t=.25+k*.005;
+    let gap=1;
+    for(const z of forbidden){
+      if(t>=z[0]&&t<=z[1]){gap=-1;break}
+      gap=Math.min(gap,Math.abs(t-z[0]),Math.abs(t-z[1]));
+    }
+    if(gap>bestGap){bestGap=gap;best=t}
+  }
+  return best;
+}
+
+function assignConstructionHistory(){
+  let ops=[];
+
+  for(const s of strips){
+    const fromLeft=Math.random()<.5;
+    const split=safeSplitForStrip(s);
+
+    s._fromLeft=fromLeft;
+    s._split=split;
+
+    if(fromLeft){
+      ops.push({sid:s.id,a:0,b:split,part:0});
+      ops.push({sid:s.id,a:split,b:1,part:1});
+    }else{
+      ops.push({sid:s.id,a:split,b:1,part:0});
+      ops.push({sid:s.id,a:0,b:split,part:1});
+    }
+  }
+
+  // Simulate "stick some starts, then come back and finish others".
+  // A weighted interleave gives much richer local over/under relationships
+  // than simply doing all first halves and then all second halves.
+  const first=ops.filter(o=>o.part===0);
+  const second=ops.filter(o=>o.part===1);
+
+  const shuffle=a=>{
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+  };
+  shuffle(first);
+  shuffle(second);
+
+  const sequence=[];
+  const started=new Set();
+
+  while(first.length || second.length){
+    const canFinish=second.filter(o=>started.has(o.sid));
+
+    const chooseFinish=
+      canFinish.length &&
+      sequence.length>3 &&
+      Math.random()<.46;
+
+    if(chooseFinish){
+      const pick=Math.floor(Math.random()*canFinish.length);
+      const op=canFinish[pick];
+      const idx=second.indexOf(op);
+      second.splice(idx,1);
+      sequence.push(op);
+    }else if(first.length){
+      const op=first.pop();
+      started.add(op.sid);
+      sequence.push(op);
+    }else if(canFinish.length){
+      const op=canFinish[Math.floor(Math.random()*canFinish.length)];
+      second.splice(second.indexOf(op),1);
+      sequence.push(op);
+    }else{
+      // Safety fallback.
+      sequence.push(second.pop());
+    }
+  }
+
+  strips.forEach(s=>s.phases=[]);
+
+  sequence.forEach((o,idx)=>{
+    strips[o.sid].phases.push({
+      a:o.a,
+      b:o.b,
+      time:idx+1
+    });
+  });
+
+  strips.forEach(s=>s.phases.sort((x,y)=>x.a-y.a));
+}
+
+function directedCycleExists(){
+  const adj=new Map();
+  strips.forEach(s=>adj.set(s.id,[]));
+  contacts.forEach(c=>adj.get(c.upper).push(c.lower));
+
+  const state=new Map();
+  function dfs(v){
+    state.set(v,1);
+    for(const w of adj.get(v)){
+      if(state.get(w)===1)return true;
+      if(!state.get(w)&&dfs(w))return true;
+    }
+    state.set(v,2);
+    return false;
+  }
+  for(const s of strips){
+    if(!state.get(s.id)&&dfs(s.id))return true;
+  }
+  return false;
+}
+
+function variedDepthCount(){
+  let count=0;
+  for(const s of strips){
+    let over=false,under=false;
+    for(const c of contacts){
+      if(c.upper===s.id)over=true;
+      if(c.lower===s.id)under=true;
+    }
+    if(over&&under)count++;
+  }
+  return count;
+}
+
+function buildPuzzle(){
+  history=[];
+  peelGhosts=[];
+
+  // Keep regenerating only the history/geometry until the proof actually
+  // demonstrates mixed local depth and at least one dependency cycle.
+  for(let attempt=0;attempt<80;attempt++){
+    generateTapeGeometry();
+    assignConstructionHistory();
+    buildContacts();
+
+    if(contacts.length>=45 && variedDepthCount()>=14 && directedCycleExists()){
+      break;
+    }
+  }
+
+  requestDraw();
+  updateStatus();
+}
+
+function intervalContains(iv,t){
+  return t>=iv[0]-1e-7&&t<=iv[1]+1e-7;
+}
+
+function tapePresentAt(s,t){
+  return !s.removed && s.intervals.some(iv=>intervalContains(iv,t));
+}
+
 function contactActive(c){
- const up=strips[c.upper];
- if(up.removed)return false;
- // A fixed contact remains active only while some of the upper tape still
- // occupies its originally mapped contact span.
- return up.intervals.some(iv=>intervalOverlapAmount(iv,c.upperSpan)>1e-6);
+  const up=strips[c.upper];
+  const center=(c.upperSpan[0]+c.upperSpan[1])/2;
+  return tapePresentAt(up,center);
 }
-function mappedParallelZones(c,upperIntervals){
- // For a parallel overlap, only the part of the LOWER contact corresponding
- // to upper tape that is still physically present remains pinned.
- const us=c.upperSpan,ls=c.lowerSpan;
- const ulen=us[1]-us[0];
- if(ulen<=1e-8)return [];
- const out=[];
- for(const iv of upperIntervals){
-   const a=Math.max(iv[0],us[0]),b=Math.min(iv[1],us[1]);
-   if(b-a<=1e-6)continue;
-   let fa=(a-us[0])/ulen,fb=(b-us[0])/ulen;
-   if(!c.sameDir){
-     const na=1-fb,nb=1-fa;fa=na;fb=nb;
-   }
-   out.push([ls[0]+fa*(ls[1]-ls[0]),ls[0]+fb*(ls[1]-ls[0])]);
- }
- return out;
-}
-function activeZones(s){
- const out=[];
- for(const c of contacts){
-   if(c.lower!==s.id)continue;
-   const up=strips[c.upper];
-   if(up.removed)continue;
-   if(c.parallel) out.push(...mappedParallelZones(c,up.intervals));
-   else if(contactActive(c)) out.push(c.lowerSpan.slice());
- }
- return out.sort((a,b)=>a[0]-b[0]);
-}
-function mergeZones(zs){
- const out=[];for(const z of zs){if(!out.length||z[0]>out[out.length-1][1]+1e-5)out.push(z.slice());else out[out.length-1][1]=Math.max(out[out.length-1][1],z[1])}return out
-}
-function snapshot(){return {
- strips:strips.map(s=>({intervals:s.intervals.map(iv=>iv.slice()),removed:s.removed})),
- tapCount
-}}
 
-function pointSegHit(px,py,s,iv){
- const p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]),vx=p1.x-p0.x,vy=p1.y-p0.y,wx=px-p0.x,wy=py-p0.y,vv=vx*vx+vy*vy;
- let u=vv?((wx*vx+wy*vy)/vv):0;u=clamp(u,0,1);
- const qx=p0.x+vx*u,qy=p0.y+vy*u;
- return{dist:hypot(px-qx,py-qy),t:iv[0]+(iv[1]-iv[0])*u};
-}
-function hitInfo(p,s){
- let best=null,biv=null;
- for(const iv of s.intervals){const h=pointSegHit(p.x,p.y,s,iv);if(!best||h.dist<best.dist){best=h;biv=iv}}
- if(!best)return null;
- return{...best,iv:biv,inside:best.dist<s.width/2,half:s.width/2};
-}
-function pickTape(p){
- const infos=strips.filter(s=>!s.removed).map(s=>({s,...hitInfo(p,s)})).filter(x=>x.iv);
- const strict=infos.filter(x=>x.inside);
- if(strict.length){
-   // Only when the tap is literally inside more than one painted tape does z-order decide.
-   strict.sort((a,b)=>b.s.layer-a.s.layer);
-   return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
- }
- const slop=5/view.scale,near=infos.filter(x=>x.dist<x.half+slop).sort((a,b)=>a.dist-b.dist);
- if(!near.length)return null;
- return{s:near[0].s,t:near[0].t,iv:near[0].iv};
+function blockerZonesFor(s){
+  const out=[];
+  for(const c of contacts){
+    if(c.lower!==s.id || !contactActive(c))continue;
+    out.push(c.lowerSpan.slice());
+  }
+  out.sort((a,b)=>a[0]-b[0]);
+
+  // merge
+  const merged=[];
+  for(const z of out){
+    if(!merged.length || z[0]>merged[merged.length-1][1]+1e-5){
+      merged.push(z);
+    }else{
+      merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],z[1]);
+    }
+  }
+  return merged;
 }
 
 function peelAccess(s,t,iv){
- const zones=mergeZones(activeZones(s).filter(z=>intervalsOverlap(z,iv)).map(z=>[
-   Math.max(z[0],iv[0]),
-   Math.min(z[1],iv[1])
- ]));
+  const zones=blockerZonesFor(s)
+    .filter(z=>Math.min(z[1],iv[1])-Math.max(z[0],iv[0])>1e-6)
+    .map(z=>[Math.max(z[0],iv[0]),Math.min(z[1],iv[1])]);
 
- // A blocker only prevents peeling THROUGH its own contact span.
- // It does not make the entire strip or opposite end inaccessible.
- // Work out the first blocker from each CURRENT end.
- let leftBlock=null;
- for(const z of zones){
-   if(z[1]<=iv[0]+1e-6)continue;
-   if(z[0]<=iv[0]+1e-6 && z[1]>iv[0]+1e-6){
-     // Current left edge is itself under a contact: not free.
-     leftBlock={atEdge:true,zone:z};
-     break;
-   }
-   if(z[0]>iv[0]+1e-6){
-     leftBlock={atEdge:false,zone:z};
-     break;
-   }
- }
+  let leftBlock=null;
+  for(const z of zones){
+    if(z[1]<=iv[0]+1e-6)continue;
+    if(z[0]<=iv[0]+1e-6 && z[1]>iv[0]+1e-6){
+      leftBlock={atEdge:true,zone:z};
+      break;
+    }
+    if(z[0]>iv[0]+1e-6){
+      leftBlock={atEdge:false,zone:z};
+      break;
+    }
+  }
 
- let rightBlock=null;
- for(let i=zones.length-1;i>=0;i--){
-   const z=zones[i];
-   if(z[0]>=iv[1]-1e-6)continue;
-   if(z[0]<iv[1]-1e-6 && z[1]>=iv[1]-1e-6){
-     // Current right edge is itself under a contact: not free.
-     rightBlock={atEdge:true,zone:z};
-     break;
-   }
-   if(z[1]<iv[1]-1e-6){
-     rightBlock={atEdge:false,zone:z};
-     break;
-   }
- }
+  let rightBlock=null;
+  for(let i=zones.length-1;i>=0;i--){
+    const z=zones[i];
+    if(z[0]>=iv[1]-1e-6)continue;
+    if(z[0]<iv[1]-1e-6 && z[1]>=iv[1]-1e-6){
+      rightBlock={atEdge:true,zone:z};
+      break;
+    }
+    if(z[1]<iv[1]-1e-6){
+      rightBlock={atEdge:false,zone:z};
+      break;
+    }
+  }
 
- const leftFree=!leftBlock || !leftBlock.atEdge;
- const rightFree=!rightBlock || !rightBlock.atEdge;
+  const leftFree=!leftBlock||!leftBlock.atEdge;
+  const rightFree=!rightBlock||!rightBlock.atEdge;
+  const leftStop=leftBlock&&!leftBlock.atEdge?leftBlock.zone[0]:iv[1];
+  const rightStop=rightBlock&&!rightBlock.atEdge?rightBlock.zone[1]:iv[0];
 
- const leftStop = leftBlock && !leftBlock.atEdge ? leftBlock.zone[0] : iv[1];
- const rightStop = rightBlock && !rightBlock.atEdge ? rightBlock.zone[1] : iv[0];
+  const inLeft=leftFree && t>=iv[0]-1e-6 && t<=leftStop+1e-6;
+  const inRight=rightFree && t>=rightStop-1e-6 && t<=iv[1]+1e-6;
 
- // A tap belongs to the left free-end segment if it lies between the actual
- // current left edge and the first blocker. Same independently for the right.
- const inLeft = leftFree && t>=iv[0]-1e-6 && t<=leftStop+1e-6;
- const inRight = rightFree && t>=rightStop-1e-6 && t<=iv[1]+1e-6;
+  if(!inLeft&&!inRight)return null;
 
- if(!inLeft && !inRight)return null;
+  if(inLeft&&inRight){
+    const dl=t-iv[0],dr=iv[1]-t;
+    if(dl<=dr)return{side:'left',from:iv[0],to:leftStop,zone:leftBlock&&!leftBlock.atEdge?leftBlock.zone:null,iv:iv.slice()};
+    return{side:'right',from:iv[1],to:rightStop,zone:rightBlock&&!rightBlock.atEdge?rightBlock.zone:null,iv:iv.slice()};
+  }
 
- if(inLeft && inRight){
-   // Whole currently visible interval is free: choose nearer end.
-   const dl=Math.abs(t-iv[0]),dr=Math.abs(iv[1]-t);
-   if(dl<=dr){
-     return {side:'left',from:iv[0],to:leftStop,zone:(leftBlock&&!leftBlock.atEdge)?leftBlock.zone:null,ivBounds:iv.slice()};
-   }else{
-     return {side:'right',from:iv[1],to:rightStop,zone:(rightBlock&&!rightBlock.atEdge)?rightBlock.zone:null,ivBounds:iv.slice()};
-   }
- }
-
- if(inLeft){
-   return {side:'left',from:iv[0],to:leftStop,zone:(leftBlock&&!leftBlock.atEdge)?leftBlock.zone:null,ivBounds:iv.slice()};
- }
-
- return {side:'right',from:iv[1],to:rightStop,zone:(rightBlock&&!rightBlock.atEdge)?rightBlock.zone:null,ivBounds:iv.slice()};
+  if(inLeft)return{side:'left',from:iv[0],to:leftStop,zone:leftBlock&&!leftBlock.atEdge?leftBlock.zone:null,iv:iv.slice()};
+  return{side:'right',from:iv[1],to:rightStop,zone:rightBlock&&!rightBlock.atEdge?rightBlock.zone:null,iv:iv.slice()};
 }
 
-function findInterval(s,b){let bi=-1,be=1e9;s.intervals.forEach((iv,i)=>{const e=Math.abs(iv[0]-b[0])+Math.abs(iv[1]-b[1]);if(e<be){be=e;bi=i}});return be<.02?bi:-1}
+function findIntervalIndex(s,bounds){
+  let best=-1,err=Infinity;
+  s.intervals.forEach((iv,i)=>{
+    const e=Math.abs(iv[0]-bounds[0])+Math.abs(iv[1]-bounds[1]);
+    if(e<err){err=e;best=i;}
+  });
+  return err<.03?best:-1;
+}
+
+function snapshot(){
+  return strips.map(s=>({
+    intervals:s.intervals.map(iv=>iv.slice()),
+    removed:s.removed
+  }));
+}
+
 function commitPeel(s,a){
- const idx=findInterval(s,a.ivBounds);if(idx<0)return;
- const iv=s.intervals[idx],STUB=.010;
- if(a.zone){
-   if(a.side==='left')s.intervals[idx]=[clamp(a.zone[0]-STUB,iv[0],iv[1]),iv[1]];
-   else s.intervals[idx]=[iv[0],clamp(a.zone[1]+STUB,iv[0],iv[1])];
- }else s.intervals.splice(idx,1);
- s.intervals=s.intervals.filter(iv=>iv[1]-iv[0]>.002).sort((a,b)=>a[0]-b[0]);
- s.removed=s.intervals.length===0;
+  const idx=findIntervalIndex(s,a.iv);
+  if(idx<0)return;
+  const iv=s.intervals[idx];
+  const STUB=.008;
+
+  if(a.zone){
+    if(a.side==='left'){
+      s.intervals[idx]=[clamp(a.zone[0]-STUB,iv[0],iv[1]),iv[1]];
+    }else{
+      s.intervals[idx]=[iv[0],clamp(a.zone[1]+STUB,iv[0],iv[1])];
+    }
+  }else{
+    s.intervals.splice(idx,1);
+  }
+
+  s.intervals=s.intervals.filter(iv=>iv[1]-iv[0]>.002);
+  s.removed=s.intervals.length===0;
 }
 
-
-function cloneStateFromStrips(){
- return strips.map(s=>({intervals:s.intervals.map(iv=>iv.slice()),removed:s.removed}));
-}
-function stateKey(state){
- return state.map(s=>s.intervals.map(iv=>iv.map(x=>x.toFixed(4)).join(',')).join('|')).join(' / ');
-}
-function contactActiveInState(c,state){
- const up=state[c.upper];
- if(up.removed)return false;
- return up.intervals.some(iv=>intervalOverlapAmount(iv,c.upperSpan)>1e-6);
-}
-function activeZonesInState(stripId,state){
- const out=[];
- for(const c of contacts){
-   if(c.lower!==stripId)continue;
-   const up=state[c.upper];
-   if(up.removed)continue;
-   if(c.parallel) out.push(...mappedParallelZones(c,up.intervals));
-   else if(contactActiveInState(c,state)) out.push(c.lowerSpan.slice());
- }
- return out.sort((a,b)=>a[0]-b[0]);
-}
-function mergeZonesPure(zs){
- const out=[];
- for(const z of zs){
-   if(!out.length || z[0]>out[out.length-1][1]+1e-6)out.push(z.slice());
-   else out[out.length-1][1]=Math.max(out[out.length-1][1],z[1]);
- }
- return out;
-}
-function possibleMovesForState(state){
- const moves=[];
- for(let sid=0;sid<state.length;sid++){
-   const ss=state[sid];
-   if(ss.removed)continue;
-   const zonesAll=mergeZonesPure(activeZonesInState(sid,state));
-   for(let ii=0;ii<ss.intervals.length;ii++){
-     const iv=ss.intervals[ii];
-     const zones=zonesAll
-       .filter(z=>intervalsOverlap(z,iv))
-       .map(z=>[Math.max(z[0],iv[0]),Math.min(z[1],iv[1])]);
-
-     // left-end peel
-     let firstRight=null;
-     for(const z of zones){
-       if(z[0]>iv[0]+1e-6){firstRight=z;break}
-       if(z[0]<=iv[0]+1e-6 && z[1]>=iv[0]-1e-6){firstRight=z;break}
-     }
-     if(firstRight){
-       if(firstRight[0]>iv[0]+1e-6){
-         moves.push({sid,ii,side:'left',zone:firstRight});
-       }
-     }else{
-       moves.push({sid,ii,side:'left',zone:null});
-     }
-
-     // right-end peel
-     let firstLeft=null;
-     for(let z=zones.length-1;z>=0;z--){
-       if(zones[z][1]<iv[1]-1e-6){firstLeft=zones[z];break}
-       if(zones[z][0]<=iv[1]+1e-6 && zones[z][1]>=iv[1]-1e-6){firstLeft=zones[z];break}
-     }
-     if(firstLeft){
-       if(firstLeft[1]<iv[1]-1e-6){
-         moves.push({sid,ii,side:'right',zone:firstLeft});
-       }
-     }else{
-       moves.push({sid,ii,side:'right',zone:null});
-     }
-   }
- }
- return moves;
-}
-function applyMoveToState(state,m){
- const ns=state.map(s=>({intervals:s.intervals.map(iv=>iv.slice()),removed:s.removed}));
- const s=ns[m.sid],iv=s.intervals[m.ii],STUB=.010;
- if(!iv)return ns;
- if(m.zone){
-   if(m.side==='left')s.intervals[m.ii]=[clamp(m.zone[0]-STUB,iv[0],iv[1]),iv[1]];
-   else s.intervals[m.ii]=[iv[0],clamp(m.zone[1]+STUB,iv[0],iv[1])];
- }else{
-   s.intervals.splice(m.ii,1);
- }
- s.intervals=s.intervals.filter(iv=>iv[1]-iv[0]>.002).sort((a,b)=>a[0]-b[0]);
- s.removed=s.intervals.length===0;
- return ns;
-}
-function solvedState(state){return state.every(s=>s.removed)}
-function greedyLowerBound(state){
- // admissible-ish simple lower bound: at least one tap per remaining strip.
- return state.reduce((n,s)=>n+(s.removed?0:1),0);
-}
-function computeOptimalSolution(){
- const start=cloneStateFromStrips();
- if(solvedState(start))return {taps:0,partial:0,path:[]};
-
- let bound=greedyLowerBound(start);
- let explored=0;
- const HARD_CAP=220000;
-
- function isPartialMove(state,m){
-   const before=state[m.sid];
-   const child=applyMoveToState(state,m);
-   return !child[m.sid].removed;
- }
-
- function dfs(state,g,bound,memo,path){
-   explored++;
-   if(explored>HARD_CAP)return {found:false,next:Infinity,aborted:true};
-   const h=greedyLowerBound(state),f=g+h;
-   if(f>bound)return {found:false,next:f};
-   if(solvedState(state)){
-     return {
-       found:true,
-       cost:g,
-       path:path.slice(),
-       partial:path.reduce((n,x)=>n+(x.partial?1:0),0)
-     };
-   }
-
-   const key=stateKey(state);
-   if(memo.has(key)&&memo.get(key)<=g)return {found:false,next:Infinity};
-   memo.set(key,g);
-
-   const moves=possibleMovesForState(state).map(m=>({...m,partial:isPartialMove(state,m)}));
-
-   // Prefer partial moves during search only as a tie-break; solution still
-   // minimizes taps first.
-   moves.sort((a,b)=>{
-     if(a.partial!==b.partial)return a.partial?-1:1;
-     return 0;
-   });
-
-   let next=Infinity;
-   for(const m of moves){
-     const child=applyMoveToState(state,m);
-     path.push(m);
-     const r=dfs(child,g+1,bound,memo,path);
-     path.pop();
-     if(r.found)return r;
-     if(r.aborted)return r;
-     if(r.next<next)next=r.next;
-   }
-   return {found:false,next};
- }
-
- while(bound<220){
-   const memo=new Map();
-   const r=dfs(start,0,bound,memo,[]);
-   if(r.found)return {taps:r.cost,partial:r.partial,path:r.path};
-   if(r.aborted)break;
-   if(!isFinite(r.next))break;
-   bound=r.next;
- }
-
- // fallback greedy, with partial count
- let state=start,steps=0,partial=0,path=[],safety=600;
- while(!solvedState(state)&&safety--){
-   const moves=possibleMovesForState(state);
-   if(!moves.length)break;
-   let best=moves[0],bestScore=-1,bestPartial=false;
-   for(const m of moves){
-     const child=applyMoveToState(state,m);
-     const becameRemoved=!state[m.sid].removed&&child[m.sid].removed;
-     const isPartial=!child[m.sid].removed;
-     const score=(becameRemoved?10:0)+(isPartial?1.5:0);
-     if(score>bestScore){bestScore=score;best=m;bestPartial=isPartial}
-   }
-   state=applyMoveToState(state,best);
-   path.push({...best,partial:bestPartial});
-   if(bestPartial)partial++;
-   steps++;
- }
- return steps?{taps:steps,partial,path}:null;
+function hitInfo(p,s){
+  let best=null;
+  for(const iv of s.intervals){
+    const p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]);
+    const vx=p1.x-p0.x,vy=p1.y-p0.y;
+    const wx=p.x-p0.x,wy=p.y-p0.y;
+    const vv=vx*vx+vy*vy;
+    let u=vv?((wx*vx+wy*vy)/vv):0;
+    u=clamp(u,0,1);
+    const qx=p0.x+vx*u,qy=p0.y+vy*u;
+    const d=hypot(p.x-qx,p.y-qy);
+    const t=iv[0]+(iv[1]-iv[0])*u;
+    if(!best||d<best.dist)best={dist:d,t,iv};
+  }
+  if(!best)return null;
+  return{...best,inside:best.dist<=s.width/2,half:s.width/2};
 }
 
-function gradeForTaps(actual,opt){
- if(!opt)return '';
- const ratio=actual/opt;
- if(ratio<=1.10)return 'Excellent';
- if(ratio<=1.25)return 'Great';
- if(ratio<=1.50)return 'Good';
- if(ratio<=2.00)return 'Okay';
- return 'Completed';
+function contactAtTap(p,c){
+  if(!contactActive(c))return false;
+  const ia=hitInfo(p,strips[c.a]);
+  const ib=hitInfo(p,strips[c.b]);
+  if(!ia||!ib||!ia.inside||!ib.inside)return false;
+
+  const spanA=c.a===c.upper?c.upperSpan:c.lowerSpan;
+  const spanB=c.b===c.upper?c.upperSpan:c.lowerSpan;
+
+  return ia.t>=spanA[0]-1e-4&&ia.t<=spanA[1]+1e-4 &&
+         ib.t>=spanB[0]-1e-4&&ib.t<=spanB[1]+1e-4;
 }
 
-function peelByTap(s,t,iv){
- if(s.removed)return;
- const a=peelAccess(s,t,iv);
- if(!a){
-   if(navigator.vibrate)navigator.vibrate(4);
-   return;
- }
- if(Math.abs(a.to-a.from)<.002)return;
+function pickTape(p){
+  const infos=strips
+    .filter(s=>!s.removed)
+    .map(s=>({s,...hitInfo(p,s)}))
+    .filter(x=>x.iv);
 
- history.push(snapshot());
- tapCount++;
+  const strict=infos.filter(x=>x.inside);
 
- // Capture the pre-commit interval for the cosmetic animation.
- const bounds=a.ivBounds.slice();
- const start=a.from;
- const limit=a.to;
+  if(strict.length===1)return strict[0];
 
- // FUNCTIONAL STATE COMMITS IMMEDIATELY.
- commitPeel(s,a);
- if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
- render();
- checkFinish();
+  if(strict.length>1){
+    const here=contacts.filter(c=>contactAtTap(p,c));
+    if(here.length){
+      // local construction time decides what is visibly on top here.
+      here.sort((x,y)=>{
+        const ux=strips[x.upper],uy=strips[y.upper];
+        const tx=(x.upperSpan[0]+x.upperSpan[1])/2;
+        const ty=(y.upperSpan[0]+y.upperSpan[1])/2;
+        return localStickTime(uy,ty)-localStickTime(ux,tx);
+      });
+      const topId=here[0].upper;
+      const h=strict.find(x=>x.s.id===topId);
+      if(h)return h;
+    }
 
- // Cosmetic peel copy only. It never participates in hit-testing or physics.
- const ghost=document.createElement('div');
- ghost.className='tape';
- ghost.style.background=s.color;
- ghost.style.zIndex=5000;
- ghost.style.pointerEvents='none';
- world.appendChild(ghost);
+    strict.sort((a,b)=>a.dist-b.dist);
+    return strict[0];
+  }
 
- const roll=document.createElement('div');
- roll.className='roll';
- roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.5) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.32) 60% 69%,${s.color} 71%)`;
- roll.style.opacity='1';
- roll.style.zIndex=5100;
- world.appendChild(roll);
-
- const duration=190+Math.min(300,Math.abs(limit-start)*430);
- const t0=performance.now();
-
- function frame(now){
-   const p=clamp((now-t0)/duration,0,1);
-   const ease=1-Math.pow(1-p,3);
-   const cur=start+(limit-start)*ease;
-
-   let ga,gb;
-   if(a.side==='left'){
-     ga=cur;
-     gb=bounds[1];
-   }else{
-     ga=bounds[0];
-     gb=cur;
-   }
-
-   const p0=pointOn(s,ga),p1=pointOn(s,gb);
-   const len=hypot(p1.x-p0.x,p1.y-p0.y);
-   const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
-
-   ghost.style.left=p0.x+'px';
-   ghost.style.top=(p0.y-s.width/2)+'px';
-   ghost.style.width=Math.max(0,len)+'px';
-   ghost.style.height=s.width+'px';
-   ghost.style.transform=`rotate(${ang}deg)`;
-
-   const rp=pointOn(s,cur);
-   roll.style.left=rp.x+'px';
-   roll.style.top=rp.y+'px';
-   roll.style.transform=`translate(-50%,-50%) scale(${1+.18*Math.sin(p*Math.PI)})`;
-
-   if(p<1){
-     requestAnimationFrame(frame);
-   }else{
-     ghost.remove();
-     roll.remove();
-   }
- }
- requestAnimationFrame(frame);
+  const slop=6/view.scale;
+  const near=infos.filter(x=>x.dist<=x.half+slop).sort((a,b)=>a.dist-b.dist);
+  return near[0]||null;
 }
 
-function render(updateStatus=true){
- for(const s of strips){
-   let draw=s.intervals.map(iv=>iv.slice());
-   if(animVisual&&animVisual.id===s.id){
-     let bi=-1,be=1e9;draw.forEach((iv,i)=>{const e=Math.abs(iv[0]-animVisual.bounds[0])+Math.abs(iv[1]-animVisual.bounds[1]);if(e<be){be=e;bi=i}});
-     if(bi>=0){draw[bi]=animVisual.side==='left'?[animVisual.cur,animVisual.bounds[1]]:[animVisual.bounds[0],animVisual.cur]}
-   }
-   ensureSegs(s,draw.length);
-   draw.forEach((iv,i)=>{
-     const el=s.segs[i],p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]),len=hypot(p1.x-p0.x,p1.y-p0.y),ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
-     el.style.left=p0.x+'px';el.style.top=(p0.y-s.width/2)+'px';el.style.width=len+'px';el.style.height=s.width+'px';el.style.transform=`rotate(${ang}deg)`;
-   });
-   if(s.removed)s.segs.forEach(el=>el.style.display='none');
- }
- if(updateStatus){
-   const rem=strips.filter(s=>!s.removed).length,active=contacts.filter(contactActive).length;
-   status.innerHTML=`<b>${rem} tape${rem===1?'':'s'} still present</b><br>${active} active overlap${active===1?'':'s'} · taps ${tapCount}${optimalTaps?' / best '+optimalTaps:''}`;
-   undoBtn.disabled=!history.length;undoBtn.style.opacity=history.length?1:.4;
- }
+function peelTape(target){
+  const s=target.s;
+  const a=peelAccess(s,target.t,target.iv);
+  if(!a){
+    if(navigator.vibrate)navigator.vibrate(4);
+    return;
+  }
+
+  history.push(snapshot());
+
+  // Functional state updates immediately.
+  const ghost={
+    sid:s.id,
+    side:a.side,
+    from:a.from,
+    to:a.to,
+    bounds:a.iv.slice(),
+    start:performance.now(),
+    duration:210+Math.min(300,Math.abs(a.to-a.from)*430)
+  };
+
+  commitPeel(s,a);
+  peelGhosts.push(ghost);
+
+  if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
+  updateStatus();
+  requestDraw();
 }
-function checkFinish(){
- if(strips.every(s=>s.removed)){
-   const grade=gradeForTaps(tapCount,optimalTaps);
-   finishText.textContent=`${grade}${optimalTaps?` · ${tapCount} taps · minimum ${optimalTaps}`:` · ${tapCount} taps`}`;
-   setTimeout(()=>finish.classList.add('show'),200);
- }
+
+function updateStatus(){
+  const remaining=strips.filter(s=>!s.removed).length;
+  const active=contacts.filter(contactActive).length;
+  const mixed=variedDepthCount();
+  status.innerHTML=`<b>${remaining} tapes left</b><br>${active} active contacts · ${mixed} tapes currently go both over and under`;
+  undoBtn.disabled=!history.length;
+  undoBtn.style.opacity=history.length?1:.4;
 }
 
-function build(){
- history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;
- tapCount=0;optimalTaps=null;optimalPartial=0;finish.classList.remove('show');
+function drawRibbonPhase(s,a,b){
+  if(b-a<1e-6)return;
 
- let solution=null;
- let attempt=0;
+  const p0=pointOn(s,a),p1=pointOn(s,b);
+  const dx=p1.x-p0.x,dy=p1.y-p0.y,L=hypot(dx,dy);
+  if(L<.1)return;
 
- do{
-   attempt++;
-   world.innerHTML='';
-   strips=[];contacts=[];
+  const nx=-dy/L*(s.width/2),ny=dx/L*(s.width/2);
 
-   const count=34,layers=[...Array(count).keys()];
-   for(let i=layers.length-1;i>0;i--){
-     const j=Math.floor(Math.random()*(i+1));
-     [layers[i],layers[j]]=[layers[j],layers[i]];
-   }
+  ctx.beginPath();
+  ctx.moveTo(p0.x+nx,p0.y+ny);
+  ctx.lineTo(p1.x+nx,p1.y+ny);
+  ctx.lineTo(p1.x-nx,p1.y-ny);
+  ctx.lineTo(p0.x-nx,p0.y-ny);
+  ctx.closePath();
 
-   for(let i=0;i<count;i++)strips.push(makeStrip(i,layers[i]));
-   buildContactMap();
+  // Deliberately flat colour.
+  // No longitudinal shadow/highlight: one tape must read unmistakably
+  // as ONE continuous strip, even beside another strip of the same colour.
+  ctx.fillStyle=s.color;
+  ctx.fill();
+}
 
-   // Reject boards that are too sparse to be interesting.
-   if(contacts.length<18){solution=null;continue}
+function visiblePhasePieces(s){
+  const pieces=[];
 
-   solution=computeOptimalSolution();
+  for(const iv of s.intervals){
+    for(const phase of s.phases){
+      const a=Math.max(iv[0],phase.a);
+      const b=Math.min(iv[1],phase.b);
+      if(b-a>1e-6){
+        pieces.push({
+          s,
+          a,
+          b,
+          time:phase.time
+        });
+      }
+    }
+  }
 
-   // Most-efficient play must contain several real partial peels.
-   // This rejects "just keep taking the totally free tape" boards.
- }while((!solution || solution.partial<3) && attempt<45);
+  return pieces;
+}
 
- optimalTaps=solution?solution.taps:null;
- optimalPartial=solution?solution.partial:0;
+function ghostPhasePieces(now){
+  const pieces=[];
 
- strips.forEach(createEls);
- fitWorld();
- render();
+  for(const g of peelGhosts){
+    const s=strips[g.sid];
+    const p=clamp((now-g.start)/g.duration,0,1);
+    const ease=1-Math.pow(1-p,3);
+    const cur=g.from+(g.to-g.from)*ease;
 
- if(optimalTaps){
-   status.innerHTML=`<b>${strips.length} tapes · minimum ${optimalTaps} taps</b><br>Optimal solution includes ${optimalPartial} partial peels`;
- }
+    let ga,gb;
+    if(g.side==='left'){
+      ga=cur;
+      gb=g.bounds[1];
+    }else{
+      ga=g.bounds[0];
+      gb=cur;
+    }
+
+    if(gb-ga<=1e-6)continue;
+
+    for(const phase of s.phases){
+      const a=Math.max(ga,phase.a);
+      const b=Math.min(gb,phase.b);
+      if(b-a>1e-6){
+        pieces.push({
+          s,
+          a,
+          b,
+          time:phase.time,
+          ghost:true
+        });
+      }
+    }
+  }
+
+  return pieces;
+}
+
+function drawScene(){
+  rafPending=false;
+
+  const dpr=canvas._dpr||1;
+  const r=viewport.getBoundingClientRect();
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,r.width,r.height);
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--bg');
+  ctx.fillRect(0,0,r.width,r.height);
+
+  ctx.save();
+  ctx.translate(view.tx,view.ty);
+  ctx.scale(view.scale,view.scale);
+
+  const now=performance.now();
+
+  // The construction history itself is the z-order.
+  // Each laid-down phase is rendered as ONE continuous polygon,
+  // never as dozens of micro-segments.
+  const pieces=[];
+
+  for(const s of strips){
+    pieces.push(...visiblePhasePieces(s));
+  }
+  pieces.push(...ghostPhasePieces(now));
+
+  pieces.sort((a,b)=>{
+    if(a.time!==b.time)return a.time-b.time;
+
+    // Deterministic tie-break only. It does not create depth;
+    // it simply prevents unstable sort flicker.
+    if(a.s.id!==b.s.id)return a.s.id-b.s.id;
+    return a.a-b.a;
+  });
+
+  for(const piece of pieces){
+    drawRibbonPhase(piece.s,piece.a,piece.b);
+  }
+
+  // Cosmetic peel heads.
+  for(const g of peelGhosts){
+    const p=clamp((now-g.start)/g.duration,0,1);
+    const ease=1-Math.pow(1-p,3);
+    const cur=g.from+(g.to-g.from)*ease;
+    const s=strips[g.sid];
+    const pt=pointOn(s,cur);
+    const radius=s.width*.25*(1+.10*Math.sin(p*Math.PI));
+
+    ctx.save();
+    ctx.translate(pt.x,pt.y);
+    ctx.beginPath();
+    ctx.ellipse(0,0,radius,radius*.64,0,0,Math.PI*2);
+    ctx.fillStyle=s.color;
+    ctx.fill();
+
+    // Very small inner curl cue only — no long highlight along the tape.
+    ctx.globalAlpha=.15;
+    ctx.beginPath();
+    ctx.ellipse(-radius*.18,0,radius*.26,radius*.17,0,0,Math.PI*2);
+    ctx.fillStyle='#fff';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  ctx.restore();
+
+  const hadGhosts=peelGhosts.length>0;
+  peelGhosts=peelGhosts.filter(g=>now-g.start<g.duration);
+
+  if(peelGhosts.length){
+    requestDraw();
+  }else if(hadGhosts){
+    // Guaranteed clean frame after the final peel head disappears.
+    requestAnimationFrame(()=>{
+      rafPending=false;
+      requestDraw();
+    });
+  }
+}
+
+function requestDraw(){
+  if(rafPending)return;
+  rafPending=true;
+  requestAnimationFrame(drawScene);
 }
 
 viewport.addEventListener('pointerdown',e=>{
- e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
- const wp=screenToWorld(e.clientX,e.clientY);
- if(pointers.size===1){tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:wp,moved:false};gesture={type:'pan',startX:e.clientX,startY:e.clientY,startTx:view.tx,startTy:view.ty}}
- else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy),cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
- gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
+  e.preventDefault();
+  viewport.setPointerCapture?.(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const wp=screenToWorld(e.clientX,e.clientY);
+
+  if(pointers.size===1){
+    tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:wp,moved:false};
+    gesture={type:'pan',startX:e.clientX,startY:e.clientY,startTx:view.tx,startTy:view.ty};
+  }else if(pointers.size===2){
+    tapCandidate=null;
+    const ps=[...pointers.values()];
+    const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
+    const d=hypot(dx,dy);
+    const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
+    gesture={type:'pinch',startDist:d,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
+  }
 },{passive:false});
+
 viewport.addEventListener('pointermove',e=>{
- if(!pointers.has(e.pointerId))return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
- if(tapCandidate&&e.pointerId===tapCandidate.id&&hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8)tapCandidate.moved=true;
- if(pointers.size===1&&gesture?.type==='pan'&&tapCandidate?.moved){const p=[...pointers.values()][0];view.tx=gesture.startTx+p.x-gesture.startX;view.ty=gesture.startTy+p.y-gesture.startY;applyView()}
- else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy);
- if(gesture?.type!=='pinch'){const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
- const ns=clamp(gesture.startScale*(dist/gesture.startDist),.26,2.5),r=viewport.getBoundingClientRect(),lx=gesture.cx-r.left,ly=gesture.cy-r.top;
- view.scale=ns;view.tx=lx-gesture.worldCenter.x*ns;view.ty=ly-gesture.worldCenter.y*ns;applyView()}
+  if(!pointers.has(e.pointerId))return;
+  e.preventDefault();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+  if(tapCandidate&&e.pointerId===tapCandidate.id){
+    if(hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8)tapCandidate.moved=true;
+  }
+
+  if(pointers.size===1&&gesture?.type==='pan'&&tapCandidate?.moved){
+    const p=[...pointers.values()][0];
+    view.tx=gesture.startTx+p.x-gesture.startX;
+    view.ty=gesture.startTy+p.y-gesture.startY;
+    requestDraw();
+  }else if(pointers.size===2){
+    tapCandidate=null;
+    const ps=[...pointers.values()];
+    const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
+    const d=hypot(dx,dy);
+
+    if(gesture?.type!=='pinch'){
+      const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
+      gesture={type:'pinch',startDist:d,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
+    }
+
+    const ns=clamp(gesture.startScale*(d/gesture.startDist),.28,2.5);
+    const r=viewport.getBoundingClientRect();
+    const lx=gesture.cx-r.left,ly=gesture.cy-r.top;
+
+    view.scale=ns;
+    view.tx=lx-gesture.worldCenter.x*ns;
+    view.ty=ly-gesture.worldCenter.y*ns;
+    requestDraw();
+  }
 },{passive:false});
-async function endPointer(e){
- if(!pointers.has(e.pointerId))return;const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;pointers.delete(e.pointerId);
- if(cand&&!cand.moved&&pointers.size===0){const target=pickTape(cand.world);if(target)peelByTap(target.s,target.t,target.iv)}
- if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty}}else if(!pointers.size)gesture=null;
- tapCandidate=null;
+
+function endPointer(e){
+  if(!pointers.has(e.pointerId))return;
+  const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;
+  pointers.delete(e.pointerId);
+
+  if(cand&&!cand.moved&&pointers.size===0){
+    const target=pickTape(cand.world);
+    if(target)peelTape(target);
+  }
+
+  if(pointers.size===1){
+    const p=[...pointers.values()][0];
+    gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
+  }else if(!pointers.size){
+    gesture=null;
+  }
+
+  tapCandidate=null;
 }
-viewport.addEventListener('pointerup',endPointer);viewport.addEventListener('pointercancel',endPointer);
-viewport.addEventListener('wheel',e=>{e.preventDefault();const r=viewport.getBoundingClientRect(),lx=e.clientX-r.left,ly=e.clientY-r.top,bx=(lx-view.tx)/view.scale,by=(ly-view.ty)/view.scale,ns=clamp(view.scale*(e.deltaY<0?1.1:.9),.26,2.5);
-view.scale=ns;view.tx=lx-bx*ns;view.ty=ly-by*ns;applyView()},{passive:false});
+
+viewport.addEventListener('pointerup',endPointer);
+viewport.addEventListener('pointercancel',endPointer);
+
+viewport.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=viewport.getBoundingClientRect();
+  const lx=e.clientX-r.left,ly=e.clientY-r.top;
+  const before={x:(lx-view.tx)/view.scale,y:(ly-view.ty)/view.scale};
+  const ns=clamp(view.scale*(e.deltaY<0?1.1:.9),.28,2.5);
+
+  view.scale=ns;
+  view.tx=lx-before.x*ns;
+  view.ty=ly-before.y*ns;
+  requestDraw();
+},{passive:false});
 
 undoBtn.addEventListener('click',()=>{
- if(!history.length)return;
- const snap=history.pop();
- strips.forEach((s,i)=>{
-   s.intervals=snap.strips[i].intervals.map(iv=>iv.slice());
-   s.removed=snap.strips[i].removed;
- });
- tapCount=snap.tapCount;
- finish.classList.remove('show');
- render();
+  if(!history.length)return;
+  const snap=history.pop();
+  strips.forEach((s,i)=>{
+    s.intervals=snap[i].intervals.map(iv=>iv.slice());
+    s.removed=snap[i].removed;
+  });
+  peelGhosts=[];
+  updateStatus();
+  requestDraw();
 });
-newBtn.addEventListener('click',build);againBtn.addEventListener('click',build);window.addEventListener('resize',fitWorld);
-requestAnimationFrame(build);
+
+newBtn.addEventListener('click',buildPuzzle);
+window.addEventListener('resize',resizeCanvas);
+
+resizeCanvas();
+buildPuzzle();
 })();
 </script>
 </body>
