@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11B-P1</div><div class="sub">v11B · parallel-contact fix only</div></div>
+  <div><div class="brand">TAPE · V11B-P2FIX-P1</div><div class="sub">v11B · parallel-contact fix only</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -521,23 +521,84 @@ function gradeForTaps(actual,opt){
  return 'Completed';
 }
 
-async function peelByTap(s,t,iv){
- if(animating||s.removed)return;
- const a=peelAccess(s,t,iv);if(!a){if(navigator.vibrate)navigator.vibrate(4);return}
+function peelByTap(s,t,iv){
+ if(s.removed)return;
+ const a=peelAccess(s,t,iv);
+ if(!a){
+   if(navigator.vibrate)navigator.vibrate(4);
+   return;
+ }
  if(Math.abs(a.to-a.from)<.002)return;
- animating=true;history.push(snapshot());tapCount++;
- const start=a.from,limit=a.to,duration=300+Math.min(620,Math.abs(limit-start)*900),t0=performance.now();
- s.roll.style.opacity='1';
- await new Promise(resolve=>{
-  function frame(now){
-   const p=clamp((now-t0)/duration,0,1),ease=1-Math.pow(1-p,3),cur=start+(limit-start)*ease,rp=pointOn(s,cur);
-   s.roll.style.left=rp.x+'px';s.roll.style.top=rp.y+'px';s.roll.style.transform=`translate(-50%,-50%) scale(${1+.25*Math.sin(p*Math.PI)})`;
-   animVisual={id:s.id,bounds:a.ivBounds,side:a.side,cur};render(false);
-   if(p<1)requestAnimationFrame(frame);else resolve();
-  }requestAnimationFrame(frame)
- });
- animVisual=null;commitPeel(s,a);s.roll.style.opacity='0';animating=false;
- if(navigator.vibrate)navigator.vibrate(s.removed?12:6);render();checkFinish();
+
+ history.push(snapshot());
+ tapCount++;
+
+ // Capture the pre-commit interval for the cosmetic animation.
+ const bounds=a.ivBounds.slice();
+ const start=a.from;
+ const limit=a.to;
+
+ // FUNCTIONAL STATE COMMITS IMMEDIATELY.
+ commitPeel(s,a);
+ if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
+ render();
+ checkFinish();
+
+ // Cosmetic peel copy only. It never participates in hit-testing or physics.
+ const ghost=document.createElement('div');
+ ghost.className='tape';
+ ghost.style.background=s.color;
+ ghost.style.zIndex=5000;
+ ghost.style.pointerEvents='none';
+ world.appendChild(ghost);
+
+ const roll=document.createElement('div');
+ roll.className='roll';
+ roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.5) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.32) 60% 69%,${s.color} 71%)`;
+ roll.style.opacity='1';
+ roll.style.zIndex=5100;
+ world.appendChild(roll);
+
+ const duration=190+Math.min(300,Math.abs(limit-start)*430);
+ const t0=performance.now();
+
+ function frame(now){
+   const p=clamp((now-t0)/duration,0,1);
+   const ease=1-Math.pow(1-p,3);
+   const cur=start+(limit-start)*ease;
+
+   let ga,gb;
+   if(a.side==='left'){
+     ga=cur;
+     gb=bounds[1];
+   }else{
+     ga=bounds[0];
+     gb=cur;
+   }
+
+   const p0=pointOn(s,ga),p1=pointOn(s,gb);
+   const len=hypot(p1.x-p0.x,p1.y-p0.y);
+   const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+
+   ghost.style.left=p0.x+'px';
+   ghost.style.top=(p0.y-s.width/2)+'px';
+   ghost.style.width=Math.max(0,len)+'px';
+   ghost.style.height=s.width+'px';
+   ghost.style.transform=`rotate(${ang}deg)`;
+
+   const rp=pointOn(s,cur);
+   roll.style.left=rp.x+'px';
+   roll.style.top=rp.y+'px';
+   roll.style.transform=`translate(-50%,-50%) scale(${1+.18*Math.sin(p*Math.PI)})`;
+
+   if(p<1){
+     requestAnimationFrame(frame);
+   }else{
+     ghost.remove();
+     roll.remove();
+   }
+ }
+ requestAnimationFrame(frame);
 }
 
 function render(updateStatus=true){
@@ -557,7 +618,7 @@ function render(updateStatus=true){
  if(updateStatus){
    const rem=strips.filter(s=>!s.removed).length,active=contacts.filter(contactActive).length;
    status.innerHTML=`<b>${rem} tape${rem===1?'':'s'} still present</b><br>${active} active overlap${active===1?'':'s'} · taps ${tapCount}${optimalTaps?' / best '+optimalTaps:''}`;
-   undoBtn.disabled=!history.length||animating;undoBtn.style.opacity=history.length&&!animating?1:.4;
+   undoBtn.disabled=!history.length;undoBtn.style.opacity=history.length?1:.4;
  }
 }
 function checkFinish(){
@@ -611,14 +672,14 @@ function build(){
 }
 
 viewport.addEventListener('pointerdown',e=>{
- if(animating)return;e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  const wp=screenToWorld(e.clientX,e.clientY);
  if(pointers.size===1){tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:wp,moved:false};gesture={type:'pan',startX:e.clientX,startY:e.clientY,startTx:view.tx,startTy:view.ty}}
  else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy),cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
  gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
 },{passive:false});
 viewport.addEventListener('pointermove',e=>{
- if(!pointers.has(e.pointerId)||animating)return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(!pointers.has(e.pointerId))return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(tapCandidate&&e.pointerId===tapCandidate.id&&hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8)tapCandidate.moved=true;
  if(pointers.size===1&&gesture?.type==='pan'&&tapCandidate?.moved){const p=[...pointers.values()][0];view.tx=gesture.startTx+p.x-gesture.startX;view.ty=gesture.startTy+p.y-gesture.startY;applyView()}
  else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy);
@@ -628,7 +689,7 @@ viewport.addEventListener('pointermove',e=>{
 },{passive:false});
 async function endPointer(e){
  if(!pointers.has(e.pointerId))return;const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;pointers.delete(e.pointerId);
- if(cand&&!cand.moved&&pointers.size===0&&!animating){const target=pickTape(cand.world);if(target)await peelByTap(target.s,target.t,target.iv)}
+ if(cand&&!cand.moved&&pointers.size===0){const target=pickTape(cand.world);if(target)peelByTap(target.s,target.t,target.iv)}
  if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty}}else if(!pointers.size)gesture=null;
  tapCandidate=null;
 }
@@ -637,7 +698,7 @@ viewport.addEventListener('wheel',e=>{e.preventDefault();const r=viewport.getBou
 view.scale=ns;view.tx=lx-bx*ns;view.ty=ly-by*ns;applyView()},{passive:false});
 
 undoBtn.addEventListener('click',()=>{
- if(!history.length||animating)return;
+ if(!history.length)return;
  const snap=history.pop();
  strips.forEach((s,i)=>{
    s.intervals=snap.strips[i].intervals.map(iv=>iv.slice());
