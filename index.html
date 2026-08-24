@@ -3,732 +3,303 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TAPE — tap peel prototype</title>
+<title>TAPE — fixed contact map v10</title>
 <style>
-:root{
-  --bg:#0f1623;
-  --text:#eef3fb;
-  --muted:#9aa6b8;
-}
+:root{--bg:#0f1623;--text:#eef3fb;--muted:#9aa6b8}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{
-  margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 body{display:flex;justify-content:center}
-#app{
-  width:min(100vw,620px);height:100dvh;display:flex;flex-direction:column;
-  padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
-}
-header{
-  height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;
-}
-.brand{font-size:14px;font-weight:800;letter-spacing:.22em}
-.sub{font-size:12px;color:var(--muted);margin-top:4px}
-button{
-  border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;padding:10px 14px;
-  font:inherit;font-weight:700;
-}
-#viewport{
-  position:relative;flex:1;min-height:0;overflow:hidden;border-radius:20px;
-  touch-action:none;background:var(--bg);
-}
-#world{
-  position:absolute;left:0;top:0;width:1100px;height:1500px;transform-origin:0 0;
-}
-.tape-seg{
-  position:absolute;transform-origin:left center;border-radius:3px;
-  box-shadow:0 3px 7px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
-  pointer-events:none;
-}
-.tape-seg:after{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.16),transparent 45%,rgba(0,0,0,.09)),
-    repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.08) 14px 15px,transparent 16px 28px);
-}
-.peel-roll{
-  position:absolute;width:34px;height:22px;border-radius:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-  box-shadow:inset -7px 0 10px rgba(0,0,0,.3),0 4px 8px rgba(0,0,0,.28);
-  z-index:8000;
-  opacity:0;
-}
-#hud{
-  position:absolute;left:12px;top:12px;z-index:9000;
-  background:rgba(18,26,40,.78);backdrop-filter:blur(8px);
-  padding:8px 10px;border-radius:12px;font-size:12px;color:#d7deea;
-}
-footer{
-  height:70px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px
-}
-#status{font-size:13px;line-height:1.35;color:#aeb8c7}
-#status b{color:#fff}
-#finish{
-  position:absolute;inset:0;background:rgba(15,22,35,.78);backdrop-filter:blur(7px);
-  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;
-  transition:.28s;z-index:10000;
-}
-#finish.show{opacity:1;pointer-events:auto}
-.card{
-  background:#182235;border-radius:22px;padding:22px 24px;text-align:center;
-  box-shadow:0 20px 50px rgba(0,0,0,.3)
-}
-.card .big{font-size:30px;font-weight:800;margin-bottom:6px}
-.card .small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
-@media(max-height:700px){
-  header{height:52px}.sub{display:none}footer{height:58px}
-}
+#app{width:min(100vw,640px);height:100dvh;display:flex;flex-direction:column;
+padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
+header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 4px}
+.brand{font-size:14px;font-weight:800;letter-spacing:.18em}.sub{font-size:12px;color:var(--muted);margin-top:4px}
+button{border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;padding:10px 14px;font:inherit;font-weight:700}
+#viewport{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:20px;touch-action:none;background:var(--bg)}
+#world{position:absolute;left:0;top:0;width:1200px;height:1600px;transform-origin:0 0}
+.tape{position:absolute;transform-origin:left center;border-radius:3px;pointer-events:none;
+box-shadow:0 4px 9px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.18)}
+.tape:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;
+background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 46%,rgba(0,0,0,.09)),
+repeating-linear-gradient(90deg,transparent 0 15px,rgba(255,255,255,.07) 16px 17px,transparent 18px 31px)}
+.roll{position:absolute;width:44px;height:28px;border-radius:50%;transform:translate(-50%,-50%);
+pointer-events:none;z-index:9000;opacity:0;box-shadow:inset -9px 0 12px rgba(0,0,0,.34),0 5px 10px rgba(0,0,0,.3)}
+#hud{position:absolute;left:12px;top:12px;z-index:9500;background:rgba(18,26,40,.78);backdrop-filter:blur(8px);
+padding:8px 10px;border-radius:12px;font-size:12px;color:#d7deea}
+footer{height:70px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px}
+#status{font-size:13px;line-height:1.35;color:#aeb8c7}#status b{color:white}
+#finish{position:absolute;inset:0;background:rgba(15,22,35,.8);backdrop-filter:blur(7px);display:flex;
+align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.25s;z-index:10000}
+#finish.show{opacity:1;pointer-events:auto}.card{background:#182235;border-radius:22px;padding:22px 24px;text-align:center}
+.big{font-size:30px;font-weight:800;margin-bottom:6px}.small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
+@media(max-height:700px){header{height:52px}.sub{display:none}footer{height:58px}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <div>
-      <div class="brand">TAPE · V9</div>
-      <div class="sub">tap exposed tape · pinch to zoom · drag to pan</div>
-    </div>
-    <button id="newBtn">New board</button>
-  </header>
-
-  <div id="viewport">
-    <div id="world"></div>
-    <div id="hud">tap tape to peel · physical overlaps pin</div>
-    <div id="finish">
-      <div class="card">
-        <div class="big">clean.</div>
-        <div class="small">all tape removed</div>
-        <button id="againBtn">Again</button>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <div id="status"><b>Tap an exposed tape segment.</b><br>Any physical overlap pins it — even an edge or tape tip.</div>
-    <button id="undoBtn">Undo</button>
-  </footer>
+<header>
+  <div><div class="brand">TAPE · V10</div><div class="sub">fixed contact map · pinch to zoom · drag to pan</div></div>
+  <button id="newBtn">New board</button>
+</header>
+<div id="viewport">
+  <div id="world"></div>
+  <div id="hud">tap tape to peel as far as physics allows</div>
+  <div id="finish"><div class="card"><div class="big">clean.</div><div class="small">all tape removed</div><button id="againBtn">Again</button></div></div>
 </div>
-
+<footer>
+  <div id="status"><b>Every overlap is mapped once.</b><br>Layer order never changes.</div>
+  <button id="undoBtn">Undo</button>
+</footer>
+</div>
 <script>
-(() => {
-  const viewport=document.getElementById('viewport');
-  const world=document.getElementById('world');
-  const status=document.getElementById('status');
-  const finish=document.getElementById('finish');
-  const newBtn=document.getElementById('newBtn');
-  const againBtn=document.getElementById('againBtn');
-  const undoBtn=document.getElementById('undoBtn');
-
-  const WORLD_W=1100, WORLD_H=1500;
-  const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
-
-  let strips=[], crossings=[], history=[];
-  let view={scale:.6,tx:0,ty:0};
-  let pointers=new Map();
-  let gesture=null;
-  let tapCandidate=null;
-  let animating=false;
-  let animVisual=null;
-
-  const rand=(a,b)=>a+Math.random()*(b-a);
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const hypot=Math.hypot;
-
-  function applyView(){
-    world.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.scale})`;
-  }
-  function fitWorld(){
-    const vw=viewport.clientWidth, vh=viewport.clientHeight;
-    const s=Math.min(vw/WORLD_W,vh/WORLD_H)*0.96;
-    view.scale=s;
-    view.tx=(vw-WORLD_W*s)/2;
-    view.ty=(vh-WORLD_H*s)/2;
-    applyView();
-  }
-  function screenToWorld(x,y){
-    const r=viewport.getBoundingClientRect();
-    return {x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale};
-  }
-
-  function makeStrip(i,layer){
-    const horizontal=i%2===0;
-    const margin=110;
-    if(horizontal){
-      const y=rand(margin,WORLD_H-margin);
-      const y2=clamp(y+rand(-55,55),margin,WORLD_H-margin);
-      const x1=rand(margin,240),x2=rand(WORLD_W-240,WORLD_W-margin);
-      return {id:i,layer,ax:x1,ay:y,bx:x2,by:y2,width:rand(46,64),color:COLORS[i%COLORS.length],
-              intervals:[[0,1]],removed:false,segs:[],roll:null};
-    }else{
-      const x=rand(margin,WORLD_W-margin);
-      const x2=clamp(x+rand(-55,55),margin,WORLD_W-margin);
-      const y1=rand(margin,240),y2=rand(WORLD_H-240,WORLD_H-margin);
-      return {id:i,layer,ax:x,ay:y1,bx:x2,by:y2,width:rand(46,64),color:COLORS[i%COLORS.length],
-              intervals:[[0,1]],removed:false,segs:[],roll:null};
-    }
-  }
-
-  function geom(s){
-    const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);
-    return {x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L};
-  }
-  function pointOn(s,t){return {x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
-
-  function lineIntersection(a,b){
-    const p={x:a.ax,y:a.ay},r={x:a.bx-a.ax,y:a.by-a.ay};
-    const q={x:b.ax,y:b.ay},s={x:b.bx-b.ax,y:b.by-b.ay};
-    const cross=(u,v)=>u.x*v.y-u.y*v.x;
-    const d=cross(r,s);
-    if(Math.abs(d)<1e-8)return null;
-    const qp={x:q.x-p.x,y:q.y-p.y};
-    const ta=cross(qp,s)/d,tb=cross(qp,r)/d;
-    if(ta>.04&&ta<.96&&tb>.04&&tb<.96)return {ta,tb};
-    return null;
-  }
-
-  function build(){
-    history=[];strips=[];crossings=[];pointers.clear();gesture=null;tapCandidate=null;animating=false;animVisual=null;
-    finish.classList.remove('show');
-    world.innerHTML='';
-
-    const count=32;
-    const layers=[...Array(count).keys()];
-    for(let i=layers.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [layers[i],layers[j]]=[layers[j],layers[i]];
-    }
-
-    for(let i=0;i<count;i++) strips.push(makeStrip(i,layers[i]));
-
-    for(let i=0;i<count;i++){
-      for(let j=i+1;j<count;j++){
-        const hit=lineIntersection(strips[i],strips[j]);
-        if(hit)crossings.push({a:i,b:j,ta:hit.ta,tb:hit.tb});
-      }
-    }
-
-    strips.forEach(createEls);
-    fitWorld();
-    render();
-  }
-
-  function createEls(s){
-    s.segs=[];
-    const roll=document.createElement('div');
-    roll.className='peel-roll';
-    roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.48) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.3) 60% 69%,${s.color} 71%)`;
-    world.appendChild(roll);s.roll=roll;
-  }
-
-  function ensureSegEls(s,n){
-    while(s.segs.length<n){
-      const seg=document.createElement('div');
-      seg.className='tape-seg';
-      seg.style.background=s.color;
-      seg.style.zIndex=100+s.layer;
-      world.appendChild(seg);
-      s.segs.push(seg);
-    }
-    s.segs.forEach((el,i)=>el.style.display=i<n?'block':'none');
-  }
-
-  function intervalContaining(s,t){
-    return s.intervals.find(iv=>t>=iv[0]-.001 && t<=iv[1]+.001) || null;
-  }
-
-  function otherPresent(otherId,t){
-    const o=strips[otherId];
-    if(o.removed)return false;
-    return !!intervalContaining(o,t);
-  }
-
-  function segmentEndpoints(s,iv){
-    return {
-      ax:s.ax+(s.bx-s.ax)*iv[0],
-      ay:s.ay+(s.by-s.ay)*iv[0],
-      bx:s.ax+(s.bx-s.ax)*iv[1],
-      by:s.ay+(s.by-s.ay)*iv[1]
-    };
-  }
-
-  function pointSegDist(px,py,ax,ay,bx,by){
-    const vx=bx-ax,vy=by-ay,wx=px-ax,wy=py-ay;
-    const vv=vx*vx+vy*vy;
-    let u=vv?((wx*vx+wy*vy)/vv):0;
-    u=clamp(u,0,1);
-    const qx=ax+vx*u,qy=ay+vy*u;
-    return {dist:hypot(px-qx,py-qy),u,qx,qy};
-  }
-
-  function segSegDistance(a1,a2,b1,b2){
-    // Robust 2D segment distance by checking endpoint-to-segment distances
-    // plus exact line intersection.
-    const cross=(ux,uy,vx,vy)=>ux*vy-uy*vx;
-    const r={x:a2.x-a1.x,y:a2.y-a1.y};
-    const s={x:b2.x-b1.x,y:b2.y-b1.y};
-    const qp={x:b1.x-a1.x,y:b1.y-a1.y};
-    const den=cross(r.x,r.y,s.x,s.y);
-
-    if(Math.abs(den)>1e-9){
-      const t=cross(qp.x,qp.y,s.x,s.y)/den;
-      const u=cross(qp.x,qp.y,r.x,r.y)/den;
-      if(t>=0&&t<=1&&u>=0&&u<=1){
-        return {dist:0,ta:t,tb:u};
-      }
-    }
-
-    const d1=pointSegDist(a1.x,a1.y,b1.x,b1.y,b2.x,b2.y);
-    const d2=pointSegDist(a2.x,a2.y,b1.x,b1.y,b2.x,b2.y);
-    const d3=pointSegDist(b1.x,b1.y,a1.x,a1.y,a2.x,a2.y);
-    const d4=pointSegDist(b2.x,b2.y,a1.x,a1.y,a2.x,a2.y);
-
-    let best={dist:d1.dist,ta:0,tb:d1.u};
-    if(d2.dist<best.dist)best={dist:d2.dist,ta:1,tb:d2.u};
-    if(d3.dist<best.dist)best={dist:d3.dist,ta:d3.u,tb:0};
-    if(d4.dist<best.dist)best={dist:d4.dist,ta:d4.u,tb:1};
-    return best;
-  }
-
-  function physicalBlockIntervals(s){
-    // Exact hierarchy: only strips with higher immutable layer can block s.
-    // Contact is based on actual tape bodies. No extra tolerance.
-    const blocked=[];
-    const sg=geom(s);
-    const sA={x:sg.x1,y:sg.y1}, sB={x:sg.x2,y:sg.y2};
-
-    for(const o of strips){
-      if(o.id===s.id || o.removed || o.layer<=s.layer)continue;
-
-      for(const oiv of o.intervals){
-        const oe=segmentEndpoints(o,oiv);
-        const oA={x:oe.ax,y:oe.ay}, oB={x:oe.bx,y:oe.by};
-
-        const closest=segSegDistance(sA,sB,oA,oB);
-        const threshold=(s.width+o.width)/2;
-
-        // Strict physical rule: if bodies do not actually touch/overlap, no pin.
-        if(closest.dist >= threshold)continue;
-
-        // Compute the span along s covered by the upper tape capsule.
-        // Project the upper segment endpoints onto s and expand by the
-        // combined half-width projected along s. This yields a stable,
-        // non-fuzzy covered interval for crossings and glancing tip overlaps.
-        const vx=sg.dx,vy=sg.dy,L2=vx*vx+vy*vy;
-        const proj=t=>((t.x-sg.x1)*vx+(t.y-sg.y1)*vy)/L2;
-        const p0=proj(oA),p1=proj(oB);
-        let lo=Math.min(p0,p1), hi=Math.max(p0,p1);
-
-        const L=Math.sqrt(L2);
-        const expand=threshold/L;
-        lo=clamp(lo-expand,0,1);
-        hi=clamp(hi+expand,0,1);
-
-        // Verify the candidate interval contains actual physical overlap,
-        // not merely projection overlap.
-        const mid=(lo+hi)/2;
-        const mp={x:sg.x1+sg.dx*mid,y:sg.y1+sg.dy*mid};
-        const md=pointSegDist(mp.x,mp.y,oA.x,oA.y,oB.x,oB.y).dist;
-        if(md >= threshold)continue;
-
-        blocked.push([lo,hi]);
-      }
-    }
-
-    blocked.sort((a,b)=>a[0]-b[0]);
-    const merged=[];
-    for(const b of blocked){
-      if(!merged.length || b[0]>merged[merged.length-1][1]+1e-5){
-        merged.push([b[0],b[1]]);
-      }else{
-        merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],b[1]);
-      }
-    }
-    return merged;
-  }
-
-  function blockersFor(s){
-    // Compatibility helper: use the midpoint of each physical blocked zone.
-    return physicalBlockIntervals(s).map(iv=>(iv[0]+iv[1])/2);
-  }
-
-  function snapshot(){
-    return strips.map(s=>({
-      intervals:s.intervals.map(iv=>[iv[0],iv[1]]),
-      removed:s.removed
-    }));
-  }
-
-  function pointToSegmentDistance(px,py,s,iv){
-    const g=geom(s);
-    const vx=g.dx,vy=g.dy,wx=px-g.x1,wy=py-g.y1;
-    const vv=vx*vx+vy*vy;
-    let t=vv?((wx*vx+wy*vy)/vv):0;
-    t=clamp(t,iv[0],iv[1]);
-    const qx=g.x1+vx*t,qy=g.y1+vy*t;
-    return {dist:hypot(px-qx,py-qy),t};
-  }
-
-  function actualHitInfo(p,s){
-    let best=null, bestIv=null;
-    for(const iv of s.intervals){
-      const hit=pointToSegmentDistance(p.x,p.y,s,iv);
-      if(!best || hit.dist<best.dist){best=hit;bestIv=iv}
-    }
-    if(!best)return {dist:1e9,t:0,half:s.width/2,inside:false,iv:null};
-    return {...best,half:s.width/2,inside:best.dist<=s.width/2,iv:bestIv};
-  }
-
-  function localCrossOverlapNear(p,a,b){
-    const ia=actualHitInfo(p,a),ib=actualHitInfo(p,b);
-    // Only a true painted-body overlap counts here.
-    return ia.inside && ib.inside;
-  }
-
-  function pickTapeAt(p){
-    const visible=strips.filter(s=>!s.removed);
-    const infos=visible.map(s=>({s,...actualHitInfo(p,s)})).filter(x=>x.iv);
-
-    const strict=infos.filter(x=>x.inside);
-    if(strict.length===1)return {s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
-    if(strict.length>1){
-      strict.sort((a,b)=>b.s.layer-a.s.layer);
-      return {s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
-    }
-
-    const slop=6/view.scale;
-    const near=infos.filter(x=>x.dist<=x.half+slop);
-    if(!near.length)return null;
-    near.sort((a,b)=>a.dist-b.dist);
-    let chosen=near[0];
-    for(const other of near.slice(1)){
-      if(localCrossOverlapNear(p,chosen.s,other.s) &&
-         other.s.layer>chosen.s.layer &&
-         other.dist<=other.half+slop*.25){
-        chosen=other;
-      }
-    }
-    return {s:chosen.s,t:chosen.t,iv:chosen.iv};
-  }
-
-  function accessiblePeelAt(s,t,iv){
-    const zones=physicalBlockIntervals(s)
-      .filter(z=>z[1]>iv[0]+.001 && z[0]<iv[1]-.001)
-      .map(z=>[Math.max(z[0],iv[0]),Math.min(z[1],iv[1])])
-      .sort((a,b)=>a[0]-b[0]);
-
-    // If the tap lies in a physically pinned zone, it cannot peel.
-    for(const z of zones){
-      if(t>=z[0]-.002 && t<=z[1]+.002)return null;
-    }
-
-    let leftZone=null,rightZone=null;
-    for(const z of zones){
-      if(z[1]<t) leftZone=z;
-      else if(z[0]>t){rightZone=z;break}
-    }
-
-    const leftIsPhysicalEnd=Math.abs(iv[0])<.001;
-    const rightIsPhysicalEnd=Math.abs(iv[1]-1)<.001;
-
-    // Internal remnants with no true tape end remain pinned objects.
-    if(!leftIsPhysicalEnd && !rightIsPhysicalEnd)return null;
-
-    if(leftIsPhysicalEnd && rightIsPhysicalEnd){
-      const dl=Math.abs(t-iv[0]),dr=Math.abs(iv[1]-t);
-      if(dl<=dr){
-        // Peel until the near edge of the first covered zone.
-        const lim=rightZone ? rightZone[0] : iv[1];
-        return {side:'left',from:iv[0],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:rightZone};
-      }else{
-        const lim=leftZone ? leftZone[1] : iv[0];
-        return {side:'right',from:iv[1],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:leftZone};
-      }
-    }
-
-    if(leftIsPhysicalEnd){
-      const lim=rightZone ? rightZone[0] : iv[1];
-      return {side:'left',from:iv[0],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:rightZone};
-    }
-
-    const lim=leftZone ? leftZone[1] : iv[0];
-    return {side:'right',from:iv[1],to:lim,ivBounds:[iv[0],iv[1]],stoppedZone:leftZone};
-  }
-
-  function findOriginalIntervalIndex(s,bounds){
-    // Find the still-current interval corresponding to the one that was tapped.
-    // Use numeric bounds rather than object identity.
-    let best=-1, bestErr=Infinity;
-    for(let i=0;i<s.intervals.length;i++){
-      const iv=s.intervals[i];
-      const err=Math.abs(iv[0]-bounds[0])+Math.abs(iv[1]-bounds[1]);
-      if(err<bestErr){bestErr=err;best=i;}
-    }
-    return bestErr<.02 ? best : -1;
-  }
-
-  function applyPeelInterval(s,access){
-    const bounds=access.ivBounds;
-    const idx=findOriginalIntervalIndex(s,bounds);
-    if(idx<0)return;
-    const iv=s.intervals[idx];
-
-    // Keep visible tape around the actual covered zone.
-    const EXTRA_STUB=0.012;
-
-    if(access.side==='left'){
-      if(access.stoppedZone){
-        const z=access.stoppedZone;
-        const newStart=clamp(z[0]-EXTRA_STUB,iv[0],iv[1]);
-        s.intervals.splice(idx,1,[newStart,iv[1]]);
-      }else{
-        s.intervals.splice(idx,1);
-      }
-    }else{
-      if(access.stoppedZone){
-        const z=access.stoppedZone;
-        const newEnd=clamp(z[1]+EXTRA_STUB,iv[0],iv[1]);
-        s.intervals.splice(idx,1,[iv[0],newEnd]);
-      }else{
-        s.intervals.splice(idx,1);
-      }
-    }
-
-    s.intervals=s.intervals
-      .filter(iv=>iv[1]-iv[0]>.003)
-      .sort((a,b)=>a[0]-b[0]);
-
-    const merged=[];
-    for(const cur of s.intervals){
-      if(!merged.length || cur[0]>merged[merged.length-1][1]+.001) merged.push(cur);
-      else merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],cur[1]);
-    }
-    s.intervals=merged;
-    s.removed=s.intervals.length===0;
-  }
-
-  async function peelByTap(s,t,iv){
-    if(animating||s.removed)return;
-
-    const access=accessiblePeelAt(s,t,iv);
-    if(!access){
-      if(navigator.vibrate)navigator.vibrate(4);
-      return;
-    }
-
-    animating=true;
-    history.push(snapshot());
-
-    const start=access.from,limit=access.to;
-    if(Math.abs(limit-start)<.002){
-      history.pop();animating=false;return;
-    }
-
-    const duration=340+Math.min(560,Math.abs(limit-start)*900);
-    const t0=performance.now();
-    s.roll.style.opacity='1';
-
-    await new Promise(resolve=>{
-      function frame(now){
-        const p=clamp((now-t0)/duration,0,1);
-        const ease=1-Math.pow(1-p,3);
-        const cur=start+(limit-start)*ease;
-        const rp=pointOn(s,cur);
-
-        s.roll.style.left=rp.x+'px';
-        s.roll.style.top=rp.y+'px';
-        s.roll.style.transform=`translate(-50%,-50%) scale(${1+0.22*Math.sin(p*Math.PI)})`;
-
-        // IMPORTANT: animate only the rendering. Do not mutate game-state intervals
-        // frame-by-frame; that was the bug in v6/v7.
-        animVisual={
-          stripId:s.id,
-          bounds:access.ivBounds,
-          side:access.side,
-          cur
-        };
-        render(false);
-
-        if(p<1)requestAnimationFrame(frame);
-        else resolve();
-      }
-      requestAnimationFrame(frame);
-    });
-
-    animVisual=null;
-    applyPeelInterval(s,access);
-
-    if(navigator.vibrate)navigator.vibrate(s.removed?12:6);
-    s.roll.style.opacity='0';
-    animating=false;
-    render();
-    checkFinish();
-  }
-
-  function render(updateStatus=true){
-    for(const s of strips){
-      let drawIntervals=s.intervals.map(iv=>[iv[0],iv[1]]);
-
-      if(animVisual && animVisual.stripId===s.id){
-        const b=animVisual.bounds;
-        let best=-1,bestErr=Infinity;
-        for(let i=0;i<drawIntervals.length;i++){
-          const iv=drawIntervals[i];
-          const err=Math.abs(iv[0]-b[0])+Math.abs(iv[1]-b[1]);
-          if(err<bestErr){bestErr=err;best=i;}
-        }
-        if(best>=0 && bestErr<.02){
-          if(animVisual.side==='left'){
-            drawIntervals[best]=[animVisual.cur,b[1]];
-          }else{
-            drawIntervals[best]=[b[0],animVisual.cur];
-          }
-        }
-      }
-
-      ensureSegEls(s,drawIntervals.length);
-
-      drawIntervals.forEach((iv,i)=>{
-        const el=s.segs[i];
-        const p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]);
-        const len=hypot(p1.x-p0.x,p1.y-p0.y);
-        const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
-        el.style.opacity='1';
-        el.style.left=p0.x+'px';
-        el.style.top=(p0.y-s.width/2)+'px';
-        el.style.width=len+'px';
-        el.style.height=s.width+'px';
-        el.style.transform=`rotate(${ang}deg)`;
-      });
-
-      if(s.removed){
-        s.segs.forEach(el=>el.style.display='none');
-        s.roll.style.opacity='0';
-      }
-    }
-
-    if(updateStatus){
-      const remaining=strips.filter(s=>!s.removed).length;
-      const fragments=strips.reduce((n,s)=>n+s.intervals.length,0);
-      status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} still attached</b><br>${fragments} visible tape segment${fragments===1?'':'s'}`;
-      undoBtn.disabled=!history.length||animating;
-      undoBtn.style.opacity=history.length&&!animating?1:.4;
-    }
-  }
-
-  function checkFinish(){
-    if(strips.every(s=>s.removed)){
-      setTimeout(()=>finish.classList.add('show'),220);
-    }
-  }
-
-  viewport.addEventListener('pointerdown',e=>{
-    if(animating)return;
-    e.preventDefault();
-    viewport.setPointerCapture?.(e.pointerId);
-    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    const p=screenToWorld(e.clientX,e.clientY);
-
-    if(pointers.size===1){
-      tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:p,moved:false};
-      const q=[...pointers.values()][0];
-      gesture={type:'pan',startX:q.x,startY:q.y,startTx:view.tx,startTy:view.ty};
-    }else if(pointers.size===2){
-      tapCandidate=null;
-      const ps=[...pointers.values()];
-      const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
-      const dist=hypot(dx,dy);
-      const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
-      gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
-    }
-  },{passive:false});
-
-  viewport.addEventListener('pointermove',e=>{
-    if(!pointers.has(e.pointerId)||animating)return;
-    e.preventDefault();
-    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-
-    if(tapCandidate && e.pointerId===tapCandidate.id){
-      if(hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8){
-        tapCandidate.moved=true;
-      }
-    }
-
-    if(pointers.size===1 && gesture?.type==='pan' && tapCandidate?.moved){
-      const p=[...pointers.values()][0];
-      view.tx=gesture.startTx+(p.x-gesture.startX);
-      view.ty=gesture.startTy+(p.y-gesture.startY);
-      applyView();
-    }else if(pointers.size===2){
-      tapCandidate=null;
-      const ps=[...pointers.values()];
-      const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
-      const dist=hypot(dx,dy);
-      if(gesture?.type!=='pinch'){
-        const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
-        gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
-      }
-      const ns=clamp(gesture.startScale*(dist/gesture.startDist),0.28,2.4);
-      const r=viewport.getBoundingClientRect();
-      const localCx=gesture.cx-r.left,localCy=gesture.cy-r.top;
-      view.scale=ns;
-      view.tx=localCx-gesture.worldCenter.x*ns;
-      view.ty=localCy-gesture.worldCenter.y*ns;
-      applyView();
-    }
-  },{passive:false});
-
-  async function finishPointer(e){
-    if(!pointers.has(e.pointerId))return;
-
-    const candidate=tapCandidate && tapCandidate.id===e.pointerId ? {...tapCandidate} : null;
-    pointers.delete(e.pointerId);
-
-    if(candidate && !candidate.moved && pointers.size===0 && !animating){
-      const target=pickTapeAt(candidate.world);
-      if(target) await peelByTap(target.s,target.t,target.iv);
-    }
-
-    if(pointers.size===1){
-      const p=[...pointers.values()][0];
-      gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
-    }else if(pointers.size===0){
-      gesture=null;
-    }
-    tapCandidate=null;
-  }
-
-  viewport.addEventListener('pointerup',finishPointer);
-  viewport.addEventListener('pointercancel',finishPointer);
-
-  viewport.addEventListener('wheel',e=>{
-    e.preventDefault();
-    const r=viewport.getBoundingClientRect();
-    const localX=e.clientX-r.left,localY=e.clientY-r.top;
-    const before={x:(localX-view.tx)/view.scale,y:(localY-view.ty)/view.scale};
-    const ns=clamp(view.scale*(e.deltaY<0?1.1:.9),0.28,2.4);
-    view.scale=ns;
-    view.tx=localX-before.x*ns;
-    view.ty=localY-before.y*ns;
-    applyView();
-  },{passive:false});
-
-  undoBtn.addEventListener('click',()=>{
-    if(!history.length||animating)return;
-    const snap=history.pop();
-    strips.forEach((s,i)=>{
-      s.intervals=snap[i].intervals.map(iv=>[iv[0],iv[1]]);
-      s.removed=snap[i].removed;
-    });
-    finish.classList.remove('show');
-    render();
-  });
-
-  newBtn.addEventListener('click',build);
-  againBtn.addEventListener('click',build);
-  window.addEventListener('resize',fitWorld);
-
-  requestAnimationFrame(build);
+(()=>{
+const viewport=document.getElementById('viewport'),world=document.getElementById('world'),
+status=document.getElementById('status'),finish=document.getElementById('finish'),
+newBtn=document.getElementById('newBtn'),againBtn=document.getElementById('againBtn'),undoBtn=document.getElementById('undoBtn');
+
+const WW=1200,WH=1600;
+const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
+let strips=[],contacts=[],history=[],animating=false,animVisual=null;
+let view={scale:.5,tx:0,ty:0},pointers=new Map(),gesture=null,tapCandidate=null;
+
+const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),hypot=Math.hypot;
+
+function applyView(){world.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.scale})`}
+function fitWorld(){const vw=viewport.clientWidth,vh=viewport.clientHeight,s=Math.min(vw/WW,vh/WH)*.96;
+view.scale=s;view.tx=(vw-WW*s)/2;view.ty=(vh-WH*s)/2;applyView()}
+function screenToWorld(x,y){const r=viewport.getBoundingClientRect();return{x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale}}
+
+function makeStrip(i,layer){
+ const horizontal=i%2===0,margin=105;
+ if(horizontal){
+   const y=rand(margin,WH-margin),y2=clamp(y+rand(-65,65),margin,WH-margin);
+   return{id:i,layer,ax:rand(margin,280),ay:y,bx:rand(WW-280,WW-margin),by:y2,width:rand(52,72),
+   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
+ }else{
+   const x=rand(margin,WW-margin),x2=clamp(x+rand(-65,65),margin,WW-margin);
+   return{id:i,layer,ax:x,ay:rand(margin,280),bx:x2,by:rand(WH-280,WH-margin),width:rand(52,72),
+   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
+ }
+}
+function pointOn(s,t){return{x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
+function geom(s){const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);return{x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L,ux:dx/L,uy:dy/L}}
+
+function tapePolygon(s){
+ const g=geom(s),nx=-g.uy*s.width/2,ny=g.ux*s.width/2;
+ return[
+  {x:g.x1+nx,y:g.y1+ny},{x:g.x2+nx,y:g.y2+ny},
+  {x:g.x2-nx,y:g.y2-ny},{x:g.x1-nx,y:g.y1-ny}
+ ];
+}
+function polygonArea(poly){
+ let a=0;for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];a+=p.x*q.y-q.x*p.y}
+ return Math.abs(a)/2;
+}
+function signedArea(poly){
+ let a=0;for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];a+=p.x*q.y-q.x*p.y}
+ return a/2;
+}
+function clipPolygon(subject,clip){
+ let output=subject.slice();
+ const sign=signedArea(clip)>=0?1:-1;
+ for(let j=0;j<clip.length;j++){
+   const A=clip[j],B=clip[(j+1)%clip.length],input=output;output=[];
+   if(!input.length)break;
+   const inside=P=>sign*((B.x-A.x)*(P.y-A.y)-(B.y-A.y)*(P.x-A.x))>=-1e-8;
+   const intersect=(P,Q)=>{
+     const rx=Q.x-P.x,ry=Q.y-P.y,sx=B.x-A.x,sy=B.y-A.y;
+     const den=rx*sy-ry*sx;if(Math.abs(den)<1e-10)return Q;
+     const t=((A.x-P.x)*sy-(A.y-P.y)*sx)/den;
+     return{x:P.x+t*rx,y:P.y+t*ry};
+   };
+   let S=input[input.length-1];
+   for(const E of input){
+     const Ein=inside(E),Sin=inside(S);
+     if(Ein){if(!Sin)output.push(intersect(S,E));output.push(E)}
+     else if(Sin)output.push(intersect(S,E));
+     S=E;
+   }
+ }
+ return output;
+}
+function projectSpan(poly,s){
+ const g=geom(s),den=g.dx*g.dx+g.dy*g.dy;
+ const ts=poly.map(p=>((p.x-g.x1)*g.dx+(p.y-g.y1)*g.dy)/den);
+ return[clamp(Math.min(...ts),0,1),clamp(Math.max(...ts),0,1)];
+}
+
+function buildContactMap(){
+ contacts=[];
+ for(let i=0;i<strips.length;i++)for(let j=i+1;j<strips.length;j++){
+   const a=strips[i],b=strips[j];
+   const inter=clipPolygon(tapePolygon(a),tapePolygon(b));
+   if(inter.length<3||polygonArea(inter)<1.0)continue; // actual overlap area only; mere near-touch does not count
+   const upper=a.layer>b.layer?a:b,lower=a.layer>b.layer?b:a;
+   contacts.push({
+     upper:upper.id,lower:lower.id,
+     upperSpan:projectSpan(inter,upper),
+     lowerSpan:projectSpan(inter,lower)
+   });
+ }
+}
+
+function createEls(s){
+ s.segs=[];
+ const roll=document.createElement('div');roll.className='roll';
+ roll.style.background=`radial-gradient(circle at 36% 50%,rgba(255,255,255,.5) 0 12%,${s.color} 20% 58%,rgba(20,20,20,.32) 60% 69%,${s.color} 71%)`;
+ world.appendChild(roll);s.roll=roll;
+}
+function ensureSegs(s,n){
+ while(s.segs.length<n){const el=document.createElement('div');el.className='tape';el.style.background=s.color;el.style.zIndex=100+s.layer;world.appendChild(el);s.segs.push(el)}
+ s.segs.forEach((el,i)=>el.style.display=i<n?'block':'none');
+}
+function intervalsOverlap(a,b){return Math.min(a[1],b[1])-Math.max(a[0],b[0])>1e-5}
+function contactActive(c){
+ const up=strips[c.upper];if(up.removed)return false;
+ return up.intervals.some(iv=>intervalsOverlap(iv,c.upperSpan));
+}
+function activeZones(s){
+ return contacts.filter(c=>c.lower===s.id&&contactActive(c)).map(c=>c.lowerSpan.slice()).sort((a,b)=>a[0]-b[0]);
+}
+function mergeZones(zs){
+ const out=[];for(const z of zs){if(!out.length||z[0]>out[out.length-1][1]+1e-5)out.push(z.slice());else out[out.length-1][1]=Math.max(out[out.length-1][1],z[1])}return out
+}
+function snapshot(){return strips.map(s=>({intervals:s.intervals.map(iv=>iv.slice()),removed:s.removed}))}
+
+function pointSegHit(px,py,s,iv){
+ const p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]),vx=p1.x-p0.x,vy=p1.y-p0.y,wx=px-p0.x,wy=py-p0.y,vv=vx*vx+vy*vy;
+ let u=vv?((wx*vx+wy*vy)/vv):0;u=clamp(u,0,1);
+ const qx=p0.x+vx*u,qy=p0.y+vy*u;
+ return{dist:hypot(px-qx,py-qy),t:iv[0]+(iv[1]-iv[0])*u};
+}
+function hitInfo(p,s){
+ let best=null,biv=null;
+ for(const iv of s.intervals){const h=pointSegHit(p.x,p.y,s,iv);if(!best||h.dist<best.dist){best=h;biv=iv}}
+ if(!best)return null;
+ return{...best,iv:biv,inside:best.dist<s.width/2,half:s.width/2};
+}
+function pickTape(p){
+ const infos=strips.filter(s=>!s.removed).map(s=>({s,...hitInfo(p,s)})).filter(x=>x.iv);
+ const strict=infos.filter(x=>x.inside);
+ if(strict.length){
+   // Only when the tap is literally inside more than one painted tape does z-order decide.
+   strict.sort((a,b)=>b.s.layer-a.s.layer);
+   return{s:strict[0].s,t:strict[0].t,iv:strict[0].iv};
+ }
+ const slop=5/view.scale,near=infos.filter(x=>x.dist<x.half+slop).sort((a,b)=>a.dist-b.dist);
+ if(!near.length)return null;
+ return{s:near[0].s,t:near[0].t,iv:near[0].iv};
+}
+
+function peelAccess(s,t,iv){
+ const zones=mergeZones(activeZones(s).filter(z=>intervalsOverlap(z,iv)).map(z=>[Math.max(z[0],iv[0]),Math.min(z[1],iv[1])]));
+ for(const z of zones)if(t>=z[0]-1e-5&&t<=z[1]+1e-5)return null;
+
+ let left=null,right=null;
+ for(const z of zones){if(z[1]<t)left=z;else if(z[0]>t){right=z;break}}
+
+ const canLeft=!left,canRight=!right;
+ if(!canLeft&&!canRight)return null;
+
+ if(canLeft&&canRight){
+   const dl=t-iv[0],dr=iv[1]-t;
+   if(dl<=dr)return{side:'left',from:iv[0],to:right?right[0]:iv[1],zone:right,ivBounds:iv.slice()};
+   return{side:'right',from:iv[1],to:left?left[1]:iv[0],zone:left,ivBounds:iv.slice()};
+ }
+ if(canLeft)return{side:'left',from:iv[0],to:right[0],zone:right,ivBounds:iv.slice()};
+ return{side:'right',from:iv[1],to:left[1],zone:left,ivBounds:iv.slice()};
+}
+
+function findInterval(s,b){let bi=-1,be=1e9;s.intervals.forEach((iv,i)=>{const e=Math.abs(iv[0]-b[0])+Math.abs(iv[1]-b[1]);if(e<be){be=e;bi=i}});return be<.02?bi:-1}
+function commitPeel(s,a){
+ const idx=findInterval(s,a.ivBounds);if(idx<0)return;
+ const iv=s.intervals[idx],STUB=.010;
+ if(a.zone){
+   if(a.side==='left')s.intervals[idx]=[clamp(a.zone[0]-STUB,iv[0],iv[1]),iv[1]];
+   else s.intervals[idx]=[iv[0],clamp(a.zone[1]+STUB,iv[0],iv[1])];
+ }else s.intervals.splice(idx,1);
+ s.intervals=s.intervals.filter(iv=>iv[1]-iv[0]>.002).sort((a,b)=>a[0]-b[0]);
+ s.removed=s.intervals.length===0;
+}
+
+async function peelByTap(s,t,iv){
+ if(animating||s.removed)return;
+ const a=peelAccess(s,t,iv);if(!a){if(navigator.vibrate)navigator.vibrate(4);return}
+ if(Math.abs(a.to-a.from)<.002)return;
+ animating=true;history.push(snapshot());
+ const start=a.from,limit=a.to,duration=300+Math.min(620,Math.abs(limit-start)*900),t0=performance.now();
+ s.roll.style.opacity='1';
+ await new Promise(resolve=>{
+  function frame(now){
+   const p=clamp((now-t0)/duration,0,1),ease=1-Math.pow(1-p,3),cur=start+(limit-start)*ease,rp=pointOn(s,cur);
+   s.roll.style.left=rp.x+'px';s.roll.style.top=rp.y+'px';s.roll.style.transform=`translate(-50%,-50%) scale(${1+.25*Math.sin(p*Math.PI)})`;
+   animVisual={id:s.id,bounds:a.ivBounds,side:a.side,cur};render(false);
+   if(p<1)requestAnimationFrame(frame);else resolve();
+  }requestAnimationFrame(frame)
+ });
+ animVisual=null;commitPeel(s,a);s.roll.style.opacity='0';animating=false;
+ if(navigator.vibrate)navigator.vibrate(s.removed?12:6);render();checkFinish();
+}
+
+function render(updateStatus=true){
+ for(const s of strips){
+   let draw=s.intervals.map(iv=>iv.slice());
+   if(animVisual&&animVisual.id===s.id){
+     let bi=-1,be=1e9;draw.forEach((iv,i)=>{const e=Math.abs(iv[0]-animVisual.bounds[0])+Math.abs(iv[1]-animVisual.bounds[1]);if(e<be){be=e;bi=i}});
+     if(bi>=0){draw[bi]=animVisual.side==='left'?[animVisual.cur,animVisual.bounds[1]]:[animVisual.bounds[0],animVisual.cur]}
+   }
+   ensureSegs(s,draw.length);
+   draw.forEach((iv,i)=>{
+     const el=s.segs[i],p0=pointOn(s,iv[0]),p1=pointOn(s,iv[1]),len=hypot(p1.x-p0.x,p1.y-p0.y),ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+     el.style.left=p0.x+'px';el.style.top=(p0.y-s.width/2)+'px';el.style.width=len+'px';el.style.height=s.width+'px';el.style.transform=`rotate(${ang}deg)`;
+   });
+   if(s.removed)s.segs.forEach(el=>el.style.display='none');
+ }
+ if(updateStatus){
+   const rem=strips.filter(s=>!s.removed).length,active=contacts.filter(contactActive).length;
+   status.innerHTML=`<b>${rem} tape${rem===1?'':'s'} still present</b><br>${active} active fixed overlap${active===1?'':'s'}`;
+   undoBtn.disabled=!history.length||animating;undoBtn.style.opacity=history.length&&!animating?1:.4;
+ }
+}
+function checkFinish(){if(strips.every(s=>s.removed))setTimeout(()=>finish.classList.add('show'),200)}
+
+function build(){
+ history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;finish.classList.remove('show');world.innerHTML='';
+ const count=34,layers=[...Array(count).keys()];
+ for(let i=layers.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[layers[i],layers[j]]=[layers[j],layers[i]]}
+ for(let i=0;i<count;i++)strips.push(makeStrip(i,layers[i]));
+ buildContactMap();strips.forEach(createEls);fitWorld();render();
+}
+
+viewport.addEventListener('pointerdown',e=>{
+ if(animating)return;e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ const wp=screenToWorld(e.clientX,e.clientY);
+ if(pointers.size===1){tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:wp,moved:false};gesture={type:'pan',startX:e.clientX,startY:e.clientY,startTx:view.tx,startTy:view.ty}}
+ else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy),cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
+ gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
+},{passive:false});
+viewport.addEventListener('pointermove',e=>{
+ if(!pointers.has(e.pointerId)||animating)return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(tapCandidate&&e.pointerId===tapCandidate.id&&hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8)tapCandidate.moved=true;
+ if(pointers.size===1&&gesture?.type==='pan'&&tapCandidate?.moved){const p=[...pointers.values()][0];view.tx=gesture.startTx+p.x-gesture.startX;view.ty=gesture.startTy+p.y-gesture.startY;applyView()}
+ else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy);
+ if(gesture?.type!=='pinch'){const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
+ const ns=clamp(gesture.startScale*(dist/gesture.startDist),.26,2.5),r=viewport.getBoundingClientRect(),lx=gesture.cx-r.left,ly=gesture.cy-r.top;
+ view.scale=ns;view.tx=lx-gesture.worldCenter.x*ns;view.ty=ly-gesture.worldCenter.y*ns;applyView()}
+},{passive:false});
+async function endPointer(e){
+ if(!pointers.has(e.pointerId))return;const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;pointers.delete(e.pointerId);
+ if(cand&&!cand.moved&&pointers.size===0&&!animating){const target=pickTape(cand.world);if(target)await peelByTap(target.s,target.t,target.iv)}
+ if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty}}else if(!pointers.size)gesture=null;
+ tapCandidate=null;
+}
+viewport.addEventListener('pointerup',endPointer);viewport.addEventListener('pointercancel',endPointer);
+viewport.addEventListener('wheel',e=>{e.preventDefault();const r=viewport.getBoundingClientRect(),lx=e.clientX-r.left,ly=e.clientY-r.top,bx=(lx-view.tx)/view.scale,by=(ly-view.ty)/view.scale,ns=clamp(view.scale*(e.deltaY<0?1.1:.9),.26,2.5);
+view.scale=ns;view.tx=lx-bx*ns;view.ty=ly-by*ns;applyView()},{passive:false});
+
+undoBtn.addEventListener('click',()=>{if(!history.length||animating)return;const snap=history.pop();strips.forEach((s,i)=>{s.intervals=snap[i].intervals.map(iv=>iv.slice());s.removed=snap[i].removed});finish.classList.remove('show');render()});
+newBtn.addEventListener('click',build);againBtn.addEventListener('click',build);window.addEventListener('resize',fitWorld);
+requestAnimationFrame(build);
 })();
 </script>
 </body>
