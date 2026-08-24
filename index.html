@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TAPE — peel prototype v2</title>
+<title>TAPE — peel prototype v3</title>
 <style>
 :root{
   --bg:#0f1623;
@@ -12,79 +12,74 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
-  margin:0;height:100%;overflow:hidden;
-  background:var(--bg);color:var(--text);
+  margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 body{display:flex;justify-content:center}
 #app{
-  width:min(100vw,560px);height:100dvh;
-  display:flex;flex-direction:column;
-  padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+  width:min(100vw,620px);height:100dvh;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
 }
 header{
-  height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 3px;
+  height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;
 }
 .brand{font-size:14px;font-weight:800;letter-spacing:.22em}
 .sub{font-size:12px;color:var(--muted);margin-top:4px}
 button{
-  border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;
-  padding:10px 14px;font:inherit;font-weight:700;
+  border:0;border-radius:14px;background:#1d293b;color:#f4f7fb;padding:10px 14px;
+  font:inherit;font-weight:700;
 }
-#stageWrap{flex:1;min-height:0;display:flex;align-items:stretch}
-#stage{
-  position:relative;flex:1;overflow:hidden;touch-action:none;
-  border-radius:22px;
-  background:var(--bg);
+#viewport{
+  position:relative;flex:1;min-height:0;overflow:hidden;border-radius:20px;
+  touch-action:none;background:var(--bg);
+}
+#world{
+  position:absolute;left:0;top:0;width:1100px;height:1500px;transform-origin:0 0;
 }
 .tape{
-  position:absolute;transform-origin:left center;
-  border-radius:2px;
-  box-shadow:0 3px 7px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22);
-  will-change:left,top,width,transform,opacity;
+  position:absolute;transform-origin:left center;border-radius:3px;
+  box-shadow:0 3px 7px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
 }
 .tape:after{
-  content:"";position:absolute;inset:0;pointer-events:none;
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.75;
   background:
-    linear-gradient(180deg,rgba(255,255,255,.16),transparent 45%,rgba(0,0,0,.08)),
-    repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,255,255,.08) 13px 14px,transparent 15px 26px);
-  opacity:.7;
+    linear-gradient(180deg,rgba(255,255,255,.16),transparent 45%,rgba(0,0,0,.09)),
+    repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.08) 14px 15px,transparent 16px 28px);
 }
-.hit{
-  position:absolute;width:58px;height:58px;border-radius:50%;
-  transform:translate(-50%,-50%);
-  background:transparent;z-index:5000;touch-action:none;
+.endpoint{
+  position:absolute;width:46px;height:46px;border-radius:50%;
+  transform:translate(-50%,-50%);z-index:7000;background:transparent;
+  touch-action:none;
 }
 .curl{
-  position:absolute;width:30px;height:20px;border-radius:50%;
-  transform:translate(-50%,-50%);pointer-events:none;z-index:4900;
+  position:absolute;width:32px;height:21px;border-radius:50%;
+  transform:translate(-50%,-50%);pointer-events:none;z-index:6900;
   box-shadow:inset -6px 0 9px rgba(0,0,0,.28),0 4px 7px rgba(0,0,0,.25);
 }
-#toast{
-  position:absolute;left:50%;top:14px;transform:translateX(-50%) translateY(-8px);
-  padding:8px 12px;border-radius:999px;background:rgba(20,29,43,.9);
-  font-size:12px;font-weight:700;opacity:0;transition:.18s;pointer-events:none;z-index:9000;
+#hud{
+  position:absolute;left:12px;top:12px;z-index:9000;
+  background:rgba(18,26,40,.78);backdrop-filter:blur(8px);
+  padding:8px 10px;border-radius:12px;font-size:12px;color:#d7deea;
 }
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#finish{
-  position:absolute;inset:0;background:rgba(15,22,35,.76);backdrop-filter:blur(7px);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:.28s;z-index:10000;
-}
-#finish.show{opacity:1;pointer-events:auto}
-.card{
-  text-align:center;padding:22px 24px;border-radius:22px;background:#182235;
-  box-shadow:0 20px 50px rgba(0,0,0,.3)
-}
-.card .big{font-size:30px;font-weight:800;margin-bottom:5px}
-.card .small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
 footer{
-  height:74px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px
+  height:70px;display:flex;align-items:center;justify-content:space-between;padding:4px 2px 0;gap:10px
 }
 #status{font-size:13px;line-height:1.35;color:#aeb8c7}
 #status b{color:#fff}
+#finish{
+  position:absolute;inset:0;background:rgba(15,22,35,.78);backdrop-filter:blur(7px);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;
+  transition:.28s;z-index:10000;
+}
+#finish.show{opacity:1;pointer-events:auto}
+.card{
+  background:#182235;border-radius:22px;padding:22px 24px;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.3)
+}
+.card .big{font-size:30px;font-weight:800;margin-bottom:6px}
+.card .small{font-size:13px;color:#aeb9c9;margin-bottom:14px}
 @media(max-height:700px){
-  header{height:54px}.sub{display:none}footer{height:60px}
+  header{height:52px}.sub{display:none}footer{height:58px}
 }
 </style>
 </head>
@@ -93,60 +88,93 @@ footer{
   <header>
     <div>
       <div class="brand">TAPE</div>
-      <div class="sub">drag a loose end and peel</div>
+      <div class="sub">pinch to zoom · drag background to move</div>
     </div>
     <button id="newBtn">New board</button>
   </header>
 
-  <div id="stageWrap">
-    <div id="stage">
-      <div id="toast"></div>
-      <div id="finish">
-        <div class="card">
-          <div class="big">clean.</div>
-          <div class="small">all tape removed</div>
-          <button id="againBtn">Again</button>
-        </div>
+  <div id="viewport">
+    <div id="world"></div>
+    <div id="hud">pinch / pan · drag tape ends</div>
+    <div id="finish">
+      <div class="card">
+        <div class="big">clean.</div>
+        <div class="small">all tape removed</div>
+        <button id="againBtn">Again</button>
       </div>
     </div>
   </div>
 
   <footer>
-    <div id="status"><b>Drag a tape end.</b><br>It stops when a higher layer pins it.</div>
+    <div id="status"><b>Peel from either end.</b><br>A crossing stays locked until the tape above it is gone there.</div>
     <button id="undoBtn">Undo</button>
   </footer>
 </div>
 
 <script>
 (() => {
-  const stage = document.getElementById('stage');
-  const status = document.getElementById('status');
-  const toast = document.getElementById('toast');
-  const finish = document.getElementById('finish');
-  const newBtn = document.getElementById('newBtn');
-  const againBtn = document.getElementById('againBtn');
-  const undoBtn = document.getElementById('undoBtn');
+  const viewport=document.getElementById('viewport');
+  const world=document.getElementById('world');
+  const status=document.getElementById('status');
+  const finish=document.getElementById('finish');
+  const newBtn=document.getElementById('newBtn');
+  const againBtn=document.getElementById('againBtn');
+  const undoBtn=document.getElementById('undoBtn');
 
-  const COLORS = ['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
-  let strips = [];
-  let crossings = [];
-  let history = [];
-  let drag = null;
+  const WORLD_W=1100, WORLD_H=1500;
+  const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
+
+  let strips=[], crossings=[], history=[];
+  let view={scale:.6,tx:0,ty:0};
+  let pointers=new Map();
+  let gesture=null;
+  let peelDrag=null;
 
   const rand=(a,b)=>a+Math.random()*(b-a);
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const hypot=Math.hypot;
 
+  function screenToWorld(x,y){
+    const r=viewport.getBoundingClientRect();
+    return {x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale};
+  }
+
+  function applyView(){
+    world.style.transform=`translate(${view.tx}px,${view.ty}px) scale(${view.scale})`;
+  }
+
+  function fitWorld(){
+    const vw=viewport.clientWidth, vh=viewport.clientHeight;
+    const s=Math.min(vw/WORLD_W,vh/WORLD_H)*0.96;
+    view.scale=s;
+    view.tx=(vw-WORLD_W*s)/2;
+    view.ty=(vh-WORLD_H*s)/2;
+    applyView();
+  }
+
+  function makeStrip(i,layer){
+    const horizontal = i%2===0;
+    const margin=120;
+    if(horizontal){
+      const y=rand(margin,WORLD_H-margin);
+      const y2=clamp(y+rand(-55,55),margin,WORLD_H-margin);
+      const x1=rand(margin,240), x2=rand(WORLD_W-240,WORLD_W-margin);
+      return {id:i,layer,ax:x1,ay:y,bx:x2,by:y2,width:rand(28,42),color:COLORS[i%COLORS.length],
+              leftPeel:0,rightPeel:0,removed:false};
+    }else{
+      const x=rand(margin,WORLD_W-margin);
+      const x2=clamp(x+rand(-55,55),margin,WORLD_W-margin);
+      const y1=rand(margin,240), y2=rand(WORLD_H-240,WORLD_H-margin);
+      return {id:i,layer,ax:x,ay:y1,bx:x2,by:y2,width:rand(28,42),color:COLORS[i%COLORS.length],
+              leftPeel:0,rightPeel:0,removed:false};
+    }
+  }
+
   function geom(s){
-    const w=stage.clientWidth,h=stage.clientHeight;
-    const x1=s.ax*w,y1=s.ay*h,x2=s.bx*w,y2=s.by*h;
-    const dx=x2-x1,dy=y2-y1,L=hypot(dx,dy);
-    return {x1,y1,x2,y2,dx,dy,L,ux:dx/L,uy:dy/L};
+    const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);
+    return {x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L};
   }
-  function pointOn(s,t){
-    const g=geom(s);
-    return {x:g.x1+g.dx*t,y:g.y1+g.dy*t};
-  }
+  function pointOn(s,t){return {x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
 
   function lineIntersection(a,b){
     const p={x:a.ax,y:a.ay}, r={x:a.bx-a.ax,y:a.by-a.ay};
@@ -161,53 +189,28 @@ footer{
   }
 
   function build(){
+    history=[];strips=[];crossings=[];pointers.clear();gesture=null;peelDrag=null;
     finish.classList.remove('show');
-    history=[];drag=null;
-    [...stage.querySelectorAll('.tape,.hit,.curl')].forEach(el=>el.remove());
-    strips=[];crossings=[];
+    world.innerHTML='';
 
-    const count = stage.clientWidth < 420 ? 14 : 17;
-    const horiz = Math.round(count*.52);
-
-    // Each strip receives ONE true physical layer.
-    // Higher layer value = visually and mechanically on top everywhere.
+    const count=18;
     const layers=[...Array(count).keys()];
     for(let i=layers.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
       [layers[i],layers[j]]=[layers[j],layers[i]];
     }
 
-    for(let i=0;i<count;i++){
-      const horizontal=i<horiz;
-      let ax,ay,bx,by;
-      if(horizontal){
-        ay=rand(.06,.94); by=clamp(ay+rand(-.035,.035),.03,.97);
-        ax=rand(-.09,-.015); bx=rand(1.015,1.09);
-      }else{
-        ax=rand(.05,.95); bx=clamp(ax+rand(-.035,.035),.03,.97);
-        ay=rand(-.08,-.01); by=rand(1.01,1.08);
-      }
-
-      const s={
-        id:i,layer:layers[i],
-        ax,ay,bx,by,
-        width:rand(21,31),
-        color:COLORS[i%COLORS.length],
-        leftPeel:0,rightPeel:0,removed:false
-      };
-      strips.push(s);
-    }
+    for(let i=0;i<count;i++) strips.push(makeStrip(i,layers[i]));
 
     for(let i=0;i<count;i++){
       for(let j=i+1;j<count;j++){
         const hit=lineIntersection(strips[i],strips[j]);
-        if(hit){
-          crossings.push({a:i,b:j,ta:hit.ta,tb:hit.tb});
-        }
+        if(hit)crossings.push({a:i,b:j,ta:hit.ta,tb:hit.tb});
       }
     }
 
     strips.forEach(createEls);
+    fitWorld();
     render();
   }
 
@@ -216,137 +219,128 @@ footer{
     tape.className='tape';
     tape.style.background=s.color;
     tape.style.zIndex=100+s.layer;
-    stage.appendChild(tape);
-    s.el=tape;
+    world.appendChild(tape); s.el=tape;
 
-    const lh=document.createElement('div'), rh=document.createElement('div');
-    lh.className=rh.className='hit';
-    lh.dataset.id=rh.dataset.id=s.id;
-    lh.dataset.side='left';rh.dataset.side='right';
-    stage.appendChild(lh);stage.appendChild(rh);
-    s.lh=lh;s.rh=rh;
+    const l=document.createElement('div'), r=document.createElement('div');
+    l.className=r.className='endpoint';
+    l.dataset.id=r.dataset.id=s.id;
+    l.dataset.side='left';r.dataset.side='right';
+    world.appendChild(l);world.appendChild(r);
+    s.lh=l;s.rh=r;
 
-    const lc=document.createElement('div'),rc=document.createElement('div');
+    const lc=document.createElement('div'), rc=document.createElement('div');
     lc.className=rc.className='curl';
-    stage.appendChild(lc);stage.appendChild(rc);
+    world.appendChild(lc);world.appendChild(rc);
     s.lc=lc;s.rc=rc;
 
-    [lh,rh].forEach(el=>el.addEventListener('pointerdown',startDrag,{passive:false}));
+    l.addEventListener('pointerdown',startPeel,{passive:false});
+    r.addEventListener('pointerdown',startPeel,{passive:false});
   }
 
-  function isOtherPresent(otherId,t){
+  function otherPresent(otherId,t){
     const o=strips[otherId];
     if(o.removed)return false;
-    return t > o.leftPeel+.002 && t < 1-o.rightPeel-.002;
+    return t > o.leftPeel+.001 && t < 1-o.rightPeel-.001;
   }
 
-  function blockingCrossings(s){
+  function blockersFor(s){
     const out=[];
     for(const c of crossings){
-      let selfT=null, otherId=null, otherT=null;
+      let selfT,otherId,otherT;
       if(c.a===s.id){selfT=c.ta;otherId=c.b;otherT=c.tb}
       else if(c.b===s.id){selfT=c.tb;otherId=c.a;otherT=c.ta}
       else continue;
 
       const o=strips[otherId];
-
-      // Mechanical rule exactly matches visual rule:
-      // only a strip on a higher global layer can pin this strip.
-      if(o.layer > s.layer && isOtherPresent(otherId,otherT)){
-        out.push(selfT);
-      }
+      if(o.layer>s.layer && otherPresent(otherId,otherT)) out.push(selfT);
     }
     return out;
   }
 
   function peelLimit(s,side){
-    const curL=s.leftPeel;
-    const curR=1-s.rightPeel;
-    const blockers=blockingCrossings(s);
-
+    const left=s.leftPeel, right=1-s.rightPeel;
+    const blockers=blockersFor(s);
     if(side==='left'){
-      const ahead=blockers.filter(t=>t>curL+.002 && t<curR-.002);
-      return ahead.length ? Math.min(...ahead) : curR;
+      const ahead=blockers.filter(t=>t>left+.001 && t<right-.001);
+      return ahead.length?Math.min(...ahead):right;
     }else{
-      const ahead=blockers.filter(t=>t<curR-.002 && t>curL+.002);
-      return ahead.length ? Math.max(...ahead) : curL;
+      const ahead=blockers.filter(t=>t<right-.001 && t>left+.001);
+      return ahead.length?Math.max(...ahead):left;
     }
   }
 
-  function available(s,side){
-    const cur=side==='left'?s.leftPeel:1-s.rightPeel;
-    return Math.abs(peelLimit(s,side)-cur)>.004;
+  function currentT(s,side){return side==='left'?s.leftPeel:1-s.rightPeel}
+
+  function canPeel(s,side){
+    return Math.abs(peelLimit(s,side)-currentT(s,side))>.002;
   }
 
   function snapshot(){
     return strips.map(s=>({leftPeel:s.leftPeel,rightPeel:s.rightPeel,removed:s.removed}));
   }
 
-  function startDrag(e){
-    e.preventDefault();
-    const el=e.currentTarget;
-    const s=strips[+el.dataset.id];
-    const side=el.dataset.side;
-    if(s.removed||!available(s,side))return;
+  function startPeel(e){
+    e.preventDefault();e.stopPropagation();
+    if(pointers.size>0)return;
+    const s=strips[+e.currentTarget.dataset.id],side=e.currentTarget.dataset.side;
+    if(s.removed||!canPeel(s,side))return;
 
     history.push(snapshot());
-    if(history.length>40)history.shift();
-
-    const g=geom(s);
-    const startT=side==='left'?s.leftPeel:1-s.rightPeel;
+    const p=screenToWorld(e.clientX,e.clientY);
+    const startT=currentT(s,side);
     const limit=peelLimit(s,side);
-
-    drag={pid:e.pointerId,s,side,g,startT,limit,lastT:startT};
-    el.setPointerCapture?.(e.pointerId);
-    el.addEventListener('pointermove',moveDrag,{passive:false});
-    el.addEventListener('pointerup',endDrag,{passive:false,once:true});
-    el.addEventListener('pointercancel',endDrag,{passive:false,once:true});
+    peelDrag={pid:e.pointerId,s,side,startT,limit,lastT:startT};
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    e.currentTarget.addEventListener('pointermove',movePeel,{passive:false});
+    e.currentTarget.addEventListener('pointerup',endPeel,{passive:false,once:true});
+    e.currentTarget.addEventListener('pointercancel',endPeel,{passive:false,once:true});
   }
 
-  function moveDrag(e){
-    if(!drag||e.pointerId!==drag.pid)return;
+  function movePeel(e){
+    if(!peelDrag||e.pointerId!==peelDrag.pid)return;
     e.preventDefault();
-
-    const r=stage.getBoundingClientRect();
-    const x=e.clientX-r.left,y=e.clientY-r.top;
-    const g=drag.g;
-    const proj=((x-g.x1)*g.dx+(y-g.y1)*g.dy)/(g.L*g.L);
+    const p=screenToWorld(e.clientX,e.clientY);
+    const s=peelDrag.s, g=geom(s);
+    const proj=((p.x-g.x1)*g.dx+(p.y-g.y1)*g.dy)/(g.L*g.L);
 
     let t;
-    if(drag.side==='left'){
-      t=clamp(proj,drag.startT,drag.limit);
-      drag.s.leftPeel=t;
+    if(peelDrag.side==='left'){
+      t=clamp(proj,peelDrag.startT,peelDrag.limit);
+      s.leftPeel=t;
     }else{
-      t=clamp(proj,drag.limit,drag.startT);
-      drag.s.rightPeel=1-t;
+      t=clamp(proj,peelDrag.limit,peelDrag.startT);
+      s.rightPeel=1-t;
     }
-    drag.lastT=t;
+    peelDrag.lastT=t;
     render();
   }
 
-  function endDrag(e){
-    if(!drag)return;
-    const {s,side,startT,limit,lastT}=drag;
-    const moved=Math.abs(lastT-startT);
-    const reached=Math.abs(lastT-limit)<.02;
+  function endPeel(e){
+    if(!peelDrag)return;
+    const {s,side,startT,limit,lastT}=peelDrag;
 
-    if(moved<.015){
-      if(side==='left') s.leftPeel=Math.min(limit,s.leftPeel+.08);
-      else s.rightPeel=Math.min(1-limit,s.rightPeel+.08);
-    }else if(reached){
+    // Hard lock: snap back to legal segment if released short,
+    // never allow "stop then resume" to jump through a pin.
+    const reached=Math.abs(lastT-limit)<.018;
+    const moved=Math.abs(lastT-startT);
+
+    if(reached){
       if(side==='left')s.leftPeel=limit;
       else s.rightPeel=1-limit;
+    }else{
+      if(moved<.01){
+        // no auto-advance on tap; this avoids bypassing the lock
+        if(side==='left')s.leftPeel=startT;
+        else s.rightPeel=1-startT;
+      }
     }
 
-    if(s.leftPeel+s.rightPeel>=.992){
+    if(s.leftPeel+s.rightPeel>=.995){
       s.removed=true;
-      if(navigator.vibrate)navigator.vibrate(12);
-      showToast('free');
-    }else if(reached){
-      if(navigator.vibrate)navigator.vibrate(6);
+      if(navigator.vibrate)navigator.vibrate(10);
     }
 
-    drag=null;
+    peelDrag=null;
     render();
     checkFinish();
   }
@@ -360,70 +354,135 @@ footer{
       }
 
       const t0=s.leftPeel,t1=1-s.rightPeel;
-      const p0=pointOn(s,t0),p1=pointOn(s,t1);
+      const p0=pointOn(s,t0), p1=pointOn(s,t1);
       const len=hypot(p1.x-p0.x,p1.y-p0.y);
       const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
 
       s.el.style.opacity='1';
       s.el.style.left=p0.x+'px';
       s.el.style.top=(p0.y-s.width/2)+'px';
-      s.el.style.width=Math.max(0,len)+'px';
+      s.el.style.width=len+'px';
       s.el.style.height=s.width+'px';
       s.el.style.transform=`rotate(${ang}deg)`;
 
-      placeHit(s.lh,p0,available(s,'left'));
-      placeHit(s.rh,p1,available(s,'right'));
+      placeEndpoint(s.lh,p0,canPeel(s,'left'));
+      placeEndpoint(s.rh,p1,canPeel(s,'right'));
 
       placeCurl(s.lc,p0,s,s.leftPeel>.01);
       placeCurl(s.rc,p1,s,s.rightPeel>.01);
     }
 
     const remaining=strips.filter(s=>!s.removed).length;
-    const partial=strips.filter(s=>!s.removed&&(s.leftPeel>.015||s.rightPeel>.015)).length;
-    status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Drag any exposed end'}`;
+    const partial=strips.filter(s=>!s.removed&&(s.leftPeel>.01||s.rightPeel>.01)).length;
+    status.innerHTML=`<b>${remaining} strip${remaining===1?'':'s'} left</b><br>${partial?partial+' partly peeled':'Pinch to zoom, then drag a loose end'}`;
     undoBtn.disabled=!history.length;
     undoBtn.style.opacity=history.length?1:.4;
   }
 
-  function placeHit(el,p,on){
+  function placeEndpoint(el,p,on){
     el.style.display=on?'block':'none';
-    el.style.left=p.x+'px';
-    el.style.top=p.y+'px';
+    el.style.left=p.x+'px';el.style.top=p.y+'px';
   }
 
   function placeCurl(el,p,s,on){
     el.style.display=on?'block':'none';
-    el.style.left=p.x+'px';
-    el.style.top=p.y+'px';
+    el.style.left=p.x+'px';el.style.top=p.y+'px';
     el.style.background=`radial-gradient(circle at 35% 50%,rgba(255,255,255,.46) 0 12%,${s.color} 20% 58%,rgba(25,25,25,.3) 60% 69%,${s.color} 71%)`;
-  }
-
-  function restore(snap){
-    strips.forEach((s,i)=>Object.assign(s,snap[i]));
-    finish.classList.remove('show');
-    render();
-  }
-
-  function showToast(txt){
-    toast.textContent=txt;
-    toast.classList.add('show');
-    clearTimeout(showToast.t);
-    showToast.t=setTimeout(()=>toast.classList.remove('show'),500);
   }
 
   function checkFinish(){
     if(strips.every(s=>s.removed)){
       setTimeout(()=>finish.classList.add('show'),220);
-      if(navigator.vibrate)navigator.vibrate([16,36,16]);
     }
   }
 
+  // Pan / pinch zoom on viewport background.
+  viewport.addEventListener('pointerdown',e=>{
+    if(e.target!==viewport && e.target!==world && !e.target.classList.contains('tape')) return;
+    if(peelDrag)return;
+    e.preventDefault();
+    viewport.setPointerCapture?.(e.pointerId);
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+    if(pointers.size===1){
+      const p=[...pointers.values()][0];
+      gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
+    }else if(pointers.size===2){
+      const ps=[...pointers.values()];
+      const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
+      const dist=hypot(dx,dy);
+      const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
+      const worldCenter=screenToWorld(cx,cy);
+      gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter};
+    }
+  },{passive:false});
+
+  viewport.addEventListener('pointermove',e=>{
+    if(!pointers.has(e.pointerId)||peelDrag)return;
+    e.preventDefault();
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+    if(pointers.size===1 && gesture?.type==='pan'){
+      const p=[...pointers.values()][0];
+      view.tx=gesture.startTx+(p.x-gesture.startX);
+      view.ty=gesture.startTy+(p.y-gesture.startY);
+      applyView();
+    }else if(pointers.size===2){
+      const ps=[...pointers.values()];
+      const dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y;
+      const dist=hypot(dx,dy);
+      if(gesture?.type!=='pinch'){
+        const cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
+        gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)};
+      }
+      const ns=clamp(gesture.startScale*(dist/gesture.startDist),0.28,2.4);
+      const r=viewport.getBoundingClientRect();
+      const localCx=gesture.cx-r.left, localCy=gesture.cy-r.top;
+      view.scale=ns;
+      view.tx=localCx-gesture.worldCenter.x*ns;
+      view.ty=localCy-gesture.worldCenter.y*ns;
+      applyView();
+    }
+  },{passive:false});
+
+  function endPointer(e){
+    pointers.delete(e.pointerId);
+    if(pointers.size===1){
+      const p=[...pointers.values()][0];
+      gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty};
+    }else if(pointers.size===0){
+      gesture=null;
+    }
+  }
+
+  viewport.addEventListener('pointerup',endPointer);
+  viewport.addEventListener('pointercancel',endPointer);
+
+  // desktop wheel zoom
+  viewport.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=viewport.getBoundingClientRect();
+    const localX=e.clientX-r.left,localY=e.clientY-r.top;
+    const before={x:(localX-view.tx)/view.scale,y:(localY-view.ty)/view.scale};
+    const factor=e.deltaY<0?1.1:.9;
+    const ns=clamp(view.scale*factor,0.28,2.4);
+    view.scale=ns;
+    view.tx=localX-before.x*ns;
+    view.ty=localY-before.y*ns;
+    applyView();
+  },{passive:false});
+
+  undoBtn.addEventListener('click',()=>{
+    if(!history.length)return;
+    const snap=history.pop();
+    strips.forEach((s,i)=>Object.assign(s,snap[i]));
+    finish.classList.remove('show');
+    render();
+  });
+
   newBtn.addEventListener('click',build);
   againBtn.addEventListener('click',build);
-  undoBtn.addEventListener('click',()=>{
-    if(history.length)restore(history.pop());
-  });
-  window.addEventListener('resize',()=>render());
+  window.addEventListener('resize',fitWorld);
 
   requestAnimationFrame(build);
 })();
