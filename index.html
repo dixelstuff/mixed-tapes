@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11F2</div><div class="sub">v11 mechanics · local fixed contacts · forced partials</div></div>
+  <div><div class="brand">TAPE · V11H</div><div class="sub">dense crosshatch · hidden locked cycles · instant taps</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -73,17 +73,56 @@ view.scale=s;view.tx=(vw-WW*s)/2;view.ty=(vh-WH*s)/2;applyView()}
 function screenToWorld(x,y){const r=viewport.getBoundingClientRect();return{x:(x-r.left-view.tx)/view.scale,y:(y-r.top-view.ty)/view.scale}}
 
 function makeStrip(i,layer){
- const horizontal=i%2===0,margin=105;
+ const margin=70;
+ const horizontal=i<17;
+ const width=rand(54,70);
+
  if(horizontal){
-   const y=rand(margin,WH-margin),y2=clamp(y+rand(-65,65),margin,WH-margin);
-   return{id:i,layer,ax:rand(margin,280),ay:y,bx:rand(WW-280,WW-margin),by:y2,width:rand(52,72),
-   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
- }else{
-   const x=rand(margin,WW-margin),x2=clamp(x+rand(-65,65),margin,WW-margin);
-   return{id:i,layer,ax:x,ay:rand(margin,280),bx:x2,by:rand(WH-280,WH-margin),width:rand(52,72),
-   color:COLORS[i%COLORS.length],intervals:[[0,1]],removed:false,segs:[],roll:null};
+   const slot=(i+1)/18;
+   const y=margin+slot*(WH-2*margin)+rand(-42,42);
+   const tilt=rand(-95,95);
+   return{
+     id:i,layer,
+     ax:rand(55,145),ay:clamp(y-tilt/2,margin,WH-margin),
+     bx:rand(WW-145,WW-55),by:clamp(y+tilt/2,margin,WH-margin),
+     width,color:COLORS[i%COLORS.length],
+     intervals:[[0,1]],removed:false,segs:[],roll:null
+   };
  }
+
+ const vi=i-17;
+ const slot=(vi+1)/18;
+ const x=margin+slot*(WW-2*margin)+rand(-34,34);
+ const tilt=rand(-80,80);
+ return{
+   id:i,layer,
+   ax:clamp(x-tilt/2,margin,WW-margin),ay:rand(55,145),
+   bx:clamp(x+tilt/2,margin,WW-margin),by:rand(WH-145,WH-55),
+   width,color:COLORS[i%COLORS.length],
+   intervals:[[0,1]],removed:false,segs:[],roll:null
+ };
 }
+
+const KNOTS=[
+ // [horizontal A, horizontal B, vertical C, vertical D]
+ [1,5,18,22],
+ [4,9,21,27],
+ [7,13,24,30],
+ [11,15,26,33]
+];
+
+function knotOverride(a,b){
+ for(const k of KNOTS){
+   const [h1,h2,v1,v2]=k;
+   // Cycle: h1 > v1 > h2 > v2 > h1
+   if((a===h1&&b===v1)||(a===v1&&b===h1))return h1;
+   if((a===v1&&b===h2)||(a===h2&&b===v1))return v1;
+   if((a===h2&&b===v2)||(a===v2&&b===h2))return h2;
+   if((a===v2&&b===h1)||(a===h1&&b===v2))return v2;
+ }
+ return null;
+}
+
 function pointOn(s,t){return{x:s.ax+(s.bx-s.ax)*t,y:s.ay+(s.by-s.ay)*t}}
 function geom(s){const dx=s.bx-s.ax,dy=s.by-s.ay,L=hypot(dx,dy);return{x1:s.ax,y1:s.ay,x2:s.bx,y2:s.by,dx,dy,L,ux:dx/L,uy:dy/L}}
 
@@ -141,25 +180,27 @@ function buildContactMap(){
  for(let i=0;i<strips.length;i++)for(let j=i+1;j<strips.length;j++){
    const a=strips[i],b=strips[j];
    const inter=clipPolygon(tapePolygon(a),tapePolygon(b));
-   if(inter.length<3)continue;
-   if(polygonArea(inter)<=0)continue;
+   if(inter.length<3 || polygonArea(inter)<=0)continue;
 
    const spanA=projectSpan(inter,a),spanB=projectSpan(inter,b);
    const penA=normalExtent(inter,a),penB=normalExtent(inter,b);
-
-   if(penA<a.width/3 || penB<b.width/3)continue;
-
    const lenA=geom(a).L*(spanA[1]-spanA[0]);
    const lenB=geom(b).L*(spanB[1]-spanB[0]);
+
+   // No dubious tiny touches: the actual overlap must be at least 1/3
+   // of tape width in both directions for BOTH tapes.
+   if(penA<a.width/3 || penB<b.width/3)continue;
    if(lenA<a.width/3 || lenB<b.width/3)continue;
 
-   const aOnTop=Math.random()<0.5;
+   const forced=knotOverride(a.id,b.id);
+   const upper=forced!==null?strips[forced]:(a.layer>b.layer?a:b);
+   const lower=upper.id===a.id?b:a;
+
    contacts.push({
      a:a.id,b:b.id,
-     upper:aOnTop?a.id:b.id,
-     lower:aOnTop?b.id:a.id,
-     upperSpan:aOnTop?spanA:spanB,
-     lowerSpan:aOnTop?spanB:spanA,
+     upper:upper.id,lower:lower.id,
+     upperSpan:upper.id===a.id?spanA:spanB,
+     lowerSpan:lower.id===a.id?spanA:spanB,
      spanA,spanB,
      patch:null
    });
@@ -236,11 +277,10 @@ function tapInsideContact(p,c){
  if(!contactActive(c))return false;
  const ia=hitInfo(p,strips[c.a]),ib=hitInfo(p,strips[c.b]);
  if(!ia||!ib||!ia.inside||!ib.inside)return false;
-
- const spanA=c.a===c.upper?c.upperSpan:c.lowerSpan;
- const spanB=c.b===c.upper?c.upperSpan:c.lowerSpan;
- return ia.t>=spanA[0]-1e-4&&ia.t<=spanA[1]+1e-4 &&
-        ib.t>=spanB[0]-1e-4&&ib.t<=spanB[1]+1e-4;
+ const sa=c.a===c.upper?c.upperSpan:c.lowerSpan;
+ const sb=c.b===c.upper?c.upperSpan:c.lowerSpan;
+ return ia.t>=sa[0]-1e-4&&ia.t<=sa[1]+1e-4 &&
+        ib.t>=sb[0]-1e-4&&ib.t<=sb[1]+1e-4;
 }
 function pickTape(p){
  const infos=strips.filter(s=>!s.removed).map(s=>({s,...hitInfo(p,s)})).filter(x=>x.iv);
@@ -251,6 +291,7 @@ function pickTape(p){
  if(strict.length>1){
    const here=contacts.filter(c=>tapInsideContact(p,c));
    if(here.length){
+     // If we're genuinely on a crossing, the locally upper tape owns the tap.
      for(const c of here){
        const hit=strict.find(x=>x.s.id===c.upper);
        if(hit)return{s:hit.s,t:hit.t,iv:hit.iv};
@@ -621,20 +662,16 @@ function renderContactPatches(){
      c.patch.style.display='none';
      continue;
    }
-
    const pieces=up.intervals
      .map(iv=>[Math.max(iv[0],c.upperSpan[0]),Math.min(iv[1],c.upperSpan[1])])
      .filter(iv=>iv[1]-iv[0]>1e-5);
-
    if(!pieces.length){
      c.patch.style.display='none';
      continue;
    }
-
    const iv=pieces[0],p0=pointOn(up,iv[0]),p1=pointOn(up,iv[1]);
    const len=hypot(p1.x-p0.x,p1.y-p0.y);
    const ang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
-
    c.patch.style.display='block';
    c.patch.style.left=p0.x+'px';
    c.patch.style.top=(p0.y-up.width/2)+'px';
@@ -675,43 +712,22 @@ function checkFinish(){
 
 function build(){
  history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;
- tapCount=0;optimalTaps=null;optimalPartial=0;tapQueue=[];ghostAnimations=[];finish.classList.remove('show');
+ tapCount=0;optimalTaps=null;optimalPartial=4;tapQueue=[];ghostAnimations=[];finish.classList.remove('show');world.innerHTML='';
 
- let solution=null;
- let attempt=0;
-
- while(!solution && attempt<150){
-   attempt++;
-   world.innerHTML='';
-   strips=[];contacts=[];
-
-   const count=34;
-   for(let i=0;i<count;i++)strips.push(makeStrip(i,0));
-
-   buildContactMap();
-   if(contacts.length<20)continue;
-
-   const candidate=computeOptimalSolution();
-   if(candidate && candidate.minPartial>=3){
-     solution=candidate;
-   }
+ const count=34,layers=[...Array(count).keys()];
+ for(let i=layers.length-1;i>0;i--){
+   const j=Math.floor(Math.random()*(i+1));
+   [layers[i],layers[j]]=[layers[j],layers[i]];
  }
+ for(let i=0;i<count;i++)strips.push(makeStrip(i,layers[i]));
 
- if(!solution){
-   status.innerHTML='<b>Regenerating…</b><br>Rejecting any board without forced partial peels.';
-   setTimeout(build,0);
-   return;
- }
-
- optimalTaps=solution.taps;
- optimalPartial=solution.minPartial;
-
+ buildContactMap();
  strips.forEach(createEls);
  createContactPatches();
  fitWorld();
  render();
 
- status.innerHTML=`<b>${strips.length} tapes · minimum ${optimalTaps} taps</b><br>Every optimal route needs at least ${optimalPartial} partial peels`;
+ status.innerHTML=`<b>${strips.length} tapes in one crosshatch</b><br>4 hidden locked cycles are buried through the field`;
 }
 
 viewport.addEventListener('pointerdown',e=>{
