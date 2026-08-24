@@ -38,7 +38,7 @@ align-items:center;justify-content:center;opacity:0;pointer-events:none;transiti
 <body>
 <div id="app">
 <header>
-  <div><div class="brand">TAPE · V11B</div><div class="sub">v11 mechanics · stricter puzzle generation</div></div>
+  <div><div class="brand">TAPE · V11C</div><div class="sub">v11 mechanics · exact contact spans · queued taps</div></div>
   <button id="newBtn">New board</button>
 </header>
 <div id="viewport">
@@ -61,6 +61,7 @@ const WW=1200,WH=1600;
 const COLORS=['#ef5b5b','#f0bb43','#4b9fe0','#5fbe84','#9b73d5','#e784b7','#ef8a4c','#54c4bc'];
 let strips=[],contacts=[],history=[],animating=false,animVisual=null;
 let tapCount=0, optimalTaps=null, optimalPartial=0;
+let tapQueue=[];
 let view={scale:.5,tx:0,ty:0},pointers=new Map(),gesture=null,tapCandidate=null;
 
 const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),hypot=Math.hypot;
@@ -399,86 +400,73 @@ function greedyLowerBound(state){
 }
 function computeOptimalSolution(){
  const start=cloneStateFromStrips();
- if(solvedState(start))return {taps:0,partial:0,path:[]};
+ if(solvedState(start))return {taps:0,minPartial:0,path:[]};
 
  let bound=greedyLowerBound(start);
  let explored=0;
- const HARD_CAP=220000;
+ const HARD_CAP=320000;
 
  function isPartialMove(state,m){
-   const before=state[m.sid];
    const child=applyMoveToState(state,m);
    return !child[m.sid].removed;
  }
 
- function dfs(state,g,bound,memo,path){
+ function searchDepth(state,g,bound,memo,path,partialCount,best){
    explored++;
-   if(explored>HARD_CAP)return {found:false,next:Infinity,aborted:true};
+   if(explored>HARD_CAP)return {aborted:true};
+
    const h=greedyLowerBound(state),f=g+h;
-   if(f>bound)return {found:false,next:f};
+   if(f>bound)return {next:f};
+
    if(solvedState(state)){
-     return {
-       found:true,
-       cost:g,
-       path:path.slice(),
-       partial:path.reduce((n,x)=>n+(x.partial?1:0),0)
-     };
+     if(!best.path || partialCount<best.minPartial){
+       best.path=path.slice();
+       best.minPartial=partialCount;
+     }
+     return {found:true,next:Infinity};
    }
 
+   // If we already have a solution at this same optimal depth and this path
+   // cannot improve its partial count, prune.
+   if(best.path && partialCount>=best.minPartial)return {next:Infinity};
+
    const key=stateKey(state);
-   if(memo.has(key)&&memo.get(key)<=g)return {found:false,next:Infinity};
-   memo.set(key,g);
+   const prev=memo.get(key);
+   if(prev && prev.g<=g && prev.partial<=partialCount)return {next:Infinity};
+   memo.set(key,{g,partial:partialCount});
 
    const moves=possibleMovesForState(state).map(m=>({...m,partial:isPartialMove(state,m)}));
+   // Search complete peels first so if a zero-partial optimal path exists, we find it quickly.
+   moves.sort((a,b)=>(a.partial?1:0)-(b.partial?1:0));
 
-   // Prefer partial moves during search only as a tie-break; solution still
-   // minimizes taps first.
-   moves.sort((a,b)=>{
-     if(a.partial!==b.partial)return a.partial?-1:1;
-     return 0;
-   });
-
-   let next=Infinity;
+   let next=Infinity,any=false;
    for(const m of moves){
      const child=applyMoveToState(state,m);
      path.push(m);
-     const r=dfs(child,g+1,bound,memo,path);
+     const r=searchDepth(child,g+1,bound,memo,path,partialCount+(m.partial?1:0),best);
      path.pop();
-     if(r.found)return r;
      if(r.aborted)return r;
+     if(r.found)any=true;
      if(r.next<next)next=r.next;
    }
-   return {found:false,next};
+   return {found:any,next};
  }
 
  while(bound<220){
+   explored=0;
+   const best={path:null,minPartial:Infinity};
    const memo=new Map();
-   const r=dfs(start,0,bound,memo,[]);
-   if(r.found)return {taps:r.cost,partial:r.partial,path:r.path};
+   const r=searchDepth(start,0,bound,memo,[],0,best);
+
+   if(best.path){
+     return {taps:best.path.length,minPartial:best.minPartial,path:best.path};
+   }
    if(r.aborted)break;
    if(!isFinite(r.next))break;
    bound=r.next;
  }
 
- // fallback greedy, with partial count
- let state=start,steps=0,partial=0,path=[],safety=600;
- while(!solvedState(state)&&safety--){
-   const moves=possibleMovesForState(state);
-   if(!moves.length)break;
-   let best=moves[0],bestScore=-1,bestPartial=false;
-   for(const m of moves){
-     const child=applyMoveToState(state,m);
-     const becameRemoved=!state[m.sid].removed&&child[m.sid].removed;
-     const isPartial=!child[m.sid].removed;
-     const score=(becameRemoved?10:0)+(isPartial?1.5:0);
-     if(score>bestScore){bestScore=score;best=m;bestPartial=isPartial}
-   }
-   state=applyMoveToState(state,best);
-   path.push({...best,partial:bestPartial});
-   if(bestPartial)partial++;
-   steps++;
- }
- return steps?{taps:steps,partial,path}:null;
+ return null;
 }
 
 function gradeForTaps(actual,opt){
@@ -491,8 +479,23 @@ function gradeForTaps(actual,opt){
  return 'Completed';
 }
 
+async function processTapQueue(){
+ if(animating || !tapQueue.length)return;
+ const item=tapQueue.shift();
+ if(item && !item.s.removed){
+   await peelByTap(item.s,item.t,item.iv);
+ }
+ if(tapQueue.length)processTapQueue();
+}
+
+function queueTap(target){
+ if(!target)return;
+ tapQueue.push(target);
+ processTapQueue();
+}
+
 async function peelByTap(s,t,iv){
- if(animating||s.removed)return;
+ if(s.removed)return;
  const a=peelAccess(s,t,iv);if(!a){if(navigator.vibrate)navigator.vibrate(4);return}
  if(Math.abs(a.to-a.from)<.002)return;
  animating=true;history.push(snapshot());tapCount++;
@@ -527,7 +530,7 @@ function render(updateStatus=true){
  if(updateStatus){
    const rem=strips.filter(s=>!s.removed).length,active=contacts.filter(contactActive).length;
    status.innerHTML=`<b>${rem} tape${rem===1?'':'s'} still present</b><br>${active} active overlap${active===1?'':'s'} · taps ${tapCount}${optimalTaps?' / best '+optimalTaps:''}`;
-   undoBtn.disabled=!history.length||animating;undoBtn.style.opacity=history.length&&!animating?1:.4;
+   undoBtn.disabled=!history.length||animating||tapQueue.length;undoBtn.style.opacity=history.length&&!animating&&!tapQueue.length?1:.4;
  }
 }
 function checkFinish(){
@@ -540,7 +543,7 @@ function checkFinish(){
 
 function build(){
  history=[];strips=[];contacts=[];animating=false;animVisual=null;pointers.clear();gesture=null;tapCandidate=null;
- tapCount=0;optimalTaps=null;optimalPartial=0;finish.classList.remove('show');
+ tapCount=0;optimalTaps=null;optimalPartial=0;tapQueue=[];finish.classList.remove('show');
 
  let solution=null;
  let attempt=0;
@@ -566,10 +569,10 @@ function build(){
 
    // Most-efficient play must contain several real partial peels.
    // This rejects "just keep taking the totally free tape" boards.
- }while((!solution || solution.partial<3) && attempt<45);
+ }while((!solution || solution.minPartial<3) && attempt<45);
 
  optimalTaps=solution?solution.taps:null;
- optimalPartial=solution?solution.partial:0;
+ optimalPartial=solution?solution.minPartial:0;
 
  strips.forEach(createEls);
  fitWorld();
@@ -581,14 +584,14 @@ function build(){
 }
 
 viewport.addEventListener('pointerdown',e=>{
- if(animating)return;e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ e.preventDefault();viewport.setPointerCapture?.(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  const wp=screenToWorld(e.clientX,e.clientY);
  if(pointers.size===1){tapCandidate={id:e.pointerId,startX:e.clientX,startY:e.clientY,world:wp,moved:false};gesture={type:'pan',startX:e.clientX,startY:e.clientY,startTx:view.tx,startTy:view.ty}}
  else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy),cx=(ps[0].x+ps[1].x)/2,cy=(ps[0].y+ps[1].y)/2;
  gesture={type:'pinch',startDist:dist,startScale:view.scale,cx,cy,worldCenter:screenToWorld(cx,cy)}}
 },{passive:false});
 viewport.addEventListener('pointermove',e=>{
- if(!pointers.has(e.pointerId)||animating)return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(!pointers.has(e.pointerId))return;e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
  if(tapCandidate&&e.pointerId===tapCandidate.id&&hypot(e.clientX-tapCandidate.startX,e.clientY-tapCandidate.startY)>8)tapCandidate.moved=true;
  if(pointers.size===1&&gesture?.type==='pan'&&tapCandidate?.moved){const p=[...pointers.values()][0];view.tx=gesture.startTx+p.x-gesture.startX;view.ty=gesture.startTy+p.y-gesture.startY;applyView()}
  else if(pointers.size===2){tapCandidate=null;const ps=[...pointers.values()],dx=ps[1].x-ps[0].x,dy=ps[1].y-ps[0].y,dist=hypot(dx,dy);
@@ -598,7 +601,7 @@ viewport.addEventListener('pointermove',e=>{
 },{passive:false});
 async function endPointer(e){
  if(!pointers.has(e.pointerId))return;const cand=tapCandidate&&tapCandidate.id===e.pointerId?{...tapCandidate}:null;pointers.delete(e.pointerId);
- if(cand&&!cand.moved&&pointers.size===0&&!animating){const target=pickTape(cand.world);if(target)await peelByTap(target.s,target.t,target.iv)}
+ if(cand&&!cand.moved&&pointers.size===0&&!animating){const target=pickTape(cand.world);if(target)queueTap(target)}
  if(pointers.size===1){const p=[...pointers.values()][0];gesture={type:'pan',startX:p.x,startY:p.y,startTx:view.tx,startTy:view.ty}}else if(!pointers.size)gesture=null;
  tapCandidate=null;
 }
