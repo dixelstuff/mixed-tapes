@@ -3,42 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Bauhaus Poster Flush Centre</title>
+<title>Growing Paint — Bauhaus Portrait Layout</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif}
 #app{height:100%;display:flex;flex-direction:column;background:#f4eee2;color:#111}
 #hud{
-  flex:0 0 104px;
+  flex:0 0 132px;
   display:grid;
-  grid-template-columns:1.25fr .85fr .85fr;
-  align-items:center;
-  gap:24px;
-  padding:0 30px;
+  grid-template-columns:1.35fr .82fr .72fr;
+  align-items:end;
+  gap:20px;
+  padding:22px 28px 18px;
   background:#f4eee2;
 }
 .metric{min-width:0}
-.label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#222;margin-bottom:5px}
-.value{font-size:34px;line-height:.95;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-#level .value{font-size:34px;letter-spacing:.02em;color:#111}
-#level .label{font-size:12px;letter-spacing:.16em;color:#e45437;margin-top:7px;margin-bottom:0}
-#wrap{position:relative;flex:1;overflow:hidden;background:#f4eee2;touch-action:none}
+.label{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:800;color:#222;margin-bottom:5px
+}
+.value{
+  font-size:32px;line-height:.95;font-weight:900;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums
+}
+#level .value{font-size:36px;letter-spacing:.015em;color:#111}
+#level .label{
+  font-size:11px;letter-spacing:.18em;color:#e45437;
+  margin-top:8px;margin-bottom:0
+}
+#wrap{
+  position:relative;
+  flex:1 1 auto;
+  overflow:hidden;
+  background:#f4eee2;
+  touch-action:none;
+}
 #paint{position:absolute;inset:0;width:100%;height:100%;display:block}
 #vector{position:absolute;pointer-events:none}
 #vector svg{display:block;width:100%;height:100%;overflow:visible}
+
+/* reserve the button zone even before the level is finished */
 #footer{
-  flex:0 0 72px;
+  flex:0 0 86px;
   display:flex;align-items:center;justify-content:center;
   background:#f4eee2;
   visibility:hidden;
 }
 #footer.show{visibility:visible}
 #retry{
-  min-width:220px;border:0;border-radius:8px;background:#111;color:#fff;
-  padding:14px 24px;font-size:15px;font-weight:900;letter-spacing:.13em;text-transform:uppercase
+  min-width:230px;border:0;border-radius:8px;background:#111;color:#fff;
+  padding:14px 26px;font-size:15px;font-weight:900;
+  letter-spacing:.13em;text-transform:uppercase
 }
+
+/* small permanent footer reserve for future navigation / branding */
+#futureFooter{
+  flex:0 0 26px;
+  background:#f4eee2;
+}
+
 @media(max-width:560px){
-  #hud{padding:0 16px;gap:10px;grid-template-columns:1.15fr .85fr .8fr}
+  #hud{
+    flex-basis:122px;
+    padding:18px 16px 16px;
+    gap:10px;
+    grid-template-columns:1.28fr .82fr .70fr;
+  }
+  .label{font-size:9px}
+  .value{font-size:25px}
+  #level .value{font-size:29px}
+  #level .label{font-size:9px}
+  #footer{flex-basis:80px}
+  #futureFooter{flex-basis:20px}
+}
   .label{font-size:9px}.value{font-size:25px}
   #level .value{font-size:26px}#level .label{font-size:9px}
 }
@@ -64,16 +101,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
   <div id="wrap">
     <canvas id="paint"></canvas>
     <div id="vector">
-      <svg viewBox="0 0 900 1180" preserveAspectRatio="none" aria-hidden="true">
-<!-- shaped pure-black non-fillable block -->
-        <path d="M700 160 H860 V560
-                 C834 525 805 500 770 480
-                 C730 458 700 438 700 398
-                 V160 Z"
-              fill="#000"
-              stroke="#fff"
-              stroke-width="10"
-              stroke-linejoin="round"/>
+      <svg viewBox="0 125 900 1015" preserveAspectRatio="none" aria-hidden="true">
 
         <!-- Interior dividers are split into real path segments.
              There is NO mask and therefore no residual white nib at any gate. -->
@@ -81,26 +109,36 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
            stroke-linecap="butt" stroke-linejoin="miter">
           <!-- mustard / teal -->
           <path d="M330.00 160.00 C366.19 211.70 390.35 282.12 394.89 356.04"/>
-          <path d="M395.63 386.02 C394.92 445.67 381.01 506.25 350.00 560.00"/>
+          <path d="M395.63 386.02 C394.92 445.67 381.01 506.25 330.00 625.00"/>
 
           <!-- teal / blue -->
-          <path d="M700.00 430.00 C673.27 441.14 642.57 457.24 611.44 476.53"/>
-          <path d="M582.94 495.02 C553.75 514.82 525.12 536.97 500.00 560.00"/>
+          <path d="M735.00 405.00 C690.00 430.00 646.00 455.00 611.44 476.53"/>
+          <path d="M582.94 495.02 C553.75 514.82 510.00 548.00 445.00 620.00"/>
 
-          <!-- blue / pink: double gate with short solid bridge -->
-          <path d="M430 650 L515 730 L579.03 762.93"/>
-          <path d="M600.37 773.91 L607.49 777.56"/>
-          <path d="M628.83 788.54 L690 820 V900 H760 V1080"/>
+          <!-- blue / pink: single peripheral gate -->
+          <path d="M410 670 L515 730 L690 820 V900 H760 V970"/>
+          <path d="M760 1008 V1080"/>
 
           <!-- pink / coral: one exact slot in the diagonal tooth wall -->
-          <path d="M430 650 L360 745 L330 800 L380 840 L374.58 852.04"/>
+          <path d="M410 670 L360 745 L330 800 L380 840 L374.58 852.04"/>
           <path d="M356.53 892.16 L335 940 L260 920 L220 1080"/>
 
           <!-- coral / mustard -->
           <path d="M40.00 740.00 C89.54 737.75 134.02 731.44 174.79 719.70"/>
-          <path d="M210.80 707.53 C246.28 693.63 278.99 674.80 310.00 650.00 L430 650"/>
+          <path d="M210.80 707.53 C246.28 693.63 278.99 674.80 330.00 635.00"/>
         </g>
 
+
+        <!-- pure-black prefilled element; drawn after separators so its white
+             outline masks divider overshoot and guarantees a seamless junction -->
+        <path d="M700 160 H860 V560
+                 C834 525 805 500 770 480
+                 C730 458 700 438 700 398
+                 V160 Z"
+              fill="#000"
+              stroke="#fff"
+              stroke-width="12"
+              stroke-linejoin="round"/>
 
         <!-- pure-white non-fillable centre -->
         <circle cx="430" cy="650" r="120" fill="#fff"/>
@@ -114,12 +152,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
   <div id="footer">
     <button id="retry">RETRY LEVEL</button>
   </div>
+  <div id="futureFooter"></div>
 </div>
 
 <script>
 (()=>{
 const TARGET=96;
 const WORLD_W=900,WORLD_H=1180;
+const VIEW_Y=125, VIEW_H=1015;
 const MW=600,MH=787;
 const PAGE=[244,238,226];
 const PLAY=[238,230,216];
@@ -128,8 +168,10 @@ const REGION='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAMTCAYAAAB9jmnH
 const GAPS=[
   {a:1,b:2,x:395.53,y:371.00,w:30,h:28,angle:88.57},
   {a:2,b:3,x:597.19,y:485.57,w:34,h:28,angle:147.03},
-  {a:3,b:5,x:589.70,y:768.42,w:24,h:24,angle:27.22},
-  {a:3,b:5,x:618.16,y:783.05,w:24,h:24,angle:27.22},
+
+  // single blue/pink gate deliberately moved well toward the periphery
+  {a:3,b:5,x:760.00,y:989.00,w:38,h:30,angle:90.00},
+
   {a:5,b:4,x:365.56,y:872.10,w:44,h:30,angle:114.23},
   {a:4,b:1,x:193.03,y:714.00,w:38,h:28,angle:-18.67}
 ];
@@ -343,14 +385,27 @@ function initSim(){
 }
 
 function resize(){
-  const r=wrap.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);
+  const r=wrap.getBoundingClientRect();
+  const dpr=Math.min(2,devicePixelRatio||1);
+
   displayW=Math.round(r.width*dpr);
   displayH=Math.round(r.height*dpr);
-  paint.width=displayW;paint.height=displayH;
+  paint.width=displayW;
+  paint.height=displayH;
 
-  const scale=Math.min(displayW/(WORLD_W+36),displayH/(WORLD_H+36));
-  DW=WORLD_W*scale;DH=WORLD_H*scale;
-  DX=(displayW-DW)/2;DY=(displayH-DH)/2;
+  // Portrait composition: scale primarily from width, then clamp to available
+  // height. The play board is deliberately top-biased instead of vertically
+  // centred, leaving breathing room below for the result button/footer.
+  const sidePad=22*dpr;
+  const topPad=8*dpr;
+  const maxW=displayW-sidePad*2;
+  const maxH=displayH-topPad-8*dpr;
+  const scale=Math.min(maxW/WORLD_W, maxH/VIEW_H);
+
+  DW=WORLD_W*scale;
+  DH=VIEW_H*scale;
+  DX=(displayW-DW)/2;
+  DY=topPad;
 
   vector.style.left=(DX/dpr)+'px';
   vector.style.top=(DY/dpr)+'px';
@@ -362,11 +417,20 @@ function resize(){
 
 function renderPaint(){
   sctx.putImageData(simImage,0,0);
+
   ctx.fillStyle=`rgb(${PAGE.join(',')})`;
   ctx.fillRect(0,0,displayW,displayH);
+
   ctx.imageSmoothingEnabled=true;
   ctx.imageSmoothingQuality='high';
-  ctx.drawImage(simCanvas,DX,DY,DW,DH);
+
+  const srcY=VIEW_Y/WORLD_H*MH;
+  const srcH=VIEW_H/WORLD_H*MH;
+  ctx.drawImage(
+    simCanvas,
+    0,srcY,MW,srcH,
+    DX,DY,DW,DH
+  );
 }
 
 function finishLevel(){
@@ -402,7 +466,10 @@ wrap.addEventListener('pointerdown',e=>{
   const r=wrap.getBoundingClientRect(),dpr=displayW/r.width;
   const px=(e.clientX-r.left)*dpr,py=(e.clientY-r.top)*dpr;
   if(px<DX||px>=DX+DW||py<DY||py>=DY+DH)return;
-  startFill((px-DX)/DW*MW,(py-DY)/DH*MH);
+  const mx=(px-DX)/DW*MW;
+  const worldY=VIEW_Y + ((py-DY)/DH)*VIEW_H;
+  const my=worldY/WORLD_H*MH;
+  startFill(mx,my);
 },{passive:false});
 
 retry.onclick=reset;
