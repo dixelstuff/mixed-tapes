@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Bauhaus Poster</title>
+<title>Growing Paint — Bauhaus Poster Flush Centre</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif}
@@ -20,8 +20,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
 .metric{min-width:0}
 .label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#222;margin-bottom:5px}
 .value{font-size:34px;line-height:.95;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-#level .label{font-size:13px;letter-spacing:.09em}
-#level .value{font-size:22px;letter-spacing:.14em;color:#e45437}
+#level .value{font-size:34px;letter-spacing:.02em;color:#111}
+#level .label{font-size:12px;letter-spacing:.16em;color:#e45437;margin-top:7px;margin-bottom:0}
 #wrap{position:relative;flex:1;overflow:hidden;background:#f4eee2;touch-action:none}
 #paint{position:absolute;inset:0;width:100%;height:100%;display:block}
 #vector{position:absolute;pointer-events:none}
@@ -40,7 +40,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
 @media(max-width:560px){
   #hud{padding:0 16px;gap:10px;grid-template-columns:1.15fr .85fr .8fr}
   .label{font-size:9px}.value{font-size:25px}
-  #level .label{font-size:10px}#level .value{font-size:17px}
+  #level .value{font-size:26px}#level .label{font-size:9px}
 }
 </style>
 </head>
@@ -48,8 +48,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
 <div id="app">
   <div id="hud">
     <div class="metric" id="level">
-      <div class="label">LEVEL 37</div>
-      <div class="value">FIVE ZONES</div>
+      <div class="value">LEVEL 37</div>
+      <div class="label sublevel">FIVE ZONES</div>
     </div>
     <div class="metric">
       <div class="label" id="accuracyLabel">ACCURACY</div>
@@ -65,33 +65,42 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d8d3c9;fon
     <canvas id="paint"></canvas>
     <div id="vector">
       <svg viewBox="0 0 900 1180" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <mask id="gapMask">
-            <rect width="900" height="1180" fill="white"/>
-            <circle cx="393" cy="371" r="11" fill="black"/>
-<circle cx="602" cy="493" r="15" fill="black"/>
-<circle cx="590" cy="767" r="10" fill="black"/>
-<circle cx="612" cy="782" r="10" fill="black"/>
-<circle cx="352" cy="866" r="22" fill="black"/>
-<circle cx="191" cy="708" r="17" fill="black"/>
-          </mask>
-        </defs>
-
-        <!-- shaped pure-black non-fillable block -->
+<!-- shaped pure-black non-fillable block -->
         <path d="M700 160 H860 V560
                  C834 525 805 500 770 480
                  C730 458 700 438 700 398
                  V160 Z"
-              fill="#000"/>
+              fill="#000"
+              stroke="#fff"
+              stroke-width="10"
+              stroke-linejoin="round"/>
 
-        <!-- all interior dividers are pure white -->
-        <g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" mask="url(#gapMask)">
-          <path d="M330 160 C400 260 425 430 350 560"/>
-          <path d="M700 430 C640 455 560 505 500 560"/>
-          <path d="M515 730 C585 760 640 790 690 820 V900 H760 V1080"/>
-          <path d="M360 745 L330 800 L380 840 L335 940 L260 920 L220 1080"/>
-          <path d="M40 740 C150 735 235 710 310 650"/>
+        <!-- Interior dividers are split into real path segments.
+             There is NO mask and therefore no residual white nib at any gate. -->
+        <g fill="none" stroke="#fff" stroke-width="10"
+           stroke-linecap="butt" stroke-linejoin="miter">
+          <!-- mustard / teal -->
+          <path d="M330.00 160.00 C366.19 211.70 390.35 282.12 394.89 356.04"/>
+          <path d="M395.63 386.02 C394.92 445.67 381.01 506.25 350.00 560.00"/>
+
+          <!-- teal / blue -->
+          <path d="M700.00 430.00 C673.27 441.14 642.57 457.24 611.44 476.53"/>
+          <path d="M582.94 495.02 C553.75 514.82 525.12 536.97 500.00 560.00"/>
+
+          <!-- blue / pink: double gate with short solid bridge -->
+          <path d="M430 650 L515 730 L579.03 762.93"/>
+          <path d="M600.37 773.91 L607.49 777.56"/>
+          <path d="M628.83 788.54 L690 820 V900 H760 V1080"/>
+
+          <!-- pink / coral: one exact slot in the diagonal tooth wall -->
+          <path d="M430 650 L360 745 L330 800 L380 840 L374.58 852.04"/>
+          <path d="M356.53 892.16 L335 940 L260 920 L220 1080"/>
+
+          <!-- coral / mustard -->
+          <path d="M40.00 740.00 C89.54 737.75 134.02 731.44 174.79 719.70"/>
+          <path d="M210.80 707.53 C246.28 693.63 278.99 674.80 310.00 650.00 L430 650"/>
         </g>
+
 
         <!-- pure-white non-fillable centre -->
         <circle cx="430" cy="650" r="120" fill="#fff"/>
@@ -116,7 +125,14 @@ const PAGE=[244,238,226];
 const PLAY=[238,230,216];
 const COLORS=[null,'#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f'];
 const REGION='data:image/png;base64,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';
-const GAPS=[{a:1,b:2,x:393,y:371,r:11},{a:2,b:3,x:602,y:493,r:15},{a:3,b:5,x:590,y:767,r:10},{a:3,b:5,x:612,y:782,r:10},{a:5,b:4,x:352,y:866,r:22},{a:4,b:1,x:191,y:708,r:17}];
+const GAPS=[
+  {a:1,b:2,x:395.53,y:371.00,w:30,h:28,angle:88.57},
+  {a:2,b:3,x:597.19,y:485.57,w:34,h:28,angle:147.03},
+  {a:3,b:5,x:589.70,y:768.42,w:24,h:24,angle:27.22},
+  {a:3,b:5,x:618.16,y:783.05,w:24,h:24,angle:27.22},
+  {a:5,b:4,x:365.56,y:872.10,w:44,h:30,angle:114.23},
+  {a:4,b:1,x:193.03,y:714.00,w:38,h:28,angle:-18.67}
+];
 
 const wrap=document.getElementById('wrap');
 const paint=document.getElementById('paint');
@@ -151,10 +167,19 @@ async function loadRegion(){
 function transitionAllowed(a,b,x,y){
   if(a===b)return true;
   if(!a||!b)return false;
+
   const wx=x*WORLD_W/MW,wy=y*WORLD_H/MH;
+
   for(const g of GAPS){
     if(!((g.a===a&&g.b===b)||(g.a===b&&g.b===a)))continue;
-    if(Math.hypot(wx-g.x,wy-g.y)<=g.r+2)return true;
+
+    const rad=-g.angle*Math.PI/180;
+    const dx=wx-g.x,dy=wy-g.y;
+    const lx=dx*Math.cos(rad)-dy*Math.sin(rad);
+    const ly=dx*Math.sin(rad)+dy*Math.cos(rad);
+
+    // Small tolerance so the physical opening matches the visible slot cleanly.
+    if(Math.abs(lx)<=g.w/2+2 && Math.abs(ly)<=g.h/2+2)return true;
   }
   return false;
 }
