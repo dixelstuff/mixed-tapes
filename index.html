@@ -352,6 +352,192 @@ function labelNearPoint(labels,GW,GH,sx,sy,p,maxR=28){
   }
   return 0;
 }
+
+/* v21 runtime geometry override */
+function rotateLocal(x,y,o){const a=rad(o.rotation||0),c=Math.cos(a),s=Math.sin(a);return{x:o.x+x*c-y*s,y:o.y+x*s+y*c}}
+function borderAttachment(p,b){
+  const ds=[
+    {edge:'left',d:Math.abs(p.x-b.x),t:(p.y-b.y)/b.h},
+    {edge:'right',d:Math.abs(p.x-(b.x+b.w)),t:(p.y-b.y)/b.h},
+    {edge:'top',d:Math.abs(p.y-b.y),t:(p.x-b.x)/b.w},
+    {edge:'bottom',d:Math.abs(p.y-(b.y+b.h)),t:(p.x-b.x)/b.w}
+  ].sort((a,b)=>a.d-b.d);
+  return{type:'border',edge:ds[0].edge,t:clamp(ds[0].t,0,1)}
+}
+function pointFromBorderAttachment(a,b){
+  if(a.edge==='left')return{x:b.x,y:b.y+b.h*a.t};
+  if(a.edge==='right')return{x:b.x+b.w,y:b.y+b.h*a.t};
+  if(a.edge==='top')return{x:b.x+b.w*a.t,y:b.y};
+  return{x:b.x+b.w*a.t,y:b.y+b.h};
+}
+function dividerPath(points){
+  if(!points.length)return'';
+  let d=`M${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`,p0=points[0];
+  for(let i=1;i<points.length;i++){
+    const p=points[i];
+    if(i<points.length-1&&p.smooth){
+      const n=points[i+1],mx=(p.x+n.x)/2,my=(p.y+n.y)/2;
+      d+=` Q${p.x.toFixed(2)} ${p.y.toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
+      p0={x:mx,y:my};
+    }else{
+      d+=` L${p.x.toFixed(2)} ${p.y.toFixed(2)}`;p0=p;
+    }
+  }
+  return d;
+}
+function flattenDivider(d,step=2){
+  const pts=d.points;if(pts.length<2)return pts.map(p=>({x:p.x,y:p.y,seg:0}));
+  const out=[{x:pts[0].x,y:pts[0].y,seg:0}];let p0=pts[0];
+  for(let i=1;i<pts.length;i++){
+    const p=pts[i];
+    if(i<pts.length-1&&p.smooth){
+      const n=pts[i+1],end={x:(p.x+n.x)/2,y:(p.y+n.y)/2};
+      const approx=dist(p0,p)+dist(p,end),N=Math.max(4,Math.ceil(approx/step));
+      for(let k=1;k<=N;k++){const t=k/N,u=1-t;out.push({x:u*u*p0.x+2*u*t*p.x+t*t*end.x,y:u*u*p0.y+2*u*t*p.y+t*t*end.y,seg:i-1})}
+      p0=end;
+    }else{
+      const N=Math.max(1,Math.ceil(dist(p0,p)/step));
+      for(let k=1;k<=N;k++){const t=k/N;out.push({x:p0.x+(p.x-p0.x)*t,y:p0.y+(p.y-p0.y)*t,seg:i-1})}
+      p0=p;
+    }
+  }
+  return out;
+}
+function polyLength(poly){let L=0;for(let i=1;i<poly.length;i++)L+=dist(poly[i-1],poly[i]);return L}
+function polyMetrics(poly){const cum=new Float64Array(poly.length);let L=0;for(let i=1;i<poly.length;i++){L+=dist(poly[i-1],poly[i]);cum[i]=L}return{cum,L}}
+function pointAtDistance(poly,m,d){d=clamp(d,0,m.L);let lo=1,hi=poly.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(m.cum[mid]<d)lo=mid+1;else hi=mid}const i=lo,a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,t=(d-m.cum[i-1])/seg;return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}}
+function pointTangentAt(poly,t){const m=polyMetrics(poly),target=clamp(t,0,1)*m.L;let i=1;while(i<poly.length-1&&m.cum[i]<target)i++;const a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,s=(target-m.cum[i-1])/seg;return{p:{x:a.x+(b.x-a.x)*s,y:a.y+(b.y-a.y)*s},v:{x:b.x-a.x,y:b.y-a.y},length:m.L}}
+function nearestT(poly,p){const total=polyLength(poly)||1;let acc=0,best={d:1e99,t:0,p:poly[0]||p,seg:0};for(let i=1;i<poly.length;i++){const a=poly[i-1],b=poly[i],dx=b.x-a.x,dy=b.y-a.y,L=dist(a,b)||1,u=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(L*L),0,1),q={x:a.x+dx*u,y:a.y+dy*u},dd=(q.x-p.x)**2+(q.y-p.y)**2;if(dd<best.d)best={d:dd,t:(acc+L*u)/total,p:q,seg:b.seg??a.seg??0};acc+=L}return best}
+function gateIntervals(gates,L,closed=false){
+  const raw=[];
+  for(const g of gates||[]){
+    const c=clamp(g.t,0,1)*L,h=(g.w||28)/2;
+    if(!closed)raw.push([clamp(c-h,0,L),clamp(c+h,0,L)]);
+    else{
+      let a=c-h,b=c+h;
+      if(a<0){raw.push([0,b],[L+a,L])}
+      else if(b>L){raw.push([a,L],[0,b-L])}
+      else raw.push([a,b]);
+    }
+  }
+  raw.sort((a,b)=>a[0]-b[0]);const merged=[];
+  for(const iv of raw){if(!merged.length||iv[0]>merged[merged.length-1][1])merged.push(iv.slice());else merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],iv[1])}
+  return merged;
+}
+function subPolyline(poly,m,a,b){if(b-a<.01)return[];const out=[pointAtDistance(poly,m,a)];for(let i=1;i<poly.length-1;i++)if(m.cum[i]>a&&m.cum[i]<b)out.push({x:poly[i].x,y:poly[i].y});out.push(pointAtDistance(poly,m,b));return out}
+function visibleRunsFromPoly(poly,gates,closed=false){
+  const m=polyMetrics(poly),merged=gateIntervals(gates,m.L,closed),runs=[];let pos=0;
+  for(const[a,b]of merged){if(a>pos+.01)runs.push(subPolyline(poly,m,pos,a));pos=Math.max(pos,b)}
+  if(pos<m.L-.01)runs.push(subPolyline(poly,m,pos,m.L));
+  return runs.filter(r=>r.length>1)
+}
+function visibleDividerRuns(d){return visibleRunsFromPoly(flattenDivider(d,1.25),d.gates,false)}
+function runsPath(runs){let d='';for(const run of runs){d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;for(let i=1;i<run.length;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`}return d}
+function shapeBoundary(s,quality=160){
+  const pts=[],w=Math.max(20,s.w||120),h=Math.max(20,s.h||120),rx=w/2,ry=h/2,type=s.type||'circle';
+  if(type==='circle'){
+    const n=Math.max(64,quality);for(let i=0;i<n;i++){const a=i/n*Math.PI*2;pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
+  }else if(type==='semicircle'){
+    const n=Math.max(48,Math.round(quality*.7));
+    for(let i=0;i<=n;i++){const a=Math.PI+i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),h/2+h*Math.sin(a),s))}
+    pts.push(rotateLocal(-rx,h/2,s));
+  }else if(type==='quarter'){
+    const n=Math.max(36,Math.round(quality*.5)),corner={x:-rx,y:ry};
+    pts.push(rotateLocal(corner.x,corner.y,s));
+    for(let i=0;i<=n;i++){const a=-Math.PI/2+i/n*(Math.PI/2);pts.push(rotateLocal(corner.x+w*Math.cos(a),corner.y+h*Math.sin(a),s))}
+  }else if(type==='rectangle'){
+    pts.push(rotateLocal(-rx,-ry,s),rotateLocal(rx,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
+  }else if(type==='triangle'){
+    pts.push(rotateLocal(0,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
+  }else if(type==='star'){
+    const n=clamp(Math.round(s.starPoints||5),5,12),inner=.43;
+    for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,r=i%2?inner:1;pts.push(rotateLocal(rx*r*Math.cos(a),ry*r*Math.sin(a),s))}
+  }
+  return pts;
+}
+function shapeLoop(s,quality=200){const p=shapeBoundary(s,quality);return p.length?p.concat([{x:p[0].x,y:p[0].y}]):[]}
+function shapePath(s){const p=shapeBoundary(s,180);if(!p.length)return'';let d=`M${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;for(let i=1;i<p.length;i++)d+=` L${p[i].x.toFixed(2)} ${p[i].y.toFixed(2)}`;return d+' Z'}
+function visibleShapeRuns(s){return visibleRunsFromPoly(shapeLoop(s,260),s.gates||[],true)}
+function shapePointAt(si,t){const loop=shapeLoop(level.shapes[si],220);return loop.length?pointTangentAt(loop,t).p:null}
+function dividerRanks(){
+  const rank=new Array(level.dividers.length).fill(0);
+  for(let k=0;k<level.dividers.length*2;k++){
+    let changed=false;
+    for(let child=0;child<level.dividers.length;child++)for(const p of level.dividers[child].points){
+      const a=p.attach;if(a?.type==='divider'&&a.divider!==child&&rank[a.divider]<=rank[child]){rank[a.divider]=rank[child]+1;changed=true}
+    }
+    if(!changed)break;
+  }
+  return[...level.dividers.keys()].sort((a,b)=>rank[a]-rank[b]);
+}
+function resolveAttachments(){
+  ensureLevel();
+  for(let pass=0;pass<level.dividers.length+3;pass++){
+    for(let di=0;di<level.dividers.length;di++){
+      const d=level.dividers[di];
+      for(const pi of[0,d.points.length-1]){
+        const p=d.points[pi],a=p.attach;if(!a)continue;
+        if(a.type==='border'){const q=pointFromBorderAttachment(a,level.board);p.x=q.x;p.y=q.y}
+        else if(a.type==='divider'&&a.divider!==di&&level.dividers[a.divider]){const q=pointTangentAt(flattenDivider(level.dividers[a.divider],2),a.t).p;p.x=q.x;p.y=q.y}
+        else if(a.type==='shape'&&level.shapes[a.shape]){const q=shapePointAt(a.shape,a.t);if(q){p.x=q.x;p.y=q.y}else p.attach=null}
+        else if((a.type==='white'||a.type==='circle')&&level.shapes[a.node||0]){a.type='shape';a.shape=a.node||0;delete a.node;const q=shapePointAt(a.shape,a.t||0);if(q){p.x=q.x;p.y=q.y}}
+        else p.attach=null;
+      }
+    }
+  }
+}
+function labelNearPoint(labels,GW,GH,sx,sy,p,maxWorld=30){
+  const cx=Math.round(p.x*sx),cy=Math.round(p.y*sy),maxR=Math.max(3,Math.round(maxWorld*Math.max(sx,sy)));
+  for(let r=0;r<=maxR;r++){
+    for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){
+      if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;
+      const x=cx+xx,y=cy+yy;if(x<0||y<0||x>=GW||y>=GH)continue;
+      const z=labels[y*GW+x];if(z>0)return z;
+    }
+  }
+  return 0;
+}
+function sampleGate(labels,GW,GH,sx,sy,pt){
+  const L=Math.hypot(pt.v.x,pt.v.y)||1,nx=-pt.v.y/L,ny=pt.v.x/L;
+  let a=0,b=0;
+  for(const off of[8,11,14,18,22,27,34]){
+    const p1={x:pt.p.x+nx*off,y:pt.p.y+ny*off},p2={x:pt.p.x-nx*off,y:pt.p.y-ny*off};
+    const x1=Math.round(p1.x*sx),y1=Math.round(p1.y*sy),x2=Math.round(p2.x*sx),y2=Math.round(p2.y*sy);
+    if(x1>=0&&y1>=0&&x1<GW&&y1<GH)a=labels[y1*GW+x1];
+    if(x2>=0&&y2>=0&&x2<GW&&y2<GH)b=labels[y2*GW+x2];
+    if(a&&b&&a!==b)break;
+  }
+  return{a,b}
+}
+function drawShapeToCanvas(x,s,fill,stroke,width=10){
+  const p=shapeBoundary(s,220);if(!p.length)return;
+  x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.closePath();
+  if(fill){x.fillStyle=fill;x.fill()}
+  if(stroke){x.strokeStyle=stroke;x.lineWidth=width;x.lineJoin='round';x.lineCap='butt';x.stroke()}
+}
+function syncRegionStyles(labels,sizes,comp,GW,GH,sx,sy){
+  ensureLevel();
+  const sxSum=new Float64Array(comp+1),sySum=new Float64Array(comp+1),ct=new Uint32Array(comp+1);
+  for(let i=0;i<labels.length;i++){const z=labels[i];if(!z)continue;sxSum[z]+=i%GW;sySum[z]+=(i/GW)|0;ct[z]++}
+  const byLabel=new Map(),used=new Set();
+  for(let si=0;si<level.regionStyles.length;si++){
+    const st=level.regionStyles[si];if(!st?.seed)continue;
+    const lab=labelNearPoint(labels,GW,GH,sx,sy,st.seed,10);
+    if(lab&&!byLabel.has(lab)){byLabel.set(lab,st);used.add(si)}
+  }
+  const next=[],styleByLabel={},styleIndexByLabel={};
+  for(let id=1;id<=comp;id++){
+    let st=byLabel.get(id);
+    if(!st){
+      const seed=ct[id]?{x:(sxSum[id]/ct[id])/sx,y:(sySum[id]/ct[id])/sy}:{x:level.board.x+20,y:level.board.y+20};
+      st={seed,paint:PAINTS[(id-1)%PAINTS.length]};
+    }
+    if(!st.paint)st.paint=PAINTS[(id-1)%PAINTS.length];
+    styleIndexByLabel[id]=next.length;styleByLabel[id]=st;next.push(st);
+  }
+  level.regionStyles=next;
+  return{styleByLabel,styleIndexByLabel};
+}
 function compileLevel(highRes=false){
   ensureLevel();resolveAttachments();
   const GW=highRes?SIM_W:600,GH=highRes?SIM_H:750,sx=GW/W,sy=GH/H,b=level.board;
