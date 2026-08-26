@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v25</title>
+<title>Growing Paint — Phone Playtest · 9 Levels · Flow v26</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -78,7 +78,7 @@ const clone=o=>JSON.parse(JSON.stringify(o)), clamp=(v,a,b)=>Math.max(a,Math.min
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE'][n]||String(n));
 let mode='edit',selected={type:'divider',d:0},compiled=null,previewCanvas=null,history=[],future=[],drag=null,suppressLineTapUntil=0,lastPointTap={key:'',time:0};
-let owner=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0;
+let owner=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0;
 let orientationBlocked=false,orientationPauseStart=0;const playPointers=new Map();let playGesture=false;
 
 function ensureLevel(){
@@ -713,7 +713,7 @@ function renderInspector(){
 function drawPaint(){const dx=+paint.dataset.dx||0,dy=+paint.dataset.dy||0,dw=+paint.dataset.dw||paint.width,dh=+paint.dataset.dh||paint.height;ctx.fillStyle=level.palette.outside;ctx.fillRect(0,0,paint.width,paint.height);const src=(mode==='play'&&simCanvas)?simCanvas:previewCanvas;if(src){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(src,dx,dy,dw,dh)}}
 function renderAll(){renderVector();renderHeader();drawPaint()}
 function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}else{mode='edit';owner=null;simCanvas=null;simImage=null;finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}$('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()}
-function resetFill(){cancelPlayPointers();if(!compiled?.valid)return;buildWallDistance();endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;const{GW,GH,regionMap}=compiled;owner=new Int16Array(GW*GH);owner.fill(-99);simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));finished=false;clock0=performance.now()/1000;const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;for(let i=0;i<regionMap.length;i++){const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255}sctx.putImageData(simImage,0,0);$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint()}
+function resetFill(){cancelPlayPointers();if(!compiled?.valid)return;buildWallDistance();endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;const{GW,GH,regionMap}=compiled;owner=new Int16Array(GW*GH);owner.fill(-99);simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));finished=false;clock0=performance.now()/1000;const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;for(let i=0;i<regionMap.length;i++){const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255}sctx.putImageData(simImage,0,0);$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint()}
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
 const dirs=[],seenDir=new Set();function gcd(a,b){while(b){const t=a%b;a=b;b=t}return Math.abs(a)||1}const DIR_R=7;for(let dy=-DIR_R;dy<=DIR_R;dy++)for(let dx=-DIR_R;dx<=DIR_R;dx++){if((!dx&&!dy)||Math.hypot(dx,dy)>DIR_R+.001)continue;const g=gcd(Math.abs(dx),Math.abs(dy)),k=(dx/g)+','+(dy/g);if(seenDir.has(k))continue;seenDir.add(k);dirs.push([dx,dy,Math.hypot(dx,dy)])}
 const SPEED=16,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18,best=(s,i)=>s.best.get(i)??Infinity;
@@ -964,30 +964,47 @@ function hasPendingPortals(){
   return portalPairState.some(st=>st&&st.locked&&!st.fired&&!st.cancelled);
 }
 function accuracy(){let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w)continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a}
+function advanceSmoothly(targetNow){
+  // Never let accelerated playback consume a large block of simulation time in
+  // one propagation pass. Small internal steps preserve the same event ordering
+  // but let confinement, wall-drag and competing fronts evolve progressively.
+  if(targetNow<simAdvanceCursor){simAdvanceCursor=targetNow;return}
+  const MAX_STEP=.018; // ~18 ms of simulation time per internal step
+  while(simAdvanceCursor+MAX_STEP<targetNow){
+    simAdvanceCursor+=MAX_STEP;
+    advance(simAdvanceCursor);
+  }
+  simAdvanceCursor=targetNow;
+  advance(simAdvanceCursor);
+}
 function loop(ms){
   if(mode==='play'&&owner&&!orientationBlocked){
     const baseNow=ms/1000-clock0;
     let all=true;
     for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}
 
-    let simNow=baseNow;
+    let simNow=baseNow,warp=1;
     if(all){
-      if(endBoostStart<0){endBoostStart=baseNow;endBoostLast=baseNow;endBoostExtra=0}
-      const dt=Math.max(0,baseNow-endBoostLast);
+      if(endBoostStart<0){endBoostStart=baseNow;endBoostLast=baseNow;endBoostExtra=0;simAdvanceCursor=baseNow}
+      // Clamp the real-time increment used by the speed ramp so a dropped frame
+      // cannot create a single giant simulation jump.
+      const dt=Math.min(.033,Math.max(0,baseNow-endBoostLast));
       const age=Math.max(0,baseNow-endBoostStart);
-      // 1.0x immediately after the final tap, easing toward 2.6x over 5.5 sec.
-      // This changes only playback speed: every front and portal clock advances
-      // together, so the competitive geometry is preserved.
-      const warp=1+1.6*smoothstep01(clamp(age/5.5,0,1));
+      warp=1+1.6*smoothstep01(clamp(age/5.5,0,1));
       endBoostExtra+=dt*(warp-1);
       endBoostLast=baseNow;
       simNow=baseNow+endBoostExtra;
     }else{
       endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;
+      simAdvanceCursor=baseNow;
     }
 
-    advance(simNow);
-    if(ms-lastPaint>28){lastPaint=ms;sctx.putImageData(simImage,0,0);drawPaint()}
+    advanceSmoothly(simNow);
+
+    // During accelerated playback draw every animation frame rather than the old
+    // ~35 fps throttle. At normal speed retain the lighter throttle.
+    const shouldDraw=all ? true : (ms-lastPaint>28);
+    if(shouldDraw){lastPaint=ms;sctx.putImageData(simImage,0,0);drawPaint()}
     if(ms-lastStats>90){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!finished){
       finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
