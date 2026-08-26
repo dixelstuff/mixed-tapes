@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v33 MSFMM</title>
+<title>Growing Paint — Phone Playtest · 9 Levels · Flow v34 MSFMM</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -69,7 +69,7 @@ button.primary,button.active{background:#fff;color:#10283a;border-color:#fff}but
 </div>
 <script>
 (()=>{
-const W=800,H=1000,SIM_W=960,SIM_H=1200;
+const W=800,H=1000,SIM_W=1200,SIM_H=1500;
 const $=id=>document.getElementById(id);
 const paint=$('paint'),ctx=paint.getContext('2d',{alpha:false}),editorSvg=$('editorSvg'),vector=$('vector'),stage=$('stageWrap');
 const PAINTS=['#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f','#7b69a8','#d1844f'];
@@ -949,12 +949,39 @@ function relaxAround(i,sid){
 }
 function startFill(gx,gy){
   if(!owner)return;
-  const{GW,GH,regionMap,visibility}=compiled,x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];
+  const{GW,GH,regionMap,visibility,wallDistance}=compiled;
+  const x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];
   if(id<=0||visibility[i]===0||started[id]||owner[i]!==-1)return;
+
   started[id]=1;
   const sid=sources.length,now=performance.now()/1000-clock0,color=compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length];
   sources.push({id,rgb:hex(color)});
-  if(now<arrival[i]){
+
+  const worldPerCell=W/GW;
+  const openDist=(wallDistance?.[i]??0)*worldPerCell;
+  const cleanOpenSpace=openDist>=24&&portalSiphonFactor(i)>.999;
+
+  if(cleanOpenSpace){
+    // Seed the first 12 px with exact Euclidean arrival times from the literal tap
+    // point. This removes the tiny-grid "starburst" visible during the first few
+    // frames, then hands seamlessly to MSFMM once the spot is large enough.
+    const seedR=12,cellR=Math.ceil(seedR/worldPerCell)+1;
+    const x0=Math.max(0,x-cellR),x1=Math.min(GW-1,x+cellR);
+    const y0=Math.max(0,y-cellR),y1=Math.min(GH-1,y+cellR);
+    for(let yy=y0;yy<=y1;yy++)for(let xx=x0;xx<=x1;xx++){
+      const ii=yy*GW+xx;
+      if(regionMap[ii]!==id||owner[ii]!==-1)continue;
+      const dx=(xx+.5-gx)*worldPerCell,dy=(yy+.5-gy)*worldPerCell;
+      const d=Math.hypot(dx,dy);
+      if(d>seedR)continue;
+      const nt=now+d/SPEED;
+      if(nt+1e-7<arrival[ii]){
+        arrival[ii]=nt;trialSid[ii]=sid;speedField[ii]=1;portalLeakField[ii]=-1;
+        heapPush({i:ii,sid,t:nt});
+      }
+    }
+  }else{
+    // Near walls, gates or portals use the normal constrained solver immediately.
     arrival[i]=now;trialSid[i]=sid;speedField[i]=1;portalLeakField[i]=-1;
     heapPush({i,sid,t:now});
   }
