@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v30</title>
+<title>Growing Paint — Phone Playtest · 9 Levels · Flow v32 FMM</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -78,7 +78,7 @@ const clone=o=>JSON.parse(JSON.stringify(o)), clamp=(v,a,b)=>Math.max(a,Math.min
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE'][n]||String(n));
 let mode='edit',selected={type:'divider',d:0},compiled=null,previewCanvas=null,history=[],future=[],drag=null,suppressLineTapUntil=0,lastPointTap={key:'',time:0};
-let owner=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,displayCanvas=null,dctx=null,lastDisplayMs=0;
+let owner=null,arrival=null,trialSid=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1;
 let orientationBlocked=false,orientationPauseStart=0;const playPointers=new Map();let playGesture=false;
 
 function ensureLevel(){
@@ -710,46 +710,45 @@ function renderInspector(){
   const areas=$('areas');areas.innerHTML='';if(compiled)for(const r of compiled.regionAreas){const color=r.active?(level.palette.paints[(r.activeIndex-1)%level.palette.paints.length]||'#999'):level.palette.excluded,row=document.createElement('div');row.className='swatchRow';row.innerHTML=`<span class="swatch" style="background:${color}"></span><span><div class="bar"><i style="width:${Math.min(100,r.pct*2.2)}%"></i></div><div class="smallNote" style="margin-top:2px">${r.active?`Active ${r.activeIndex}`:'Excluded'} · Region ${r.id}</div></span><span class="pct">${r.pct.toFixed(1)}%</span>`;areas.appendChild(row)}
   const v=$('validation');if(!compiled)v.innerHTML='Validating…';else if(compiled.valid)v.innerHTML=`<div class="ok">✓ VALID LEVEL</div><div class="smallNote">${compiled.activeCount} active · ${compiled.excludedIds.length} excluded. Accuracy uses only visible painted active area.</div>`;else v.innerHTML=`<div class="bad">✕ INVALID</div>${compiled.errors.map(e=>`<div class="smallNote" style="margin-top:5px">${e}</div>`).join('')}`;$('playBtn').disabled=!compiled?.valid;
 }
-function updateDisplay(ms){
-  if(!simCanvas||!displayCanvas||!dctx)return;
-  const dt=Math.max(0,Math.min(.05,(ms-lastDisplayMs)/1000));
-  lastDisplayMs=ms;
-  const a=1-Math.exp(-dt/.050);
-  dctx.save();
-  dctx.globalAlpha=clamp(a,.12,1);
-  dctx.drawImage(simCanvas,0,0);
-  dctx.restore();
-}
 function drawPaint(){
   const dx=+paint.dataset.dx||0,dy=+paint.dataset.dy||0,dw=+paint.dataset.dw||paint.width,dh=+paint.dataset.dh||paint.height;
   ctx.fillStyle=level.palette.outside;
   ctx.fillRect(0,0,paint.width,paint.height);
-  const src=(mode==='play'&&displayCanvas)?displayCanvas:previewCanvas;
+  const src=(mode==='play'&&simCanvas)?simCanvas:previewCanvas;
   if(src){
     ctx.imageSmoothingEnabled=true;
     ctx.imageSmoothingQuality='high';
-    const canFilter=('filter' in ctx);
-    if(canFilter)ctx.filter='blur(0.45px)';
     ctx.drawImage(src,dx,dy,dw,dh);
-    if(canFilter)ctx.filter='none';
   }
 }
 function renderAll(){renderVector();renderHeader();drawPaint()}
-function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}else{mode='edit';owner=null;simCanvas=null;simImage=null;displayCanvas=null;dctx=null;finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}$('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()}
-function resetFill(){cancelPlayPointers();if(!compiled?.valid)return;buildWallDistance();endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;const{GW,GH,regionMap}=compiled;owner=new Int16Array(GW*GH);owner.fill(-99);simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);displayCanvas=document.createElement('canvas');displayCanvas.width=GW;displayCanvas.height=GH;dctx=displayCanvas.getContext('2d',{alpha:false});lastDisplayMs=performance.now();sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));finished=false;clock0=performance.now()/1000;const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;for(let i=0;i<regionMap.length;i++){const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255}sctx.putImageData(simImage,0,0);dctx.drawImage(simCanvas,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint()}
-function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
-const dirs=[];
-function gcd(a,b){while(b){const t=a%b;a=b;b=t}return Math.abs(a)||1}
-// Richer symmetric angular stencil. Using every primitive lattice direction
-// inside radius 6 gives 72 evenly paired directions without duplicate slopes.
-// This restores much rounder wavefronts while retaining the v28 efficiency work.
-const DIR_R=6;
-for(let dy=-DIR_R;dy<=DIR_R;dy++)for(let dx=-DIR_R;dx<=DIR_R;dx++){
-  if((!dx&&!dy)||Math.hypot(dx,dy)>DIR_R+.001)continue;
-  if(gcd(Math.abs(dx),Math.abs(dy))!==1)continue;
-  dirs.push([dx,dy,Math.hypot(dx,dy)]);
+function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}else{mode='edit';owner=null;simCanvas=null;simImage=null;finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}$('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()}
+function resetFill(){
+  cancelPlayPointers();if(!compiled?.valid)return;
+  buildWallDistance();endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;
+  const{GW,GH,regionMap}=compiled,N=GW*GH;
+  owner=new Int16Array(N);owner.fill(-99);
+  arrival=new Float32Array(N);arrival.fill(Infinity);
+  trialSid=new Int16Array(N);trialSid.fill(-1);
+  speedField=new Float32Array(N);speedField.fill(1);
+  portalLeakField=new Float32Array(N);portalLeakField.fill(-1);
+  simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);
+  sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);
+  portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));
+  finished=false;clock0=performance.now()/1000;
+  const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;
+  for(let i=0;i<N;i++){
+    const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;
+    if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;
+    simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
+  }
+  sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  $('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint();
 }
-const SPEED=16,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18,best=(s,i)=>s.best.get(i)??Infinity;
+function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
+function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
+
+const SPEED=16,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18;
 function smoothstep01(v){v=clamp(v,0,1);return v*v*(3-2*v)}
 function portalLeakFactor(d){
   if(d<=20)return 1;
@@ -773,24 +772,44 @@ function portalSiphonFactor(i){
   }
   return factor;
 }
-function filamentSurvives(i,dx,dy,sid){
-  if(!dx&&!dy)return true;
-  const{GW,GH,regionMap}=compiled,x=i%GW,y=(i/GW)|0,z=regionMap[i],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,maxCells=Math.max(2,Math.ceil(8/(W/GW)));
-  let n=false,p=false;
-  for(const sign of[-1,1])for(let r=1;r<=maxCells;r++){
-    const xx=Math.round(x+nx*r*sign),yy=Math.round(y+ny*r*sign);if(xx<0||yy<0||xx>=GW||yy>=GH)break;
-    const ni=yy*GW+xx;if(regionMap[ni]!==z)break;
-    if(owner[ni]>=0&&owner[ni]!==sid){if(sign<0)n=true;else p=true;break}
+function gateAllows(a,b,gx,gy){
+  if(a===b)return true;if(a<=0||b<=0)return false;
+  const wx=gx*W/compiled.GW,wy=gy*H/compiled.GH;
+  for(const g of compiled.gateInfos){
+    const aa=compiled.activeMap.get(g.a)||0,bb=compiled.activeMap.get(g.b)||0;
+    if(!((aa===a&&bb===b)||(aa===b&&bb===a)))continue;
+    const L=Math.hypot(g.v.x,g.v.y)||1,ux=g.v.x/L,uy=g.v.y/L,nx=-uy,ny=ux,ddx=wx-g.p.x,ddy=wy-g.p.y;
+    const effectiveHalf=Math.max(1,g.w/2-1.25);
+    if(Math.abs(ddx*ux+ddy*uy)<=effectiveHalf&&Math.abs(ddx*nx+ddy*ny)<=9.5)return true;
   }
-  return !(n&&p)
+  return false;
+}
+function stepAllowed(from,to){
+  const{GW,GH,regionMap}=compiled;
+  if(from<0||to<0||from>=regionMap.length||to>=regionMap.length)return false;
+  const a=regionMap[from],b=regionMap[to];if(a<=0||b<=0)return false;
+  const x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
+  if(Math.abs(x1-x0)+Math.abs(y1-y0)!==1)return false;
+  if(a===b)return true;
+  return gateAllows(a,b,(x0+x1)/2,(y0+y1)/2);
 }
 function buildWallDistance(){
   if(!compiled?.regionMap)return;
   const{GW,GH,regionMap}=compiled,N=GW*GH,INF=1e6,d=new Float32Array(N),SQ2=1.41421356;
-  for(let i=0;i<N;i++)d[i]=regionMap[i]<=0?0:INF;
-
-  // Two-pass chamfer distance transform: fast approximation to distance from
-  // each playable pixel to a divider, obstacle, excluded region or outer wall.
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
+    const i=y*GW+x,z=regionMap[i];
+    if(z<=0){d[i]=0;continue}
+    let wall=false;
+    if(x===0||y===0||x===GW-1||y===GH-1)wall=true;
+    if(!wall){
+      const ns=[i-1,i+1,i-GW,i+GW];
+      for(const ni of ns){
+        const zz=regionMap[ni];
+        if(zz<=0||(zz!==z&&!stepAllowed(i,ni))){wall=true;break}
+      }
+    }
+    d[i]=wall?0:INF;
+  }
   for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
     const i=y*GW+x;if(d[i]===0)continue;let v=d[i];
     if(x>0)v=Math.min(v,d[i-1]+1);
@@ -811,17 +830,18 @@ function buildWallDistance(){
 }
 function boundaryDragFactor(i){
   const d=compiled?.wallDistance;if(!d)return 1;
-  const worldDist=d[i]*(W/compiled.GW);
-  const reach=20;
+  const worldDist=d[i]*(W/compiled.GW),reach=20;
   if(worldDist>=reach)return 1;
   const q=1-clamp(worldDist/reach,0,1);
-  // A little "viscosity" against solid geometry. Strongest right beside a wall,
-  // smoothly disappearing into the body of the flow.
   return 1-.18*smoothstep01(q);
 }
-function confinementTarget(i,dx,dy){
+function confinementTarget(i,dx,dy,sid){
   if(!owner||(!dx&&!dy))return 1;
-  const{GW,GH,regionMap}=compiled,x=i%GW,y=(i/GW)|0,z=regionMap[i],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,worldPerCell=W/GW;
+  const{GW,GH,regionMap,wallDistance}=compiled,worldPerCell=W/GW;
+  // Most of a broad/open front is now O(1): if the nearest solid wall is already
+  // farther than half the confinement width, the corridor cannot be narrow.
+  if(wallDistance&&wallDistance[i]*worldPerCell>CONFINE_WIDE*.52)return 1;
+  const x=i%GW,y=(i/GW)|0,z=regionMap[i],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;
   const maxCells=Math.max(4,Math.ceil(CONFINE_WIDE/worldPerCell));
   function openDistance(sign){
     let last=0;
@@ -830,7 +850,9 @@ function confinementTarget(i,dx,dy){
       if(xx<0||yy<0||xx>=GW||yy>=GH)break;
       const ni=yy*GW+xx;
       if(regionMap[ni]!==z)break;
-      if(owner[ni]!==-1&&ni!==i)break;
+      // Same-colour paint is not a wall. Only competing paint can weakly pinch
+      // the channel; this removes noisy self-interaction across broad fronts.
+      if(owner[ni]>=0&&owner[ni]!==sid)break;
       last=r;
     }
     return last;
@@ -840,65 +862,71 @@ function confinementTarget(i,dx,dy){
   const q=1-(width-CONFINE_NARROW)/(CONFINE_WIDE-CONFINE_NARROW);
   return 1+(CONFINE_MAX-1)*smoothstep01(q);
 }
-function gateAllows(a,b,gx,gy){
-  if(a===b)return true;if(a<=0||b<=0)return false;
-  const wx=gx*W/compiled.GW,wy=gy*H/compiled.GH;
-  for(const g of compiled.gateInfos){
-    const aa=compiled.activeMap.get(g.a)||0,bb=compiled.activeMap.get(g.b)||0;
-    if(!((aa===a&&bb===b)||(aa===b&&bb===a)))continue;
-    const L=Math.hypot(g.v.x,g.v.y)||1,ux=g.v.x/L,uy=g.v.y/L,nx=-uy,ny=ux,ddx=wx-g.p.x,ddy=wy-g.p.y;
-    // Tiny player-side bias: propagation sees a gate about 2.5 px narrower than the
-    // visible opening, preventing sub-pixel/anti-aliased edge leaks that look sealed.
-    const effectiveHalf=Math.max(1,g.w/2-1.25);
-    if(Math.abs(ddx*ux+ddy*uy)<=effectiveHalf&&Math.abs(ddx*nx+ddy*ny)<=9.5)return true;
+function fmmCandidate(ni,sid){
+  const{GW,GH,regionMap}=compiled,x=ni%GW,y=(ni/GW)|0,s=sources[sid];
+  if(!s||owner[ni]!==-1||regionMap[ni]<=0)return null;
+
+  let ax=Infinity,ay=Infinity,parent=-1;
+  const consider=(j,axis)=>{
+    if(j<0||j>=owner.length||owner[j]!==sid||!stepAllowed(j,ni))return;
+    const t=arrival[j];
+    if(axis===0){if(t<ax)ax=t}else{if(t<ay)ay=t}
+    if(parent<0||t<arrival[parent])parent=j;
+  };
+  if(x>0)consider(ni-1,0);
+  if(x<GW-1)consider(ni+1,0);
+  if(y>0)consider(ni-GW,1);
+  if(y<GH-1)consider(ni+GW,1);
+  if(parent<0)return null;
+
+  const px=parent%GW,py=(parent/GW)|0,dx=x-px,dy=y-py,worldPerCell=W/GW;
+  const currentM=speedField[parent]||1,currentLeak=portalLeakField[parent];
+  let nextLeak=currentLeak,leakM=1;
+  if(currentLeak>=0){
+    if(regionMap[ni]===s.id)nextLeak=-1;
+    else{nextLeak=currentLeak+worldPerCell;leakM=portalLeakFactor(nextLeak)}
   }
-  return false;
+  const targetM=confinementTarget(parent,dx,dy,sid)*portalSiphonFactor(parent)*boundaryDragFactor(parent)*leakM;
+  const baseDt=worldPerCell/(SPEED*Math.max(.55,currentM));
+  const tau=targetM>currentM?ACCEL_TAU:DECEL_TAU;
+  const alpha=1-Math.exp(-baseDt/tau),nextM=currentM+(targetM-currentM)*alpha;
+  const h=worldPerCell/(SPEED*Math.max(.55,(currentM+nextM)*.5));
+
+  let nt;
+  if(Number.isFinite(ax)&&Number.isFinite(ay)){
+    const lo=Math.min(ax,ay),hi=Math.max(ax,ay),diff=hi-lo;
+    if(diff>=h)nt=lo+h;
+    else nt=(ax+ay+Math.sqrt(Math.max(0,2*h*h-diff*diff)))*.5;
+  }else nt=(Number.isFinite(ax)?ax:ay)+h;
+
+  return{t:nt,speed:nextM,leak:nextLeak};
 }
-function clearSegment(x0,y0,x1,y1){
-  const{GW,GH,regionMap}=compiled,dx=x1-x0,dy=y1-y0,n=Math.max(Math.abs(dx),Math.abs(dy));
-  let px=x0,py=y0,pr=regionMap[y0*GW+x0];if(pr<=0)return false;
-  for(let q=1;q<=n;q++){
-    const x=Math.round(x0+dx*q/n),y=Math.round(y0+dy*q/n);
-    if(x<0||y<0||x>=GW||y>=GH)return false;
-    const r=regionMap[y*GW+x];if(r<=0)return false;
-    if(r!==pr&&!gateAllows(pr,r,(px+x)/2,(py+y)/2))return false;
-    px=x;py=y;pr=r;
-  }
-  return true;
+function relaxCell(ni,sid){
+  const c=fmmCandidate(ni,sid);if(!c)return;
+  // One global trial per cell. Later candidates from any source are irrelevant:
+  // whichever source reaches a cell first is the only one that can propagate through it.
+  if(c.t+1e-7>=arrival[ni])return;
+  arrival[ni]=c.t;trialSid[ni]=sid;speedField[ni]=c.speed;portalLeakField[ni]=c.leak;
+  heapPush({i:ni,sid,t:c.t});
 }
-function schedule(i,sid,t,inDx=0,inDy=0){
-  const{GW,GH,regionMap}=compiled,s=sources[sid],x=i%GW,y=(i/GW)|0;
-  const currentM=s.speed.get(i)??1,currentPortalLeak=s.portalLeak.get(i)??-1;
-  const geometryM=confinementTarget(i,inDx,inDy),siphonM=portalSiphonFactor(i),wallM=boundaryDragFactor(i);
-  if(!filamentSurvives(i,inDx,inDy,sid))return;
-  const worldPerCell=W/GW;
-  for(const[dx,dy,cost]of dirs){
-    const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=GW||ny>=GH)continue;
-    const ni=ny*GW+nx;if(regionMap[ni]<=0)continue;
-    if(owner[ni]!==-1&&owner[ni]!==sid)continue;
-    if(!clearSegment(x,y,nx,ny))continue;
-    let nextPortalLeak=currentPortalLeak,leakM=1;
-    if(currentPortalLeak>=0){
-      const stepWorld=cost*worldPerCell;
-      if(regionMap[ni]===s.id)nextPortalLeak=-1;
-      else{nextPortalLeak=currentPortalLeak+stepWorld;leakM=portalLeakFactor(nextPortalLeak)}
-    }
-    const targetM=geometryM*siphonM*wallM*leakM;
-    const baseDt=cost/(SPEED*Math.max(.55,currentM)),tau=targetM>currentM?ACCEL_TAU:DECEL_TAU;
-    const alpha=1-Math.exp(-baseDt/tau),nextM=currentM+(targetM-currentM)*alpha,avgM=Math.max(.55,(currentM+nextM)*.5);
-    const nt=t+cost/(SPEED*avgM);
-    if(nt+1e-6<best(s,ni)){
-      s.best.set(ni,nt);s.speed.set(ni,nextM);s.portalLeak.set(ni,nextPortalLeak);
-      heapPush({i:ni,sid,t:nt,dx,dy});
-    }
-  }
+function relaxAround(i,sid){
+  const{GW,GH}=compiled,x=i%GW,y=(i/GW)|0;
+  if(x>0)relaxCell(i-1,sid);
+  if(x<GW-1)relaxCell(i+1,sid);
+  if(y>0)relaxCell(i-GW,sid);
+  if(y<GH-1)relaxCell(i+GW,sid);
 }
 function startFill(gx,gy){
   if(!owner)return;
   const{GW,GH,regionMap,visibility}=compiled,x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];
   if(id<=0||visibility[i]===0||started[id]||owner[i]!==-1)return;
-  started[id]=1;const sid=sources.length,now=performance.now()/1000-clock0,color=compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length];
-  const s={id,rgb:hex(color),best:new Map([[i,now]]),speed:new Map([[i,1]]),portalLeak:new Map([[i,-1]])};sources.push(s);heapPush({i,sid,t:now,dx:0,dy:0})
+  started[id]=1;
+  const sid=sources.length,now=performance.now()/1000-clock0,color=compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length];
+  sources.push({id,rgb:hex(color)});
+  if(now<arrival[i]){
+    arrival[i]=now;trialSid[i]=sid;speedField[i]=1;portalLeakField[i]=-1;
+    heapPush({i,sid,t:now});
+  }
 }
 function seedPortalBloom(info,fromA,sid,fireTime,currentSpeed){
   const s=sources[sid];if(!s)return;
@@ -911,12 +939,16 @@ function seedPortalBloom(info,fromA,sid,fireTime,currentSpeed){
     const nx=(x-cx)/(rx||1),ny=(y-cy)/(ry||1);if(nx*nx+ny*ny>1)continue;
     const ii=y*GW+x;if(regionMap[ii]!==destZone||owner[ii]!==-1)continue;
     const nt=fireTime+.015*Math.hypot(nx,ny);
-    if(nt+1e-6<best(s,ii)){s.best.set(ii,nt);s.speed.set(ii,Math.max(.72,currentSpeed*.86));s.portalLeak.set(ii,0);heapPush({i:ii,sid,t:nt,dx:0,dy:0,teleport:true});planted++}
+    if(nt+1e-7<arrival[ii]){
+      arrival[ii]=nt;trialSid[ii]=sid;speedField[ii]=Math.max(.72,currentSpeed*.86);portalLeakField[ii]=0;
+      heapPush({i:ii,sid,t:nt});planted++;
+    }
   }
   if(!planted){
     const dest=fromA?info.bSeed:info.aSeed;
-    if(dest!=null&&dest>=0&&owner[dest]!==-2&&fireTime+1e-6<best(s,dest)){
-      s.best.set(dest,fireTime);s.speed.set(dest,Math.max(.72,currentSpeed*.86));s.portalLeak.set(dest,0);heapPush({i:dest,sid,t:fireTime,dx:0,dy:0,teleport:true});
+    if(dest!=null&&dest>=0&&owner[dest]===-1&&fireTime+1e-7<arrival[dest]){
+      arrival[dest]=fireTime;trialSid[dest]=sid;speedField[dest]=Math.max(.72,currentSpeed*.86);portalLeakField[dest]=0;
+      heapPush({i:dest,sid,t:fireTime});
     }
   }
 }
@@ -928,56 +960,30 @@ function portalCoverage(info,side,sid){
   const y0=Math.max(0,Math.floor((pos.y-r)*sy)),y1=Math.min(GH-1,Math.ceil((pos.y+r)*sy));
   let own=0,other=0,total=0;
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
-    const wx=(x+.5)/sx,wy=(y+.5)/sy;
-    if((wx-pos.x)**2+(wy-pos.y)**2>r*r)continue;
-    const ii=y*GW+x;
-    if(regionMap[ii]!==zone)continue;
-    total++;
-    if(owner[ii]===sid)own++;
-    else if(owner[ii]>=0&&owner[ii]!==sid)other++;
+    const wx=(x+.5)/sx,wy=(y+.5)/sy;if((wx-pos.x)**2+(wy-pos.y)**2>r*r)continue;
+    const ii=y*GW+x;if(regionMap[ii]!==zone)continue;
+    total++;if(owner[ii]===sid)own++;else if(owner[ii]>=0&&owner[ii]!==sid)other++;
   }
   return{own:total?own/total:0,other:total?other/total:0,total};
 }
 function triggerPortal(i,sid,t){
   const code=compiled.portalCellMap?.[i]||0;if(!code)return;
-  const pair=Math.abs(code)-1,fromA=code>0,info=compiled.portalSeeds?.[pair],s=sources[sid];if(!info||!s)return;
+  const pair=Math.abs(code)-1,fromA=code>0,info=compiled.portalSeeds?.[pair];if(!info||!sources[sid])return;
   let st=portalPairState[pair];
   if(!st)st=portalPairState[pair]={locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1};
   if(st.cancelled||st.fired)return;
   if(!st.locked){
-    st.locked=true;
-    st.inlet=fromA?'a':'b';
-    st.sid=sid;
-    st.fireTime=t+portalChargeDelay(info.radius||13);
-    st.currentSpeed=s.speed.get(i)??1;
+    st.locked=true;st.inlet=fromA?'a':'b';st.sid=sid;
+    st.fireTime=t+portalChargeDelay(info.radius||13);st.currentSpeed=speedField[i]||1;
   }
 }
 function processPortalFires(now){
   for(let pair=0;pair<portalPairState.length;pair++){
     const st=portalPairState[pair],info=compiled.portalSeeds?.[pair];
     if(!st||!info||!st.locked||st.fired||st.cancelled||now<st.fireTime)continue;
-
-    const inlet=st.inlet,outlet=inlet==='a'?'b':'a';
-    const inCov=portalCoverage(info,inlet,st.sid);
-    const outCov=portalCoverage(info,outlet,st.sid);
-
-    // If a competing front has covered at least half of the outlet before the
-    // inlet manages to transmit, the two flows cancel and this portal pair is dead
-    // for the rest of the attempt.
-    if(outCov.other>=.50){
-      st.cancelled=true;
-      continue;
-    }
-
-    // Treat a portal as charged only once the winning paint really owns almost all
-    // of the inlet opening. This makes close timing contests resolve visually.
-    if(inCov.own>=.95){
-      seedPortalBloom(info,inlet==='a',st.sid,now,st.currentSpeed||1);
-      st.fired=true;
-      continue;
-    }
-
-    // If no propagation remains that could further fill the inlet, it can never fire.
+    const inlet=st.inlet,outlet=inlet==='a'?'b':'a',inCov=portalCoverage(info,inlet,st.sid),outCov=portalCoverage(info,outlet,st.sid);
+    if(outCov.other>=.50){st.cancelled=true;continue}
+    if(inCov.own>=.95){seedPortalBloom(info,inlet==='a',st.sid,now,st.currentSpeed||1);st.fired=true;continue}
     if(heap.length===0)st.cancelled=true;
   }
 }
@@ -993,30 +999,27 @@ function flushSimImage(){
   dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
 }
 function advance(now){
-  let n=0;
   while(heap.length&&heap[0].t<=now){
-    const e=heapPop(),s=sources[e.sid];n++;
-    if(!s||Math.abs(best(s,e.i)-e.t)>.0001)continue;
-    if(owner[e.i]!==-1){if(owner[e.i]!==e.sid)continue}
-    else{
-      owner[e.i]=e.sid;
-      const c=s.rgb,j=e.i*4;
-      simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255;
-      markDirty(e.i);
-    }
+    const e=heapPop();
+    if(trialSid[e.i]!==e.sid||Math.abs(arrival[e.i]-e.t)>.00001)continue;
+    if(owner[e.i]!==-1)continue;
+    owner[e.i]=e.sid;
+    const s=sources[e.sid],c=s.rgb,j=e.i*4;
+    simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255;
+    markDirty(e.i);
     triggerPortal(e.i,e.sid,e.t);
-    schedule(e.i,e.sid,e.t,e.dx||0,e.dy||0);
+    relaxAround(e.i,e.sid);
   }
   processPortalFires(now);
-  return n;
 }
 function hasPendingPortals(){
   return portalPairState.some(st=>st&&st.locked&&!st.fired&&!st.cancelled);
 }
+
 function accuracy(){let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w)continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a}
 function advanceSmoothly(targetNow){
   if(targetNow<simAdvanceCursor){simAdvanceCursor=targetNow;return}
-  const MAX_STEP=.020;
+  const MAX_STEP=.016;
   while(simAdvanceCursor+MAX_STEP<targetNow){
     simAdvanceCursor+=MAX_STEP;
     advance(simAdvanceCursor);
@@ -1044,7 +1047,6 @@ function loop(ms){
 
     advanceSmoothly(simNow);
     flushSimImage();
-    updateDisplay(ms);
     drawPaint();
     if(ms-lastStats>90){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!finished){
