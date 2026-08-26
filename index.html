@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v32 FMM</title>
+<title>Growing Paint — Phone Playtest · 9 Levels · Flow v33 MSFMM</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -69,7 +69,7 @@ button.primary,button.active{background:#fff;color:#10283a;border-color:#fff}but
 </div>
 <script>
 (()=>{
-const W=800,H=1000,SIM_W=840,SIM_H=1050;
+const W=800,H=1000,SIM_W=960,SIM_H=1200;
 const $=id=>document.getElementById(id);
 const paint=$('paint'),ctx=paint.getContext('2d',{alpha:false}),editorSvg=$('editorSvg'),vector=$('vector'),stage=$('stageWrap');
 const PAINTS=['#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f','#7b69a8','#d1844f'];
@@ -862,21 +862,50 @@ function confinementTarget(i,dx,dy,sid){
   const q=1-(width-CONFINE_NARROW)/(CONFINE_WIDE-CONFINE_NARROW);
   return 1+(CONFINE_MAX-1)*smoothstep01(q);
 }
+function diagonalAllowed(from,to){
+  const{GW,regionMap}=compiled,x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
+  if(Math.abs(x1-x0)!==1||Math.abs(y1-y0)!==1)return false;
+  const z=regionMap[to];if(z<=0||regionMap[from]!==z)return false;
+  // Require both orthogonal corner cells to be the same free region. This keeps
+  // the diagonal stencil out of walls, gates and tight corners.
+  const c1=y0*GW+x1,c2=y1*GW+x0;
+  return regionMap[c1]===z&&regionMap[c2]===z;
+}
+function solveEikonal(a,b,h){
+  const af=Number.isFinite(a),bf=Number.isFinite(b);
+  if(!af&&!bf)return Infinity;
+  if(!af)return b+h;if(!bf)return a+h;
+  const lo=Math.min(a,b),hi=Math.max(a,b),diff=hi-lo;
+  if(diff>=h)return lo+h;
+  return (a+b+Math.sqrt(Math.max(0,2*h*h-diff*diff)))*.5;
+}
 function fmmCandidate(ni,sid){
   const{GW,GH,regionMap}=compiled,x=ni%GW,y=(ni/GW)|0,s=sources[sid];
   if(!s||owner[ni]!==-1||regionMap[ni]<=0)return null;
 
-  let ax=Infinity,ay=Infinity,parent=-1;
+  let ax=Infinity,ay=Infinity,d1=Infinity,d2=Infinity,parent=-1;
+  const takeParent=j=>{if(j>=0&&j<owner.length&&owner[j]===sid&&(parent<0||arrival[j]<arrival[parent]))parent=j};
   const consider=(j,axis)=>{
     if(j<0||j>=owner.length||owner[j]!==sid||!stepAllowed(j,ni))return;
-    const t=arrival[j];
-    if(axis===0){if(t<ax)ax=t}else{if(t<ay)ay=t}
-    if(parent<0||t<arrival[parent])parent=j;
+    const t=arrival[j];if(axis===0){if(t<ax)ax=t}else if(t<ay)ay=t;takeParent(j);
   };
+  const considerDiag=(j,axis)=>{
+    if(j<0||j>=owner.length||owner[j]!==sid||!diagonalAllowed(j,ni))return;
+    const t=arrival[j];if(axis===0){if(t<d1)d1=t}else if(t<d2)d2=t;takeParent(j);
+  };
+
   if(x>0)consider(ni-1,0);
   if(x<GW-1)consider(ni+1,0);
   if(y>0)consider(ni-GW,1);
   if(y<GH-1)consider(ni+GW,1);
+
+  // Rotated 45-degree stencil. In open space this removes the slight
+  // cardinal-axis pinching of first-order 4-neighbour FMM.
+  if(x>0&&y>0)considerDiag(ni-GW-1,0);
+  if(x<GW-1&&y<GH-1)considerDiag(ni+GW+1,0);
+  if(x<GW-1&&y>0)considerDiag(ni-GW+1,1);
+  if(x>0&&y<GH-1)considerDiag(ni+GW-1,1);
+
   if(parent<0)return null;
 
   const px=parent%GW,py=(parent/GW)|0,dx=x-px,dy=y-py,worldPerCell=W/GW;
@@ -884,28 +913,26 @@ function fmmCandidate(ni,sid){
   let nextLeak=currentLeak,leakM=1;
   if(currentLeak>=0){
     if(regionMap[ni]===s.id)nextLeak=-1;
-    else{nextLeak=currentLeak+worldPerCell;leakM=portalLeakFactor(nextLeak)}
+    else{nextLeak=currentLeak+worldPerCell*Math.hypot(dx,dy);leakM=portalLeakFactor(nextLeak)}
   }
+
   const targetM=confinementTarget(parent,dx,dy,sid)*portalSiphonFactor(parent)*boundaryDragFactor(parent)*leakM;
   const baseDt=worldPerCell/(SPEED*Math.max(.55,currentM));
   const tau=targetM>currentM?ACCEL_TAU:DECEL_TAU;
   const alpha=1-Math.exp(-baseDt/tau),nextM=currentM+(targetM-currentM)*alpha;
   const h=worldPerCell/(SPEED*Math.max(.55,(currentM+nextM)*.5));
 
-  let nt;
-  if(Number.isFinite(ax)&&Number.isFinite(ay)){
-    const lo=Math.min(ax,ay),hi=Math.max(ax,ay),diff=hi-lo;
-    if(diff>=h)nt=lo+h;
-    else nt=(ax+ay+Math.sqrt(Math.max(0,2*h*h-diff*diff)))*.5;
-  }else nt=(Number.isFinite(ax)?ax:ay)+h;
-
+  const cardinal=solveEikonal(ax,ay,h);
+  const diagonal=solveEikonal(d1,d2,h*Math.SQRT2);
+  const nt=Math.min(cardinal,diagonal);
+  if(!Number.isFinite(nt))return null;
   return{t:nt,speed:nextM,leak:nextLeak};
 }
 function relaxCell(ni,sid){
   const c=fmmCandidate(ni,sid);if(!c)return;
-  // One global trial per cell. Later candidates from any source are irrelevant:
-  // whichever source reaches a cell first is the only one that can propagate through it.
-  if(c.t+1e-7>=arrival[ni])return;
+  const old=arrival[ni],oldSid=trialSid[ni],eps=1e-7;
+  if(c.t>old+eps)return;
+  if(Math.abs(c.t-old)<=eps&&oldSid>=0&&sid>=oldSid)return;
   arrival[ni]=c.t;trialSid[ni]=sid;speedField[ni]=c.speed;portalLeakField[ni]=c.leak;
   heapPush({i:ni,sid,t:c.t});
 }
@@ -915,6 +942,10 @@ function relaxAround(i,sid){
   if(x<GW-1)relaxCell(i+1,sid);
   if(y>0)relaxCell(i-GW,sid);
   if(y<GH-1)relaxCell(i+GW,sid);
+  if(x>0&&y>0)relaxCell(i-GW-1,sid);
+  if(x<GW-1&&y>0)relaxCell(i-GW+1,sid);
+  if(x>0&&y<GH-1)relaxCell(i+GW-1,sid);
+  if(x<GW-1&&y<GH-1)relaxCell(i+GW+1,sid);
 }
 function startFill(gx,gy){
   if(!owner)return;
