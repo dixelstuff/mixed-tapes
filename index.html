@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v23</title>
+<title>Growing Paint — Phone Playtest · 9 Levels · Flow v25</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -975,10 +975,10 @@ function loop(ms){
       if(endBoostStart<0){endBoostStart=baseNow;endBoostLast=baseNow;endBoostExtra=0}
       const dt=Math.max(0,baseNow-endBoostLast);
       const age=Math.max(0,baseNow-endBoostStart);
-      // 1.0x immediately after the final tap, easing toward 2.6x over 4.5 sec.
+      // 1.0x immediately after the final tap, easing toward 2.6x over 5.5 sec.
       // This changes only playback speed: every front and portal clock advances
       // together, so the competitive geometry is preserved.
-      const warp=1+1.6*smoothstep01(clamp(age/4.5,0,1));
+      const warp=1+1.6*smoothstep01(clamp(age/5.5,0,1));
       endBoostExtra+=dt*(warp-1);
       endBoostLast=baseNow;
       simNow=baseNow+endBoostExtra;
