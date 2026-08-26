@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Playtest Levels (6) · Confinement Flow</title>
+<title>Growing Paint — Playtest Levels Flow v2 (6) · Confinement Flow</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -199,7 +199,7 @@ function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;
 function resetFill(){cancelPlayPointers();if(!compiled?.valid)return;const{GW,GH,regionMap}=compiled;owner=new Int16Array(GW*GH);owner.fill(-99);simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);finished=false;clock0=performance.now()/1000;const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;for(let i=0;i<regionMap.length;i++){const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255}sctx.putImageData(simImage,0,0);$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint()}
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
 const dirs=[],seenDir=new Set();function gcd(a,b){while(b){const t=a%b;a=b;b=t}return Math.abs(a)||1}const DIR_R=7;for(let dy=-DIR_R;dy<=DIR_R;dy++)for(let dx=-DIR_R;dx<=DIR_R;dx++){if((!dx&&!dy)||Math.hypot(dx,dy)>DIR_R+.001)continue;const g=gcd(Math.abs(dx),Math.abs(dy)),k=(dx/g)+','+(dy/g);if(seenDir.has(k))continue;seenDir.add(k);dirs.push([dx,dy,Math.hypot(dx,dy)])}
-const SPEED=16,CONFINE_MAX=1.22,CONFINE_WIDE=58,CONFINE_NARROW=16,ACCEL_TAU=.36,DECEL_TAU=.20,best=(s,i)=>s.best.get(i)??Infinity;
+const SPEED=16,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18,best=(s,i)=>s.best.get(i)??Infinity;
 function smoothstep01(v){v=clamp(v,0,1);return v*v*(3-2*v)}
 function confinementTarget(i,dx,dy){
   if(!owner||(!dx&&!dy))return 1;
