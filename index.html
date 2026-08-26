@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Playtest Levels (6)</title>
+<title>Growing Paint — Playtest Levels (6) · Confinement Flow</title>
 <style>
 *{box-sizing:border-box}
 :root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
@@ -198,12 +198,35 @@ function renderAll(){renderVector();renderEditor();renderHeader();renderInspecto
 function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}else{mode='edit';owner=null;simCanvas=null;simImage=null;finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}$('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()}
 function resetFill(){cancelPlayPointers();if(!compiled?.valid)return;const{GW,GH,regionMap}=compiled;owner=new Int16Array(GW*GH);owner.fill(-99);simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);finished=false;clock0=performance.now()/1000;const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;for(let i=0;i<regionMap.length;i++){const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255}sctx.putImageData(simImage,0,0);$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint()}
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
-const dirs=[],seenDir=new Set();function gcd(a,b){while(b){const t=a%b;a=b;b=t}return Math.abs(a)||1}const DIR_R=7;for(let dy=-DIR_R;dy<=DIR_R;dy++)for(let dx=-DIR_R;dx<=DIR_R;dx++){if((!dx&&!dy)||Math.hypot(dx,dy)>DIR_R+.001)continue;const g=gcd(Math.abs(dx),Math.abs(dy)),k=(dx/g)+','+(dy/g);if(seenDir.has(k))continue;seenDir.add(k);dirs.push([dx,dy,Math.hypot(dx,dy)])}const SPEED=16,best=(s,i)=>s.best.get(i)??Infinity;
+const dirs=[],seenDir=new Set();function gcd(a,b){while(b){const t=a%b;a=b;b=t}return Math.abs(a)||1}const DIR_R=7;for(let dy=-DIR_R;dy<=DIR_R;dy++)for(let dx=-DIR_R;dx<=DIR_R;dx++){if((!dx&&!dy)||Math.hypot(dx,dy)>DIR_R+.001)continue;const g=gcd(Math.abs(dx),Math.abs(dy)),k=(dx/g)+','+(dy/g);if(seenDir.has(k))continue;seenDir.add(k);dirs.push([dx,dy,Math.hypot(dx,dy)])}
+const SPEED=16,CONFINE_MAX=1.22,CONFINE_WIDE=58,CONFINE_NARROW=16,ACCEL_TAU=.36,DECEL_TAU=.20,best=(s,i)=>s.best.get(i)??Infinity;
+function smoothstep01(v){v=clamp(v,0,1);return v*v*(3-2*v)}
+function confinementTarget(i,dx,dy){
+  if(!owner||(!dx&&!dy))return 1;
+  const{GW,GH,regionMap}=compiled,x=i%GW,y=(i/GW)|0,z=regionMap[i],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,worldPerCell=W/GW;
+  const maxCells=Math.max(4,Math.ceil(CONFINE_WIDE/worldPerCell));
+  function openDistance(sign){
+    let last=0;
+    for(let r=1;r<=maxCells;r++){
+      const xx=Math.round(x+nx*r*sign),yy=Math.round(y+ny*r*sign);
+      if(xx<0||yy<0||xx>=GW||yy>=GH)break;
+      const ni=yy*GW+xx;
+      if(regionMap[ni]!==z)break;
+      if(owner[ni]!==-1 && ni!==i)break;
+      last=r;
+    }
+    return last;
+  }
+  const width=(openDistance(-1)+openDistance(1)+1)*worldPerCell;
+  if(width>=CONFINE_WIDE)return 1;
+  const q=1-(width-CONFINE_NARROW)/(CONFINE_WIDE-CONFINE_NARROW);
+  return 1+(CONFINE_MAX-1)*smoothstep01(q);
+}
 function gateAllows(a,b,gx,gy){if(a===b)return true;if(a<=0||b<=0)return false;const wx=gx*W/compiled.GW,wy=gy*H/compiled.GH;for(const g of compiled.gateInfos){const aa=compiled.activeMap.get(g.a)||0,bb=compiled.activeMap.get(g.b)||0;if(!((aa===a&&bb===b)||(aa===b&&bb===a)))continue;const L=Math.hypot(g.v.x,g.v.y)||1,ux=g.v.x/L,uy=g.v.y/L,nx=-uy,ny=ux,dx=wx-g.p.x,dy=wy-g.p.y;if(Math.abs(dx*ux+dy*uy)<=g.w/2+3&&Math.abs(dx*nx+dy*ny)<=10)return true}return false}
 function clearSegment(x0,y0,x1,y1){const{GW,GH,regionMap}=compiled,dx=x1-x0,dy=y1-y0,n=Math.max(Math.abs(dx),Math.abs(dy));let px=x0,py=y0,pr=regionMap[y0*GW+x0];if(pr<=0)return false;for(let q=1;q<=n;q++){const x=Math.round(x0+dx*q/n),y=Math.round(y0+dy*q/n);if(x<0||y<0||x>=GW||y>=GH)return false;const r=regionMap[y*GW+x];if(r<=0)return false;if(r!==pr&&!gateAllows(pr,r,(px+x)/2,(py+y)/2))return false;px=x;py=y;pr=r}return true}
-function schedule(i,sid,t){const{GW,GH,regionMap}=compiled,s=sources[sid],x=i%GW,y=(i/GW)|0;for(const[dx,dy,cost]of dirs){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=GW||ny>=GH)continue;const ni=ny*GW+nx;if(regionMap[ni]<=0)continue;if(owner[ni]!==-1&&owner[ni]!==sid)continue;if(!clearSegment(x,y,nx,ny))continue;const nt=t+cost/SPEED;if(nt+1e-6<best(s,ni)){s.best.set(ni,nt);heapPush({i:ni,sid,t:nt})}}}
-function startFill(gx,gy){if(!owner)return;const{GW,GH,regionMap,visibility}=compiled,x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];if(id<=0||visibility[i]===0||started[id]||owner[i]!==-1)return;started[id]=1;const sid=sources.length,now=performance.now()/1000-clock0,s={id,rgb:hex(level.palette.paints[(id-1)%level.palette.paints.length]),best:new Map([[i,now]])};sources.push(s);heapPush({i,sid,t:now})}
-function advance(now){let n=0;while(heap.length&&heap[0].t<=now&&n++<22000){const e=heapPop(),s=sources[e.sid];if(!s||Math.abs(best(s,e.i)-e.t)>.0001)continue;if(owner[e.i]!==-1){if(owner[e.i]!==e.sid)continue}else{owner[e.i]=e.sid;const c=s.rgb,j=e.i*4;simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255}schedule(e.i,e.sid,e.t)}}
+function schedule(i,sid,t,inDx=0,inDy=0){const{GW,GH,regionMap}=compiled,s=sources[sid],x=i%GW,y=(i/GW)|0,currentM=s.speed.get(i)??1,targetM=confinementTarget(i,inDx,inDy);for(const[dx,dy,cost]of dirs){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=GW||ny>=GH)continue;const ni=ny*GW+nx;if(regionMap[ni]<=0)continue;if(owner[ni]!==-1&&owner[ni]!==sid)continue;if(!clearSegment(x,y,nx,ny))continue;const baseDt=cost/(SPEED*Math.max(1,currentM)),tau=targetM>currentM?ACCEL_TAU:DECEL_TAU,alpha=1-Math.exp(-baseDt/tau),nextM=currentM+(targetM-currentM)*alpha,avgM=(currentM+nextM)*.5,nt=t+cost/(SPEED*avgM);if(nt+1e-6<best(s,ni)){s.best.set(ni,nt);s.speed.set(ni,nextM);heapPush({i:ni,sid,t:nt,dx,dy})}}}
+function startFill(gx,gy){if(!owner)return;const{GW,GH,regionMap,visibility}=compiled,x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];if(id<=0||visibility[i]===0||started[id]||owner[i]!==-1)return;started[id]=1;const sid=sources.length,now=performance.now()/1000-clock0,s={id,rgb:hex(level.palette.paints[(id-1)%level.palette.paints.length]),best:new Map([[i,now]]),speed:new Map([[i,1]])};sources.push(s);heapPush({i,sid,t:now,dx:0,dy:0})}
+function advance(now){let n=0;while(heap.length&&heap[0].t<=now&&n++<22000){const e=heapPop(),s=sources[e.sid];if(!s||Math.abs(best(s,e.i)-e.t)>.0001)continue;if(owner[e.i]!==-1){if(owner[e.i]!==e.sid)continue}else{owner[e.i]=e.sid;const c=s.rgb,j=e.i*4;simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255}schedule(e.i,e.sid,e.t,e.dx||0,e.dy||0)}}
 function accuracy(){let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w)continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a}
 function loop(ms){if(mode==='play'&&owner&&!orientationBlocked){advance(ms/1000-clock0);if(ms-lastPaint>28){lastPaint=ms;sctx.putImageData(simImage,0,0);drawPaint()}if(ms-lastStats>90){lastStats=ms;accuracy()}let all=true;for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}if(all&&heap.length===0&&!finished){finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'}}requestAnimationFrame(loop)}
 function isTouchDevice(){return (window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||(navigator.maxTouchPoints||0)>0}
