@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 8 Level Phone App v6.7</title>
+<title>Growing Paint — 8 Level Phone App v6.9 Rotation Pause</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -21,10 +21,10 @@ button,select,input[type=number]{min-height:40px;border:1px solid var(--border);
 button.primary,button.active{background:#111;color:#fff;border-color:#111}button:disabled{opacity:.4;cursor:not-allowed}
 #workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px}
 #left{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--navy)}
-#playHeader{flex:0 0 116px;display:grid;grid-template-columns:1.35fr .82fr .72fr;align-items:end;gap:18px;padding:22px 26px 18px;background:var(--paper)}
+#playHeader{flex:0 0 116px;display:grid;grid-template-columns:1.25fr .76fr .76fr .68fr;align-items:end;gap:12px;padding:22px 26px 18px;background:var(--paper)}
 .label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:#2a2826;margin-bottom:5px}
 .value{font-size:31px;font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}
-#levelValue{font-size:35px}#sublevel{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;color:var(--accent);margin-top:8px}
+#levelValue{font-size:35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#sublevel{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;color:var(--accent);margin-top:8px}
 #stageWrap{position:relative;flex:1;min-height:0;background:var(--navy);overflow:hidden;touch-action:none}
 #paint{position:absolute;inset:0;width:100%;height:100%;display:block}
 #hingeDebugCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
@@ -54,7 +54,7 @@ button.primary,button.active{background:#111;color:#fff;border-color:#111}button
 #orientation{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;background:var(--navy);color:#fff;z-index:20;font-weight:900;letter-spacing:.04em}
 #orientation.show{display:flex}
 @media(max-width:980px){#workspace{grid-template-columns:1fr}#side{display:none}}
-@media(max-width:560px){#playHeader{flex-basis:98px;padding:14px 16px;gap:8px;grid-template-columns:1.25fr .8fr .72fr}.value{font-size:23px}#levelValue{font-size:27px}.label,#sublevel{font-size:8px}#playFooter{flex-basis:66px}}
+@media(max-width:560px){#playHeader{flex-basis:98px;padding:14px 12px;gap:6px;grid-template-columns:1.12fr .76fr .76fr .68fr}.value{font-size:21px}#levelValue{font-size:26px}.label,#sublevel{font-size:8px}#playFooter{flex-basis:66px}}
 
 /* Standalone mobile player */
 html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">8 Level Phone App v6.7</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">8 Level Phone App v6.9</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -129,7 +129,8 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
     <div id="left">
       <div id="playHeader">
         <div><div class="value" id="levelValue">LEVEL 1</div><div id="sublevel">ZERO ACTIVE · 1 REGION</div></div>
-        <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">100.00%</div></div>
+        <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">--.--%</div></div>
+        <div><div class="label">BEST</div><div class="value" id="bestAccuracy">--.--%</div></div>
         <div><div class="label">TARGET</div><div class="value" id="targetReadout">99.2%</div></div>
       </div>
       <div id="stageWrap">
@@ -300,7 +301,7 @@ let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,porta
 
 function blankLevel(){
   return{
-    version:23,level:1,target:99.2,palette:clone(DEFAULT),
+    version:23,level:1,name:'',target:99.2,palette:clone(DEFAULT),
     board:{x:36,y:28,w:728,h:922},
     dividers:[],shapes:[],portals:[],regionStyles:[]
   };
@@ -319,9 +320,46 @@ PLAYER_LEVELS.splice(0,2,REPLACEMENT_LEVEL_7,REPLACEMENT_LEVEL_6,REPLACEMENT_LEV
 const APPENDED_LEVEL_8={"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":345.4966012084592,"smooth":false,"attach":{"type":"border","edge":"right","t":0.3443564004430143}},{"x":633.4041423260754,"y":810.4347620845922,"smooth":false,"attach":null},{"x":436.4017230188234,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5500023667840981}}],"gates":[{"t":0.2932941893864233,"w":37,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":236.91508821620346,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2759822640332465}},{"x":556.3934619696702,"y":591.1123961480363,"smooth":false,"attach":null},{"x":764,"y":217.83539463746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.2058952219495252}}],"gates":[{"t":0.22515398613445678,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":573.6166268991606,"y":560.1451085934266,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.5684376709125305}},{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}}],"gates":[{"t":0.794378833459734,"w":52,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.12683778429321965,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":253.5906060069629,"y":456.8247262084592,"smooth":false,"attach":null},{"x":432.99984269776485,"y":420.95943211890494,"smooth":false,"attach":{"type":"divider","divider":2,"t":0.2615558693049325}}],"gates":[]}],"shapes":[{"type":"circle","role":"playable","x":198.73620699828876,"y":698.8208553625378,"w":183.88121791467518,"h":183.88121791467518,"rotation":0,"color":"#ffffff","gates":[{"t":0.70896239634246,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.0754795998368788,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":136.80297397769516,"y":240.49400490936557},"b":{"x":393.27904643889775,"y":827.7060517371601},"radius":17,"color":"#ffffff"},{"a":{"x":380.0141617985484,"y":181.69373111782477},"b":{"x":563.2265297692807,"y":422.3765577794562},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":684.2914888056451,"y":162.74419955280658},"paint":"#6f8798"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#c28e91"},{"seed":{"x":501.41217016222754,"y":682.8293823841219},"paint":"#8d9b76"},{"seed":{"x":656.3595396275849,"y":751.3263591279124},"paint":"#c5a24f"},{"seed":{"x":197.09157175398636,"y":689.3499367248797},"paint":"#bf718f"}]};
 PLAYER_LEVELS.push(APPENDED_LEVEL_8);
 let playerIndex=0;
+let currentLevelFingerprint='',currentBestAccuracy=null;
+let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
+const BEST_SCORE_PREFIX='growing-paint-best-v1:';
+
+// Canonical key ordering makes the identity depend on the level data rather
+// than incidental JSON property order. Geometry, gates, portals, colours,
+// targets and every other saved setting therefore define one level version.
+function stableLevelString(value){
+  if(value===null||typeof value!=='object')return JSON.stringify(value);
+  if(Array.isArray(value))return'['+value.map(stableLevelString).join(',')+']';
+  return'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableLevelString(value[k])).join(',')+'}'
+}
+function fingerprintLevel(levelData){
+  const text=stableLevelString(levelData);let h1=2166136261,h2=2246822519;
+  for(let i=0;i<text.length;i++){
+    const c=text.charCodeAt(i);
+    h1=Math.imul(h1^c,16777619);
+    h2=Math.imul(h2^c,3266489917);h2^=h2>>>13
+  }
+  return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')
+}
+function bestScoreKey(){return BEST_SCORE_PREFIX+currentLevelFingerprint}
+function readStoredBest(){
+  if(!currentLevelFingerprint)return null;
+  try{const raw=localStorage.getItem(bestScoreKey());if(raw===null)return null;const n=Number(raw);return Number.isFinite(n)?n:null}catch{return null}
+}
+function renderBestAccuracy(){
+  const el=$('bestAccuracy');if(el)el.textContent=Number.isFinite(currentBestAccuracy)?currentBestAccuracy.toFixed(2)+'%':'--.--%'
+}
+function recordBestAccuracy(score){
+  if(!Number.isFinite(score)||!currentLevelFingerprint)return;
+  if(Number.isFinite(currentBestAccuracy)&&score<=currentBestAccuracy+1e-7)return;
+  currentBestAccuracy=score;
+  try{localStorage.setItem(bestScoreKey(),String(score))}catch{}
+  renderBestAccuracy()
+}
 let level=blankLevel();
 
 function ensureLevel(){
+  level.name=String(level.name||'').trim();
   level.palette=Object.assign(clone(DEFAULT),level.palette||{});
   level.dividers=Array.isArray(level.dividers)?level.dividers:[];
   level.shapes=Array.isArray(level.shapes)?level.shapes:[];
@@ -1366,8 +1404,9 @@ function selectedRegionStyle(){
   const idx=compiled.styleIndexByLabel[selected.label];return idx==null?null:level.regionStyles[idx]
 }
 function renderHeader(){
-  $('levelValue').textContent=`LEVEL ${playerIndex+1}`;
-  $('sublevel').textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
+  const named=String(level.name||'').trim();
+  $('levelValue').textContent=named||`LEVEL ${playerIndex+1}`;
+  $('sublevel').textContent=named?`LEVEL ${playerIndex+1} · ${playerIndex+1} / ${PLAYER_LEVELS.length}`:`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
   $('targetReadout').textContent=Number(level.target).toFixed(1)+'%';
   $('targetInput').value=Number(level.target).toFixed(1);
   const prev=$('prevBtn'),next=$('nextBtn');
@@ -1457,7 +1496,7 @@ function drawPaint(){
 function renderAll(){renderVector();renderEditor();renderHeader();renderInspector();drawPaint()}
 function setMode(m){
   if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}
-  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}
+  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='--.--%';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy()}
   $('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()
 }
 function resetFill(){
@@ -1482,7 +1521,7 @@ function resetFill(){
     simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
   }
   sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
-  $('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';updateHingeDoorLayer();drawPaint();
+  $('accuracy').textContent='--.--%';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy();updateHingeDoorLayer();drawPaint();
 }
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
 function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
@@ -2143,6 +2182,7 @@ function accuracy(){
     }
   }
   filled=Math.max(0,filled);correct=clamp(correct,0,filled);
+  if(filled<=0){$('accuracy').textContent='--.--%';return NaN}
   const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a
 }
 function advanceSmoothly(targetNow){
@@ -2156,7 +2196,7 @@ function advanceSmoothly(targetNow){
   advance(simAdvanceCursor);
 }
 function loop(ms){
-  if(mode==='play'&&owner){
+  if(mode==='play'&&owner&&!orientationPaused){
     const baseNow=ms/1000-clock0;
     let all=true;
     for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}
@@ -2181,7 +2221,7 @@ function loop(ms){
     if(paintChanged||hingeDebugEnabled)drawPaint();
     if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
-      finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
+      finished=true;const a=accuracy();recordBestAccuracy(a);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
     }
   }
   requestAnimationFrame(loop)
@@ -2325,7 +2365,7 @@ window.addEventListener('keydown',e=>{
 });
 
 function playTap(e){
-  if(mode!=='play'||!compiled?.valid||e.button>0)return;
+  if(mode!=='play'||!compiled?.valid||orientationPaused||e.button>0)return;
   const r=paint.getBoundingClientRect(),dpr=paint.width/r.width,px=(e.clientX-r.left)*dpr,py=(e.clientY-r.top)*dpr,dx=+paint.dataset.dx,dy=+paint.dataset.dy,dw=+paint.dataset.dw,dh=+paint.dataset.dh;
   if(px<dx||px>=dx+dw||py<dy||py>=dy+dh)return;
   startFill((px-dx)/dw*compiled.GW,(py-dy)/dh*compiled.GH)
@@ -2474,6 +2514,8 @@ function loadPlayerLevel(index){
   hardResetPlayerState();
   playerIndex=index;
   mode='play';
+  currentLevelFingerprint=fingerprintLevel(PLAYER_LEVELS[playerIndex]);
+  currentBestAccuracy=readStoredBest();
 
   // Use the v5.6 builder's own migration/default path for every embedded level.
   migrateImported(clone(PLAYER_LEVELS[playerIndex]));
@@ -2487,14 +2529,48 @@ function loadPlayerLevel(index){
 
   resetFill();
   $('editorSvg').classList.add('hidden');
-  $('accuracy').textContent='100.00%';
+  $('accuracy').textContent='--.--%';
   $('accuracyLabel').textContent='ACCURACY';
+  renderBestAccuracy();
   renderVector();renderHeader();drawPaint();
   layoutStage();checkOrientation();
 }
 
-function checkOrientation(){$('orientation').classList.toggle('show',mode==='play'&&window.innerWidth<760&&window.innerWidth>window.innerHeight)}
-window.addEventListener('resize',()=>{layoutStage();checkOrientation()});
+function checkOrientation(){
+  // This standalone player is portrait-only. Pause on every landscape phone
+  // width, including modern devices whose landscape CSS width exceeds 760 px.
+  const blocked=mode==='play'&&window.innerWidth>window.innerHeight,now=performance.now();
+  orientationBlocked=blocked;
+  if(blocked&&!orientationPaused){
+    orientationPaused=true;orientationPauseStartedMs=now
+  }
+  $('orientation').classList.toggle('show',blocked);
+  return blocked
+}
+function resumeAfterOrientationLayout(){
+  if(orientationBlocked||!orientationPaused)return;
+  // Move the simulation epoch forward by the complete paused duration. Waiting
+  // until layout is settled prevents even one frame using mismatched layers.
+  const pausedSeconds=Math.max(0,(performance.now()-orientationPauseStartedMs)/1000);
+  if(owner&&clock0)clock0+=pausedSeconds;
+  orientationPaused=false;orientationPauseStartedMs=0;
+  hingeLastUpdateTime=0;hingePhysicsTime=currentSimNow;hingeAccumulator=0
+}
+function scheduleSettledLayout(){
+  // Mobile browsers report several intermediate viewport sizes while rotating
+  // and while their address bar settles. Re-layout after two animation frames,
+  // then rebuild the vector layer and paint from the same final stage rectangle.
+  if(settledLayoutRaf)cancelAnimationFrame(settledLayoutRaf);
+  settledLayoutRaf=requestAnimationFrame(()=>{
+    settledLayoutRaf=requestAnimationFrame(()=>{
+      settledLayoutRaf=0;layoutStage();renderVector();updateHingeDoorLayer();drawPaint();resumeAfterOrientationLayout()
+    })
+  })
+}
+function handleViewportChange(){checkOrientation();scheduleSettledLayout()}
+window.addEventListener('resize',handleViewportChange);
+window.addEventListener('orientationchange',handleViewportChange);
+if(window.visualViewport)window.visualViewport.addEventListener('resize',handleViewportChange);
 
 loadPlayerLevel(0);requestAnimationFrame(loop);
 })();
