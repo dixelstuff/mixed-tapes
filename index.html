@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 4 Level App v5.9 Faster Paint</title>
+<title>Growing Paint — 4 Level App v6.0 Stable Parallel Fronts</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.9 · FASTER PAINT</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v6.0 · STABLE PARALLEL FRONTS</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -296,7 +296,7 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),hex=h=>[parseInt(h.slice(1,3),16),
 const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE'][n]||String(n));
 
 let mode='edit',selected={type:'none'},compiled=null,previewCanvas=null,history=[],future=[],drag=null,lastPointTap={key:'',time:0},suppressLineTapUntil=0;
-let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[],hingeStates=new Map(),hingeCoverCount=null,hingePhysicsActive=false,hingeLastUpdateTime=0,hingePhysicsTime=0,hingeAccumulator=0,currentSimNow=0,doorRelaxFloor=-1,hingeDebugEnabled=false,hingeDebugData=new Map();
+let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[],hingeStates=new Map(),hingeCoverCount=null,hingeBlockedEdgeCounts=new Map(),hingePhysicsActive=false,hingeLastUpdateTime=0,hingePhysicsTime=0,hingeAccumulator=0,currentSimNow=0,doorRelaxFloor=-1,hingeDebugEnabled=false,hingeDebugData=new Map(),accuracyFilledTotal=0,accuracyCorrectTotal=0;
 
 function blankLevel(){
   return{
@@ -913,9 +913,11 @@ function installHingeFootprint(st,next){
 }
 function settledNeighbourSources(i){
   const out=new Set(),{GW,GH}=compiled,x=i%GW,y=(i/GW)|0;
-  for(let yy=Math.max(0,y-1);yy<=Math.min(GH-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(GW-1,x+1);xx++){
-    if(xx===x&&yy===y)continue;
-    const j=yy*GW+xx,sid=owner[j];
+  const neighbours=[];
+  if(x>0)neighbours.push(i-1);if(x<GW-1)neighbours.push(i+1);
+  if(y>0)neighbours.push(i-GW);if(y<GH-1)neighbours.push(i+GW);
+  for(const j of neighbours){
+    const sid=owner[j];
     if(sid<0)continue;
     if(fmmParentTransitionAllowed(j,i))out.add(sid)
   }
@@ -1119,18 +1121,18 @@ function setHingeCover(st){
   installHingeFootprint(st,rasterDoorCells(st.geom))
 }
 function initHingeStates(){
-  hingeStates=new Map();hingeCoverCount=new Uint8Array(compiled.GW*compiled.GH);
+  hingeStates=new Map();hingeCoverCount=new Uint8Array(compiled.GW*compiled.GH);hingeBlockedEdgeCounts=new Map();
   hingeLastUpdateTime=0;hingePhysicsTime=0;hingeAccumulator=0;hingeDebugData=new Map();
   for(const info of compiled.gateInfos){
     if(info.mode!=='hinge')continue;
     const maxAngle=hingeClearMaxAngle(info),angle=Math.min(info.initialAngle||45,maxAngle),geom=hingeDoorGeometry(info,angle);
-    const coverCells=rasterDoorCells(geom);
+    const coverCells=rasterDoorCells(geom),blockedEdges=rigidDoorBlockedEdges(geom);
     const st={
       info,angle,maxAngle,latchedClosed:false,geom,coverCells:new Set(),lastMotionTime:-1e9,
-      rawTorque:0,filteredTorque:0,angularVelocity:0,blockedEdges:rigidDoorBlockedEdges(geom),
+      rawTorque:0,filteredTorque:0,angularVelocity:0,blockedEdges:new Set(),
       topologyGeom:geom,topologyAngle:angle
     };
-    hingeStates.set(info.key,st);installHingeFootprint(st,coverCells);
+    hingeStates.set(info.key,st);installHingeFootprint(st,coverCells);installDoorBlockedEdges(st,blockedEdges);
     hingeDebugData.set(info.key,{previous:new Set(),current:new Set(coverCells),swept:new Set(coverCells),wake:new Set(),unfilled:new Set()})
   }
 }
@@ -1158,7 +1160,9 @@ function rigidDoorBlockedEdges(g){
   const{GW,GH}=compiled,cellX=W/GW,cellY=H/GH,pad=DOOR_HALF+Math.max(cellX,cellY)*1.5;
   const x0=clamp(Math.floor((g.minX-pad)/cellX),0,GW-1),x1=clamp(Math.ceil((g.maxX+pad)/cellX),0,GW-1);
   const y0=clamp(Math.floor((g.minY-pad)/cellY),0,GH-1),y1=clamp(Math.ceil((g.maxY+pad)/cellY),0,GH-1);
-  const dirs=[[1,0],[0,1],[1,1],[-1,1]];
+  // Paint propagation is cardinal-only, so only cardinal graph edges need
+  // dynamic door topology entries.
+  const dirs=[[1,0],[0,1]];
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const i=y*GW+x,a={x:(x+.5)*cellX,y:(y+.5)*cellY};
     for(const[ox,oy]of dirs){
@@ -1175,6 +1179,14 @@ function changedDoorEdgeCells(before,after){
   for(const key of after)if(!before.has(key))add(key);
   return cells
 }
+function installDoorBlockedEdges(st,next){
+  for(const key of st.blockedEdges||[]){
+    const n=(hingeBlockedEdgeCounts.get(key)||0)-1;
+    if(n>0)hingeBlockedEdgeCounts.set(key,n);else hingeBlockedEdgeCounts.delete(key)
+  }
+  for(const key of next)hingeBlockedEdgeCounts.set(key,(hingeBlockedEdgeCounts.get(key)||0)+1);
+  st.blockedEdges=next
+}
 function doorBlocksWorldSegment(a,b){
   if(!hingePhysicsActive||!hingeStates?.size)return false;
   for(const st of hingeStates.values())if(segmentIntersectsRigidDoor(a,b,st.geom))return true;
@@ -1182,9 +1194,7 @@ function doorBlocksWorldSegment(a,b){
 }
 function doorBlocksStep(from,to){
   if(!hingePhysicsActive||!compiled||!hingeStates?.size)return false;
-  const key=transitionEdgeKey(from,to);
-  for(const st of hingeStates.values())if(st.blockedEdges?.has(key))return true;
-  return false
+  return hingeBlockedEdgeCounts.has(transitionEdgeKey(from,to))
 }
 function ownerSampleWorld(wx,wy){
   if(!owner||!compiled)return{sid:-99,i:-1};const x=Math.floor(wx*compiled.GW/W),y=Math.floor(wy*compiled.GH/H);if(x<0||y<0||x>=compiled.GW||y>=compiled.GH)return{sid:-99,i:-1};const i=y*compiled.GW+x;return{sid:owner[i],i};
@@ -1210,7 +1220,7 @@ function setHingeAngle(st,newAngle,now){
 
   const previous=new Set(st.coverCells||[]),beforeEdges=st.blockedEdges||rigidDoorBlockedEdges(topo);
   const current=rasterDoorCells(newGeom),afterEdges=rigidDoorBlockedEdges(newGeom);
-  st.blockedEdges=afterEdges;st.topologyGeom=newGeom;st.topologyAngle=newAngle;
+  installDoorBlockedEdges(st,afterEdges);st.topologyGeom=newGeom;st.topologyAngle=newAngle;
 
   let footprintChanged=current.size!==(st.coverCells?.size||0);
   if(!footprintChanged){
@@ -1428,12 +1438,12 @@ function drawPaint(){
 function renderAll(){renderVector();renderEditor();renderHeader();renderInspector();drawPaint()}
 function setMode(m){
   if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}
-  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}
+  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}
   $('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()
 }
 function resetFill(){
   if(!compiled?.valid)return;
-  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;
+  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;accuracyFilledTotal=0;accuracyCorrectTotal=0;
   const{GW,GH,regionMap}=compiled,N=GW*GH;
   owner=new Int16Array(N);owner.fill(-99);
   arrival=new Float32Array(N);arrival.fill(Infinity);
@@ -1561,9 +1571,8 @@ function confinementTarget(i,dx,dy,sid){
       if(xx<0||yy<0||xx>=GW||yy>=GH)break;
       const ni=yy*GW+xx;
       if(regionMap[ni]!==z)break;
-      // Same-colour paint is not a wall. Only competing paint can weakly pinch
-      // the channel; this removes noisy self-interaction across broad fronts.
-      if(owner[ni]>=0&&owner[ni]!==sid)break;
+      // Confinement belongs to the static geometry. Treating an opposing paint
+      // front as a wall creates positive feedback from tiny initial leads.
       last=r;
     }
     return last;
@@ -1585,9 +1594,7 @@ function fmmParentTransitionAllowed(from,to){
   const{GW}=compiled;
   const x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
   const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0);
-  if(dx+dy===1)return stepAllowed(from,to);
-  if(dx===1&&dy===1)return diagonalAllowed(from,to);
-  return false;
+  return dx+dy===1&&stepAllowed(from,to)
 }
 function solveEikonal(a,b,h){
   const af=Number.isFinite(a),bf=Number.isFinite(b);
@@ -1601,28 +1608,16 @@ function fmmCandidate(ni,sid){
   const{GW,GH,regionMap}=compiled,x=ni%GW,y=(ni/GW)|0,s=sources[sid];
   if(!s||owner[ni]!==-1||regionMap[ni]<=0)return null;
 
-  let ax=Infinity,ay=Infinity,d1=Infinity,d2=Infinity,parent=-1;
+  let ax=Infinity,ay=Infinity,parent=-1;
   const takeParent=j=>{if(j>=0&&j<owner.length&&owner[j]===sid&&(parent<0||arrival[j]<arrival[parent]))parent=j};
   const consider=(j,axis)=>{
     if(j<0||j>=owner.length||owner[j]!==sid||!stepAllowed(j,ni))return;
     const t=arrival[j];if(axis===0){if(t<ax)ax=t}else if(t<ay)ay=t;takeParent(j);
   };
-  const considerDiag=(j,axis)=>{
-    if(j<0||j>=owner.length||owner[j]!==sid||!diagonalAllowed(j,ni))return;
-    const t=arrival[j];if(axis===0){if(t<d1)d1=t}else if(t<d2)d2=t;takeParent(j);
-  };
-
   if(x>0)consider(ni-1,0);
   if(x<GW-1)consider(ni+1,0);
   if(y>0)consider(ni-GW,1);
   if(y<GH-1)consider(ni+GW,1);
-
-  // Rotated 45-degree stencil. In open space this removes the slight
-  // cardinal-axis pinching of first-order 4-neighbour FMM.
-  if(x>0&&y>0)considerDiag(ni-GW-1,0);
-  if(x<GW-1&&y<GH-1)considerDiag(ni+GW+1,0);
-  if(x<GW-1&&y>0)considerDiag(ni-GW+1,1);
-  if(x>0&&y<GH-1)considerDiag(ni+GW-1,1);
 
   if(parent<0)return null;
 
@@ -1640,18 +1635,16 @@ function fmmCandidate(ni,sid){
   const alpha=1-Math.exp(-baseDt/tau),nextM=currentM+(targetM-currentM)*alpha;
   const h=worldPerCell/(SPEED*Math.max(.55,(currentM+nextM)*.5));
 
-  const cardinal=solveEikonal(ax,ay,h);
-  const diagonal=solveEikonal(d1,d2,h*Math.SQRT2);
-  const nt=Math.min(cardinal,diagonal);
+  const nt=solveEikonal(ax,ay,h);
   if(!Number.isFinite(nt))return null;
   return{t:nt,speed:nextM,leak:nextLeak,parent};
 }
 function relaxCell(ni,sid){
   const c=fmmCandidate(ni,sid);if(!c)return;
   if(doorRelaxFloor>=0&&c.t<doorRelaxFloor){const cellDt=(W/compiled.GW)/(SPEED*Math.max(.55,c.speed||1));c.t=doorRelaxFloor+cellDt}
-  const old=arrival[ni],oldSid=trialSid[ni],eps=1e-7;
-  if(c.t>old+eps)return;
-  if(Math.abs(c.t-old)<=eps&&oldSid>=0&&sid>=oldSid)return;
+  // Preserve strict first arrival: near-ties keep the front that established
+  // the trial first instead of allowing later source-id bias.
+  if(c.t+1e-7>=arrival[ni])return;
   arrival[ni]=c.t;trialSid[ni]=sid;trialParent[ni]=c.parent??-1;speedField[ni]=c.speed;portalLeakField[ni]=c.leak;
   heapPush({i:ni,sid,t:c.t});
 }
@@ -1661,10 +1654,6 @@ function relaxAround(i,sid){
   if(x<GW-1)relaxCell(i+1,sid);
   if(y>0)relaxCell(i-GW,sid);
   if(y<GH-1)relaxCell(i+GW,sid);
-  if(x>0&&y>0)relaxCell(i-GW-1,sid);
-  if(x<GW-1&&y>0)relaxCell(i-GW+1,sid);
-  if(x>0&&y<GH-1)relaxCell(i+GW-1,sid);
-  if(x<GW-1&&y<GH-1)relaxCell(i+GW+1,sid);
 }
 function startFill(gx,gy){
   if(!owner)return;
@@ -2073,10 +2062,11 @@ function markDirty(i){
   if(y<dirtyMinY)dirtyMinY=y;if(y>dirtyMaxY)dirtyMaxY=y;
 }
 function flushSimImage(){
-  if(!simImage||!sctx||dirtyMaxX<dirtyMinX||dirtyMaxY<dirtyMinY)return;
+  if(!simImage||!sctx||dirtyMaxX<dirtyMinX||dirtyMaxY<dirtyMinY)return false;
   const x=dirtyMinX,y=dirtyMinY,w=dirtyMaxX-dirtyMinX+1,h=dirtyMaxY-dirtyMinY+1;
   sctx.putImageData(simImage,0,0,x,y,w,h);
   dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  return true
 }
 function advance(now){
   currentSimNow=now;
@@ -2096,6 +2086,8 @@ function advance(now){
     }
     owner[e.i]=e.sid;trialParent[e.i]=-1;
     const src=sources[e.sid],c=src.rgb,j=e.i*4;
+    const aw=compiled.visibility[e.i],az=compiled.regionMap[e.i];
+    if(aw&&az>0){accuracyFilledTotal+=aw;if(src.id===az)accuracyCorrectTotal+=aw}
     simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255;
     markDirty(e.i);noteCollisionBlocks(e.i,e.sid);triggerPortal(e.i,e.sid,e.t);relaxAround(e.i,e.sid);
   }
@@ -2107,7 +2099,19 @@ function hasPendingPortals(){
 }
 
 function accuracy(){
-  let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w||hingeCoverCount?.[i])continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}
+  let filled=accuracyFilledTotal,correct=accuracyCorrectTotal;
+  // Totals update as cells settle; only the small moving-door footprints need
+  // subtracting here, avoiding a full simulation-grid scan on the phone.
+  if(hingeCoverCount&&hingeStates?.size){
+    const seen=new Set();
+    for(const st of hingeStates.values())for(const i of st.coverCells||[]){
+      if(seen.has(i)||!hingeCoverCount[i])continue;seen.add(i);
+      const sid=owner[i],w=compiled.visibility[i],z=compiled.regionMap[i];
+      if(sid<0||!w||z<=0)continue;
+      filled-=w;if(sources[sid]?.id===z)correct-=w
+    }
+  }
+  filled=Math.max(0,filled);correct=clamp(correct,0,filled);
   const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a
 }
 function advanceSmoothly(targetNow){
@@ -2140,8 +2144,10 @@ function loop(ms){
 
     advanceSmoothly(simNow);
     updateHingeDoorLayer();
-    flushSimImage();
-    drawPaint();
+    const paintChanged=flushSimImage();
+    // The door itself is SVG. Do not rescale and composite the large paint
+    // bitmap on frames where none of its pixels changed.
+    if(paintChanged||hingeDebugEnabled)drawPaint();
     if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
       finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
@@ -2392,7 +2398,7 @@ $('redoBtn').onclick=()=>{if(!future.length)return;history.push(clone(level));le
 $('clearCanvasBtn').onclick=()=>{
   if(!confirm('Clear the canvas and start a completely new blank level?'))return;
   if(mode!=='edit')setMode('edit');pushHistory();level=blankLevel();ensureLevel();selected={type:'none'};drag=null;
-  hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];portalPairState=[];resolveAttachments();compileLevel(false);renderAll();updateUndoRedo();
+  hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];portalPairState=[];resolveAttachments();compileLevel(false);renderAll();updateUndoRedo();
 };
 
 $('exportBtn').onclick=()=>{
@@ -2404,7 +2410,7 @@ $('importFile').onchange=async e=>{
   try{
     const raw=await f.text(),o=JSON.parse(raw);
     history=[];future=[];selected={type:'none'};drag=null;
-    hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;sctx=null;simImage=null;heap=[];sources=[];started=null;portalPairState=[];
+    hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;sctx=null;simImage=null;heap=[];sources=[];started=null;portalPairState=[];
     compiled=null;previewCanvas=null;previewImage=null;
     migrateImported(clone(o));
     resolveAttachments();compileLevel(false);renderAll();updateUndoRedo();
@@ -2415,7 +2421,7 @@ $('importFile').onchange=async e=>{
 
 function hardResetPlayerState(){
   hingePhysicsActive=false;
-  hingeStates=new Map();hingeCoverCount=null;hingeDebugData=new Map();
+  hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();
   hingeLastUpdateTime=0;hingePhysicsTime=0;hingeAccumulator=0;
   owner=null;arrival=null;trialSid=null;trialParent=null;
   speedField=null;portalLeakField=null;
@@ -2425,6 +2431,7 @@ function hardResetPlayerState(){
   currentSimNow=0;doorRelaxFloor=-1;
   collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];
   dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  accuracyFilledTotal=0;accuracyCorrectTotal=0;
   finished=false;compiled=null;previewCanvas=null;
   selected={type:'none'};drag=null;
   vector.innerHTML='';editorSvg.innerHTML='';
