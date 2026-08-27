@@ -3,87 +3,284 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Phone Playtest · 9 Levels · Flow v42 State Safe</title>
+<title>Growing Paint — 4 Level App v5.7 Fast Dynamic Doors</title>
 <style>
 *{box-sizing:border-box}
-:root{--paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;--muted:#726a61;--border:#d8cfc3;--accent:#df543d}
+:root{
+  --paper:#f4eee2;--panel:#fffaf1;--navy:#10283a;--ink:#111;
+  --muted:#726a61;--border:#d8cfc3;--accent:#df543d
+}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper);font-family:"Helvetica Neue",Arial,sans-serif;color:var(--ink)}
-button,input,select{font:inherit}button{cursor:pointer}input[type=color]{width:38px;height:30px;padding:0;border:1px solid var(--border);border-radius:6px;background:#fff}
+button,input,select{font:inherit}button{cursor:pointer}
+input[type=color]{width:42px;height:32px;padding:0;border:1px solid var(--border);border-radius:6px;background:#fff}
 #app{height:100%;display:grid;grid-template-rows:auto 1fr}
 #topbar{min-height:78px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--paper)}
 .brand{margin-right:10px}.eyebrow{font-size:10px;letter-spacing:.17em;text-transform:uppercase;font-weight:900;color:var(--accent)}.brandName{font-size:21px;font-weight:900;letter-spacing:-.02em}
 .group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.compact{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:var(--muted)}
 button,select,input[type=number]{min-height:40px;border:1px solid var(--border);border-radius:7px;background:#fffaf4;color:#171717;padding:8px 11px;font-size:12px;font-weight:800;letter-spacing:.04em}
-button.primary,button.active{background:#fff;color:#10283a;border-color:#fff}button:disabled{opacity:.4;cursor:not-allowed}
-#workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 320px}
+button.primary,button.active{background:#111;color:#fff;border-color:#111}button:disabled{opacity:.4;cursor:not-allowed}
+#workspace{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px}
 #left{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--navy)}
-#playHeader{flex:0 0 116px;display:grid;grid-template-columns:1.35fr .82fr .72fr;align-items:end;gap:18px;padding:22px 26px 18px;background:var(--navy);color:#fff}
-.label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:#eee6d8;margin-bottom:5px}.value{font-size:31px;font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}#levelValue{font-size:35px}#sublevel{display:none}
-#stageWrap{position:relative;flex:1;min-height:0;background:var(--navy);overflow:hidden;touch-action:none}#paint{position:absolute;inset:0;width:100%;height:100%;display:block}#vector{position:absolute;pointer-events:none}#vector svg{width:100%;height:100%;display:block;overflow:visible}#editorSvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none}
-#playFooter{flex:0 0 82px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--navy);border-top:0}#playFooter button{min-width:150px}
-#side{min-width:0;min-height:0;overflow:auto;background:var(--panel);border-left:1px solid var(--border);padding:14px}.section{padding:12px 0;border-bottom:1px solid var(--border)}.section:first-child{padding-top:0}.section:last-child{border-bottom:0}.section h3{margin:0 0 10px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#4c4741}
-.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}.row label{font-size:12px;font-weight:800}.readout{font-size:12px;font-variant-numeric:tabular-nums;color:#605952}.full{width:100%}.smallNote{font-size:11px;color:#726b63;line-height:1.45}.hidden{display:none!important}
-.swatchRow{display:grid;grid-template-columns:24px 1fr 48px;gap:7px;align-items:center;margin:7px 0}.swatch{width:20px;height:20px;border-radius:4px;border:1px solid #0002}.bar{height:8px;border-radius:999px;background:#e6ddd0;overflow:hidden}.bar i{display:block;height:100%;background:#111}.pct{text-align:right;font-size:11px;font-variant-numeric:tabular-nums}.ok{color:#23774b;font-weight:900}.bad{color:#b44235;font-weight:900}
-.selectLine{fill:none;stroke:#df543d;stroke-width:16;opacity:.001;pointer-events:auto;cursor:crosshair}.helper{stroke:#111;stroke-width:1.3;stroke-dasharray:5 5;opacity:.38}.h-point{pointer-events:auto;fill:#fff;stroke:#111;stroke-width:2.5;cursor:grab}.h-smooth{fill:#efe6d8}.h-corner{fill:#fff;stroke:#111;stroke-width:2.5}.h-gate{pointer-events:auto;fill:#df543d;stroke:#fff;stroke-width:2.5;cursor:grab}.selectedRing{fill:none;stroke:#df543d;stroke-width:2.5;pointer-events:none}
-#orientation{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;background:var(--navy);color:#fff;z-index:9999;font-weight:900;letter-spacing:.04em}#orientation.show{display:flex}
-@media(max-width:980px){#workspace{grid-template-columns:1fr}#side{display:none}}@media(max-width:560px){#playHeader{flex-basis:98px;padding:14px 16px;gap:8px;grid-template-columns:1.25fr .8fr .72fr}.value{font-size:23px}#levelValue{font-size:27px}.label,#sublevel{font-size:8px}#playFooter{flex-basis:66px}}
+#playHeader{flex:0 0 116px;display:grid;grid-template-columns:1.35fr .82fr .72fr;align-items:end;gap:18px;padding:22px 26px 18px;background:var(--paper)}
+.label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:#2a2826;margin-bottom:5px}
+.value{font-size:31px;font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}
+#levelValue{font-size:35px}#sublevel{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;color:var(--accent);margin-top:8px}
+#stageWrap{position:relative;flex:1;min-height:0;background:var(--navy);overflow:hidden;touch-action:none}
+#paint{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hingeDebugCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#vector{position:absolute;pointer-events:none}
+#vector svg{width:100%;height:100%;display:block;overflow:visible}
+#editorSvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none}
+#playFooter{flex:0 0 82px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--paper);border-top:1px solid var(--border)}
+#playFooter button{min-width:0;flex:1;max-width:190px}
+#side{min-width:0;min-height:0;overflow:auto;background:var(--panel);border-left:1px solid var(--border);padding:14px}
+.section{padding:12px 0;border-bottom:1px solid var(--border)}.section:first-child{padding-top:0}.section:last-child{border-bottom:0}
+.section h3{margin:0 0 10px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#4c4741}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}
+.row label{font-size:12px;font-weight:800}.readout{font-size:12px;font-variant-numeric:tabular-nums;color:#605952}
+.full{width:100%}.smallNote{font-size:11px;color:#726b63;line-height:1.45}.hidden{display:none!important}
+.swatchRow{display:grid;grid-template-columns:24px 1fr 50px;gap:7px;align-items:center;margin:7px 0;cursor:pointer;padding:3px;border-radius:6px}
+.swatchRow:hover{background:#f2e9dc}.swatchRow.selected{outline:2px solid var(--accent)}
+.swatch{width:20px;height:20px;border-radius:4px;border:1px solid #0002}.bar{height:8px;border-radius:999px;background:#e6ddd0;overflow:hidden}.bar i{display:block;height:100%;background:#111}.pct{text-align:right;font-size:11px;font-variant-numeric:tabular-nums}
+.ok{color:#23774b;font-weight:900}.bad{color:#b44235;font-weight:900}
+.selectLine{fill:none;stroke:#df543d;stroke-width:17;opacity:.001;pointer-events:auto;cursor:crosshair}
+.selectShape{fill:rgba(0,0,0,.001);stroke:rgba(0,0,0,.001);stroke-width:24;pointer-events:all;cursor:pointer}
+.helper{stroke:#111;stroke-width:1.3;stroke-dasharray:5 5;opacity:.38}
+.h-point{pointer-events:auto;fill:#fff;stroke:#111;stroke-width:2.5;cursor:grab}
+.h-smooth{fill:#efe6d8}.h-corner{fill:#fff;stroke:#111;stroke-width:2.5}
+.h-gate{pointer-events:auto;fill:#df543d;stroke:#fff;stroke-width:2.5;cursor:grab}
+.selectedRing{fill:none;stroke:#df543d;stroke-width:2.5;pointer-events:none}
+.regionDot{fill:#df543d;stroke:#fff;stroke-width:2;pointer-events:none}
+#orientation{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;background:var(--navy);color:#fff;z-index:20;font-weight:900;letter-spacing:.04em}
+#orientation.show{display:flex}
+@media(max-width:980px){#workspace{grid-template-columns:1fr}#side{display:none}}
+@media(max-width:560px){#playHeader{flex-basis:98px;padding:14px 16px;gap:8px;grid-template-columns:1.25fr .8fr .72fr}.value{font-size:23px}#levelValue{font-size:27px}.label,#sublevel{font-size:8px}#playFooter{flex-basis:66px}}
 
-/* Standalone player */
-#topbar,#side,#editorSvg{display:none!important}
+/* player shell: the v5.6 builder engine remains underneath, but editing UI is hidden */
+#topbar,#side{display:none!important}
 #app{grid-template-rows:1fr}
 #workspace{grid-template-columns:1fr}
-#playHeader{flex-basis:116px}
-#playFooter{gap:8px;padding:0 12px}
-#playFooter button{min-width:0;flex:0 1 150px}
-#prevLevelBtn,#nextLevelBtn{background:#fffaf4;color:#171717}
-#levelCounter{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#eee6d8;white-space:nowrap}
-@media(max-width:560px){#playFooter button{padding:8px 9px;font-size:9px}#levelCounter{font-size:8px}}
+#left{height:100vh}
+#editorSvg{display:none!important}
+#playFooter{padding:0 12px}
+@media(max-width:560px){
+  #playFooter{gap:6px;padding:0 8px}
+  #playFooter button{font-size:10px;padding:7px 6px}
+}
+
 </style>
 </head>
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Level Editor v0.9</div></div>
-    <div class="group"><button id="editBtn" class="active">EDIT</button><button id="playBtn">PLAY TEST</button><button id="resetFillBtn">RESET FILL</button></div>
-    <div class="group"><span class="compact">Seed dividers</span><select id="seedCount"><option>4</option><option selected>5</option><option>6</option><option>7</option></select><span class="compact">Target</span><input id="targetInput" type="number" min="90" max="100" step="0.1" value="99.2" style="width:76px"></div>
-    <div class="group"><button id="addGateBtn">+ ADD GATE</button><button id="undoBtn">UNDO</button><button id="redoBtn">REDO</button><button id="exportBtn">EXPORT JSON</button><button id="importBtn">IMPORT JSON</button><input id="importFile" type="file" accept=".json,application/json" class="hidden"></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.7 · FAST DYNAMIC DOORS</div></div>
+    <div class="group">
+      <button id="editBtn" class="active">EDIT</button>
+      <button id="playBtn">PLAY TEST</button>
+      <button id="resetFillBtn">RESET FILL</button>
+    </div>
+    <div class="group">
+      <span class="compact">Target</span><input id="targetInput" type="number" min="80" max="100" step="0.1" value="99.2" style="width:76px">
+    </div>
+    <div class="group">
+      <button id="addLineBtn">+ ADD LINE</button>
+      <button id="addGateBtn">+ ADD GATE</button>
+      <button id="addShapeBtn">+ ADD SHAPE</button>
+      <button id="addPortalBtn">+ ADD PORTAL PAIR</button>
+      <button id="undoBtn">UNDO</button>
+      <button id="redoBtn">REDO</button>
+      <button id="clearCanvasBtn">CLEAR CANVAS</button>
+      <button id="exportBtn">EXPORT JSON</button>
+      <button id="importBtn">IMPORT JSON</button>
+      <input id="importFile" type="file" accept=".json,application/json" class="hidden">
+    </div>
   </div>
+
   <div id="workspace">
     <div id="left">
-      <div id="playHeader"><div><div class="value" id="levelValue">LEVEL 37</div><div id="sublevel">FIVE ACTIVE · 5 REGIONS</div></div><div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">100.00%</div></div><div><div class="label">TARGET</div><div class="value" id="targetReadout">99.2%</div></div></div>
-      <div id="stageWrap"><canvas id="paint"></canvas><div id="vector"></div><svg id="editorSvg" viewBox="0 0 800 1000" preserveAspectRatio="none"></svg><div id="orientation">PORTRAIT ONLY<br><span style="display:block;margin-top:8px;font-size:13px;font-weight:600;opacity:.78">Rotate back to portrait to continue playing</span></div></div>
-      <div id="playFooter"><button id="prevLevelBtn">PREVIOUS</button><span id="levelCounter">1 / 9</span><button id="retryBtn" class="primary">RETRY</button><button id="nextLevelBtn">NEXT</button><button id="backEditBtn" style="display:none">BACK TO EDIT</button></div>
-    </div>
-    <aside id="side">
-      <div class="section"><h3>Selection</h3><div id="selectionText" class="smallNote">Click a line to add a vertex. Drag endpoints onto the white object, border or another line.</div>
-        <div id="pointControls" class="hidden"><div class="row"><label>Vertex type</label><span id="pointType" class="readout"></span></div><div id="attachmentText" class="smallNote"></div><div class="group" style="margin-top:8px"><button id="toggleVertexBtn">TOGGLE SMOOTH / CORNER</button><button id="deleteVertexBtn">DELETE VERTEX</button></div><div class="smallNote" style="margin-top:6px">Double-click also toggles smooth/corner. Delete/Backspace removes a selected interior vertex.</div></div>
-        <div id="gateControls" class="hidden"><div class="row"><label>Gate position</label><span id="gateTOut" class="readout"></span></div><input id="gateT" class="full" type="range" min="0.02" max="0.98" step="0.002"><div class="row"><label>Gate width</label><span id="gateWOut" class="readout"></span></div><input id="gateW" class="full" type="range" min="12" max="76" step="1"><button id="deleteGateBtn" class="full">DELETE GATE</button></div>
-        <div id="whiteControls" class="hidden"><div class="row"><label>White object</label><select id="whiteType"><option value="circle">Circle</option><option value="semicircle">Semicircle</option><option value="quarter">Quarter circle</option><option value="rectangle">Rectangle</option><option value="triangle">Triangle</option></select></div><div class="row"><label>Width</label><span id="whiteWOut" class="readout"></span></div><input id="whiteW" class="full" type="range" min="40" max="420" step="1"><div class="row"><label>Height</label><span id="whiteHOut" class="readout"></span></div><input id="whiteH" class="full" type="range" min="40" max="420" step="1"><div class="row"><label>Rotation</label><span id="whiteRotOut" class="readout"></span></div><input id="whiteRot" class="full" type="range" min="-180" max="180" step="1"><div class="smallNote" style="margin-top:6px">Drag the centre handle to move it; side/bottom handles resize; red handle rotates. Attached dividers follow automatically.</div></div>
+      <div id="playHeader">
+        <div><div class="value" id="levelValue">LEVEL 1</div><div id="sublevel">ZERO ACTIVE · 1 REGION</div></div>
+        <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">100.00%</div></div>
+        <div><div class="label">TARGET</div><div class="value" id="targetReadout">99.2%</div></div>
       </div>
-      <div class="section"><h3>Colours</h3><div class="row"><label>Outside</label><input id="outsideColor" type="color"></div><div class="row"><label>Unfilled active</label><input id="unfilledColor" type="color"></div><div class="row"><label>Excluded / charcoal</label><input id="excludedColor" type="color"></div><div id="paintColorRows"></div></div>
-      <div class="section"><h3>Regions</h3><div id="areas"></div></div>
+      <div id="stageWrap">
+        <canvas id="paint"></canvas>
+        <div id="vector"></div>
+        <canvas id="hingeDebugCanvas"></canvas>
+        <svg id="editorSvg" viewBox="0 0 800 1000" preserveAspectRatio="none"></svg>
+        <div id="orientation">PORTRAIT ONLY<br><span style="display:block;margin-top:8px;font-size:13px;font-weight:600;opacity:.78">Rotate back to portrait to continue playing</span></div>
+      </div>
+      <div id="playFooter">
+          <button id="prevBtn">PREVIOUS</button>
+          <button id="retryBtn" class="primary">RETRY LEVEL</button>
+          <button id="nextBtn">NEXT</button>
+          <button id="backEditBtn" class="hidden">BACK TO EDIT</button>
+        </div>
+    </div>
+
+    <aside id="side">
+      <div class="section">
+        <h3>Selection</h3>
+        <div id="selectionText" class="smallNote">Blank board. Add a line, shape or portal pair.</div>
+
+        <div id="dividerControls" class="hidden">
+          <div class="row"><label>Line colour</label><input id="lineColor" type="color"></div>
+          <button id="deleteLineBtn" class="full">DELETE LINE</button>
+          <div class="smallNote" style="margin-top:6px">Touch an inactive line once to select it. Touch the selected line to add a vertex.</div>
+        </div>
+
+        <div id="pointControls" class="hidden">
+          <div class="row"><label>Vertex type</label><span id="pointType" class="readout"></span></div>
+          <div id="attachmentText" class="smallNote"></div>
+          <div class="group" style="margin-top:8px">
+            <button id="toggleVertexBtn">TOGGLE SMOOTH / CORNER</button>
+            <button id="deleteVertexBtn">DELETE VERTEX</button>
+          </div>
+          <div class="smallNote" style="margin-top:6px">Double-click / double-tap also toggles smooth/corner.</div>
+        </div>
+
+        <div id="gateControls" class="hidden">
+          <div class="row"><label id="gateOwnerLabel">Gate</label><span id="gateTOut" class="readout"></span></div>
+          <input id="gateT" class="full" type="range" min="0" max="1" step="0.002">
+          <div class="row"><label>Gate width</label><span id="gateWOut" class="readout"></span></div>
+          <input id="gateW" class="full" type="range" min="10" max="90" step="1">
+          <div class="row"><label>Gate type</label><select id="gateMode"><option value="open">Normal gap</option><option value="hinge">Hinged door</option></select></div>
+          <div id="hingeGateControls" class="hidden">
+            <div class="row"><label>Hinge end</label><select id="gateHingeEnd"><option value="start">Start end</option><option value="end">Finish end</option></select></div>
+            <div class="row"><label>Opens</label><select id="gateSwingSide"><option value="1">Clockwise</option><option value="-1">Anticlockwise</option></select></div>
+            <div class="row"><label>Door angle</label><span id="gateAngleOut" class="readout">45.0°</span></div>
+            <div class="row"><label>Debug door raster</label><input id="hingeDebugToggle" type="checkbox"></div>
+            <div class="smallNote" id="hingeDebugLegend" style="margin:4px 0 8px;display:none">
+              <b style="color:#2878d8">previous</b> · <b style="color:#df543d">current</b> ·
+              <b style="color:#e58b24">swept</b> · <b style="color:#8b55c5">wake</b> ·
+              <b style="color:#16a34a">unfilled wake</b>
+              <div id="hingeMotionReadout" style="margin-top:5px;color:#6f7c83"></div>
+            </div>
+            <div class="smallNote" style="margin:6px 0 8px">Starts 45° open. Goo on one face closes it; goo on the other face opens it toward 120° (or the first wall it hits). Opposing fronts can trap it at an intermediate angle.</div>
+          </div>
+          <button id="deleteGateBtn" class="full">DELETE GATE</button>
+        </div>
+
+        <div id="shapeControls" class="hidden">
+          <div class="row"><label>Shape</label>
+            <select id="shapeType">
+              <option value="circle">Circle</option>
+              <option value="semicircle">Semicircle</option>
+              <option value="quarter">Quarter circle</option>
+              <option value="rectangle">Rectangle</option>
+              <option value="triangle">Triangle</option>
+              <option value="star">Star</option>
+            </select>
+          </div>
+          <div class="row"><label>Behaviour</label>
+            <select id="shapeRole">
+              <option value="obstacle">Prefilled obstacle</option>
+              <option value="playable">Playable divider</option>
+            </select>
+          </div>
+          <div class="row"><label>Object / outline colour</label><input id="shapeColor" type="color"></div>
+          <div class="row"><label>Lock width : height ratio</label><input id="shapeRatioLock" type="checkbox"></div>
+          <div class="row"><label>Width</label><span id="shapeWOut" class="readout"></span></div><input id="shapeW" class="full" type="range" min="30" max="500" step="1">
+          <div class="row"><label>Height</label><span id="shapeHOut" class="readout"></span></div><input id="shapeH" class="full" type="range" min="30" max="500" step="1">
+          <div class="row"><label>Rotation</label><span id="shapeRotOut" class="readout"></span></div><input id="shapeRot" class="full" type="range" min="-180" max="180" step="1">
+          <div id="starControls" class="hidden"><div class="row"><label>Star points</label><span id="starPointsOut" class="readout"></span></div><input id="starPoints" class="full" type="range" min="5" max="12" step="1"></div>
+          <button id="deleteShapeBtn" class="full" style="margin-top:8px">DELETE SHAPE</button>
+          <div id="shapePlayableNote" class="smallNote" style="margin-top:6px">Playable shapes use their outline as a wall; add one or more gates to let paint enter the enclosed region.</div>
+        </div>
+
+        <div id="portalControls" class="hidden">
+          <div class="row"><label>Portal pair</label><span id="portalIndexOut" class="readout"></span></div>
+          <div class="row"><label>Ring colour</label><input id="portalColor" type="color"></div>
+          <div class="row"><label>Portal radius</label><span id="portalRadiusOut" class="readout"></span></div><input id="portalRadius" class="full" type="range" min="7" max="32" step="1">
+          <button id="deletePortalBtn" class="full" style="margin-top:8px">DELETE PORTAL PAIR</button>
+          <div class="smallNote" style="margin-top:6px">First end reached begins charging and locks the direction for that attempt. If the opposing front covers at least half of the outlet before transmission, the pair cancels. Larger portals charge more slowly. The inlet locally siphons/slows the advancing front; portal-emerged leakage is progressively damped.</div>
+        </div>
+
+        <div id="regionControls" class="hidden">
+          <div class="row"><label>Region</label><span id="regionStatus" class="readout"></span></div>
+          <div class="row"><label>Target paint colour</label><input id="regionColor" type="color"></div>
+          <div class="smallNote">This colour is stored against a seed point inside the geometric region, so it survives export/import and normal editing much more reliably than region-number ordering.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Quick palette</h3>
+        <div class="row"><label>Palette</label>
+          <select id="palettePreset">
+            <option value="bauhaus">Bauhaus classic</option>
+            <option value="matisse">Matisse bright</option>
+            <option value="softmodern">Soft modern</option>
+            <option value="mediterranean">Mediterranean</option>
+            <option value="nordic">Nordic muted</option>
+            <option value="desert">Desert modern</option>
+            <option value="coastal">Coastal</option>
+            <option value="jewel">Jewel tones</option>
+          </select>
+        </div>
+        <button id="applyPaletteBtn" class="full">APPLY PALETTE</button>
+        <div class="smallNote" style="margin-top:6px">Applies a coordinated sequence to playable fill regions only. It never changes shapes, divider lines or portal colours.</div>
+      </div>
+
+      <div class="section">
+        <h3>Global colours</h3>
+        <div class="row"><label>Outside</label><input id="outsideColor" type="color"></div>
+        <div class="row"><label>Unfilled active</label><input id="unfilledColor" type="color"></div>
+        <div class="row"><label>Excluded / inactive</label><input id="excludedColor" type="color"></div>
+      </div>
+
+      <div class="section"><h3>Regions</h3><div class="smallNote" style="margin-bottom:8px">Click a region here or directly on the board to assign its paint colour.</div><div id="areas"></div></div>
       <div class="section"><h3>Validation</h3><div id="validation">Validating…</div></div>
-      <div class="section"><h3>Topology rule</h3><div class="smallNote">A geometric region with at least one valid gate is active. A region with <b>zero gates</b> auto-fills charcoal and is excluded from Accuracy. Attached endpoints are persistent relationships: if the white object or receiving line moves, the attached line follows. Accuracy is calculated only from <b>visible painted active pixels</b>: white lines, the white object, outer border and charcoal regions are excluded.</div></div>
+      <div class="section"><h3>Builder model</h3>
+        <div class="smallNote">
+          A new level begins completely blank. Region count is derived only from your geometry.
+          Lines and playable-shape outlines are walls; their gates create connections.
+          Prefilled shapes are static coloured obstacles and are excluded from Accuracy.
+          Portals create virtual connections. Regions with no gate/portal connection are excluded.
+          JSON stores colours for every divider, shape, portal pair and geometric fill region.
+        </div>
+      </div>
     </aside>
   </div>
 </div>
+
 <script>
 (()=>{
-const W=800,H=1000,SIM_W=960,SIM_H=1200;
+const W=800,H=1000,SIM_W=1200,SIM_H=1500;
 const $=id=>document.getElementById(id);
-const paint=$('paint'),ctx=paint.getContext('2d',{alpha:false}),editorSvg=$('editorSvg'),vector=$('vector'),stage=$('stageWrap');
-const PAINTS=['#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f','#7b69a8','#d1844f'];
-const DEFAULT={outside:'#10283a',unfilled:'#eee6d8',excluded:'#303234',paints:PAINTS.slice()};
-const clone=o=>JSON.parse(JSON.stringify(o)), clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), rad=a=>a*Math.PI/180, deg=a=>a*180/Math.PI;
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE'][n]||String(n));
-let mode='edit',selected={type:'divider',d:0},compiled=null,previewCanvas=null,history=[],future=[],drag=null,suppressLineTapUntil=0,lastPointTap={key:'',time:0};
-let owner=null,arrival=null,trialSid=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[];
-let orientationBlocked=false,orientationPauseStart=0;const playPointers=new Map();let playGesture=false;
+const paint=$('paint'),ctx=paint.getContext('2d',{alpha:false}),hingeDebugCanvas=$('hingeDebugCanvas'),hingeDebugCtx=hingeDebugCanvas.getContext('2d'),editorSvg=$('editorSvg'),vector=$('vector'),stage=$('stageWrap');
+const PAINTS=['#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f','#7b69a8','#d1844f','#4c8d63','#d66b8a'];
+const QUICK_PALETTES={
+  bauhaus:['#e5b43d','#e4624d','#496fa5','#4f918a','#bf718f','#7b69a8','#d1844f','#5f8e54','#c96a83','#5d7792','#b58a4e','#6f697f'],
+  matisse:['#f05b4f','#2456a6','#65a84d','#f1c84b','#d35c9a','#53b8bd','#f28b45','#7656a7','#90bd45','#d94c72','#4c7fbb','#dc9a35'],
+  softmodern:['#7fa6b8','#a9b58f','#d98978','#b78aa1','#e4c66f','#5e918b','#8f8175','#8795b5','#c6a07f','#6e9e88','#bf8790','#9a8f69'],
+  mediterranean:['#d7a33d','#c75d45','#4d86a8','#78946b','#d9cba7','#835f78','#4e7770','#c98542','#6b79a2','#a66f55','#799a91','#b1975a'],
+  nordic:['#6f8798','#c28e91','#8d9b76','#c5a24f','#b8735e','#718a88','#837a8f','#98a7b2','#aa8f6f','#728f6d','#a77982','#6b7b91'],
+  desert:['#d1a15c','#b65f45','#81845a','#4f8b8a','#8d6278','#665f55','#d2bf9a','#c47e55','#75876f','#9b7161','#627d89','#ad925f'],
+  coastal:['#79b7d3','#4e8fa3','#86a979','#e0c56b','#d88770','#7e78a4','#5e807b','#9ac7c3','#6d91ba','#b5a060','#b77c8e','#67947d'],
+  jewel:['#2f6b9a','#8f3f65','#3f806d','#b8872d','#6e4f8e','#b14f3c','#476678','#2d7f88','#9b6b2c','#5964a0','#a34f79','#537a43']
+};
+const DEFAULT={outside:'#10283a',unfilled:'#eee6d8',excluded:'#303234'};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rad=a=>a*Math.PI/180,deg=a=>a*180/Math.PI;
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE'][n]||String(n));
+
+let mode='edit',selected={type:'none'},compiled=null,previewCanvas=null,history=[],future=[],drag=null,lastPointTap={key:'',time:0},suppressLineTapUntil=0;
+let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[],hingeStates=new Map(),hingeCoverCount=null,hingePhysicsActive=false,hingeLastUpdateTime=0,hingePhysicsTime=0,hingeAccumulator=0,currentSimNow=0,doorRelaxFloor=-1,hingeDebugEnabled=false,hingeDebugData=new Map();
+
+function blankLevel(){
+  return{
+    version:23,level:1,target:99.2,palette:clone(DEFAULT),
+    board:{x:36,y:28,w:728,h:922},
+    dividers:[],shapes:[],portals:[],regionStyles:[]
+  };
+}
+const PLAYER_LEVELS=[{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"portals":[{"a":{"x":81.9481118236305,"y":760.8525572246066},"b":{"x":701.962921050058,"y":191.00947782546496},"radius":16,"color":"#ffffff"}],"dividers":[{"points":[{"x":151.0333333333333,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.15801282051282048}},{"x":139.33333333333331,"y":341.48,"smooth":true,"attach":null},{"x":170.83333333333331,"y":654.96,"smooth":true,"attach":null},{"x":165.4333333333333,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.17779304029304027}}],"gates":[{"t":0.3,"w":28}],"color":"#ffffff"},{"points":[{"x":286.7166666666666,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.3443910256410256}},{"x":301.66666666666663,"y":341.48,"smooth":true,"attach":null},{"x":261.41666666666663,"y":654.96,"smooth":true,"attach":null},{"x":268.3166666666666,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3191163003663003}}],"gates":[{"t":0.69,"w":36},{"t":0.20162285483280823,"w":37}],"color":"#ffffff"},{"points":[{"x":390.2,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.48653846153846153}},{"x":372,"y":341.48,"smooth":true,"attach":null},{"x":421,"y":654.96,"smooth":true,"attach":null},{"x":412.6,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5173076923076924}}],"gates":[{"t":0.43,"w":24}],"color":"#ffffff"},{"points":[{"x":527.6333333333332,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.6753205128205126}},{"x":539.3333333333333,"y":341.48,"smooth":true,"attach":null},{"x":507.83333333333326,"y":654.96,"smooth":true,"attach":null},{"x":513.2333333333332,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.6555402930402929}}],"gates":[{"t":0.78,"w":42}],"color":"#ffffff"},{"points":[{"x":634.6166666666668,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8222756410256412}},{"x":619.6666666666667,"y":341.48,"smooth":true,"attach":null},{"x":659.9166666666667,"y":654.96,"smooth":true,"attach":null},{"x":653.0166666666668,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.8475503663003664}}],"gates":[{"t":0.56,"w":30}],"color":"#ffffff"}],"shapes":[],"regionStyles":[]},{"version":21,"level":37,"target":97,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"portals":[{"a":{"x":203.38703015282942,"y":884.1932590634442},"b":{"x":694.5005015636985,"y":245.86362348942598},"radius":16,"color":"#ffffff"}],"dividers":[{"points":[{"x":764,"y":404.06674848942595,"smooth":false,"attach":{"type":"border","edge":"right","t":0.4078815059538242}},{"x":627.7984304006609,"y":326.13647092145015,"smooth":false,"attach":null},{"x":582.7285065203281,"y":252.14784743202418,"smooth":false,"attach":null},{"x":529.4919454770757,"y":260.2081759818731,"smooth":false,"attach":null},{"x":483.2359709683129,"y":181.20397469788517,"smooth":true,"attach":null},{"x":440.6502625833481,"y":221.33449773413895,"smooth":false,"attach":null},{"x":332.73145689502564,"y":349.4087518882175,"smooth":false,"attach":null},{"x":220.91225585649377,"y":384.1047488670695,"smooth":true,"attach":null},{"x":105.15135422198618,"y":452.7119524169184,"smooth":true,"attach":null},{"x":36,"y":468.85621223564954,"smooth":false,"attach":{"type":"border","edge":"left","t":0.4781520740082967}}],"gates":[{"t":0.8659186451401104,"w":28}],"color":"#ffffff"},{"points":[{"x":36,"y":490.7241314199396,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5018699906940777}},{"x":331.993863220629,"y":553.0707137462235,"smooth":true,"attach":null},{"x":488.12867698044573,"y":581.6221604803101,"smooth":false,"attach":{"type":"divider","divider":2,"t":0.3760843427050486}}],"gates":[{"t":0.381151387512832,"w":36}],"color":"#ffffff"},{"points":[{"x":764,"y":532.8844882930514,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5475970588861728}},{"x":390.34637398949667,"y":568.7311178247734,"smooth":true,"attach":null},{"x":451.8970909305482,"y":734.2038802870092,"smooth":true,"attach":null},{"x":315.4717649141441,"y":782.6897658610272,"smooth":true,"attach":null},{"x":412.6,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5173076923076924}}],"gates":[{"t":0.5759916026044511,"w":24}],"color":"#ffffff"},{"points":[{"x":764,"y":699.1833459214502,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7279645834289047}},{"x":699.5810467929427,"y":780.8546544561934,"smooth":true,"attach":null},{"x":592.8482917330501,"y":818.3298716012085,"smooth":true,"attach":null},{"x":574.8392045789816,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7401637425535461}}],"gates":[{"t":0.78,"w":42}],"color":"#ffffff"},{"points":[{"x":354.83488064688714,"y":323.17718369011317,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.611117319424433}},{"x":420.304478668791,"y":353.24419373111783,"smooth":false,"attach":null},{"x":494.78963828406205,"y":327.8299660120846,"smooth":false,"attach":null},{"x":552.4930666194607,"y":347.2609044561933,"smooth":false,"attach":null},{"x":632.326013633795,"y":328.7270124189394,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.16598275825812667}}],"gates":[{"t":0.8481397403000362,"w":30}],"color":"#ffffff"}],"shapes":[{"type":"circle","role":"obstacle","x":233.51035581518846,"y":147.4096487915408,"w":137.4054947129909,"h":137.4054947129909,"rotation":0,"color":"#f7ff85","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[{"seed":{"x":380.31781470240236,"y":193.2778778057856},"paint":"#8bd2fd"},{"seed":{"x":488.10262028667944,"y":288.3658054109985},"paint":"#e1f0f9"},{"seed":{"x":455.7474392922388,"y":453.55001334236505},"paint":"#606162"},{"seed":{"x":209.14483904765345,"y":733.488685766586},"paint":"#67a268"},{"seed":{"x":556.0856630704656,"y":733.3318414108688},"paint":"#5cdb75"},{"seed":{"x":687.0571558082993,"y":862.9815799233528},"paint":"#438466"}]},{"version":21,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":590.8409648791541,"smooth":false,"attach":{"type":"border","edge":"left","t":0.6104565779600369}},{"x":91.93957632619343,"y":585.3002265861027,"smooth":true,"attach":null},{"x":150.75824629727975,"y":613.0334214501511,"smooth":true,"attach":null},{"x":358.1223815424559,"y":635.7628398791541,"smooth":true,"attach":null},{"x":438.1424440903995,"y":666.2339501510573,"smooth":true,"attach":null},{"x":539.4642119549184,"y":668.8361499244712,"smooth":true,"attach":null},{"x":629.9699061780847,"y":730.315332326284,"smooth":true,"attach":null},{"x":764,"y":757.0218089123866,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7906961051110484}}],"gates":[{"t":0.7427744818833376,"w":28}]},{"color":"#ffffff","points":[{"x":203.59370763990466,"y":618.0389642867608,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.22725279241872295}},{"x":204.6025845282351,"y":404.42078927492446,"smooth":false,"attach":null},{"x":146.16746326783502,"y":384.0516427492447,"smooth":true,"attach":null},{"x":109.86015223933438,"y":352.31778700906347,"smooth":true,"attach":null},{"x":112.367970732283,"y":220.51430324773412,"smooth":true,"attach":null},{"x":147.76656635392695,"y":236.67626510574019,"smooth":true,"attach":null},{"x":156.0748215023308,"y":330.939624244713,"smooth":true,"attach":null},{"x":199.35091756653094,"y":351.87523602719034,"smooth":false,"attach":null},{"x":211.39434708207943,"y":193.7016144259819,"smooth":false,"attach":null},{"x":211.9431167758305,"y":137.85758119335347,"smooth":false,"attach":null},{"x":224.19897326960526,"y":99.86310422960725,"smooth":true,"attach":null},{"x":251.7436714462737,"y":131.47894637462235,"smooth":true,"attach":null},{"x":256.08662300112115,"y":174.36508685800604,"smooth":true,"attach":null},{"x":268.3424794948959,"y":408.4273508308157,"smooth":false,"attach":null},{"x":317.6727444385437,"y":410.9469410876133,"smooth":true,"attach":null},{"x":321.6793532778663,"y":271.4430702416918,"smooth":true,"attach":null},{"x":340.5912550893964,"y":246.44189010574019,"smooth":true,"attach":null},{"x":354.26329143801263,"y":302.7520770392749,"smooth":true,"attach":null},{"x":363.0613087862158,"y":382.6531816465257,"smooth":true,"attach":null},{"x":326.0931138254558,"y":452.818164652568,"smooth":true,"attach":null},{"x":267.26264235557915,"y":457.97535876132935,"smooth":false,"attach":null},{"x":273.77182174423245,"y":626.6173981736738,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.32103288562990706}}],"gates":[{"t":0.954874296376502,"w":28}]},{"color":"#ffffff","points":[{"x":272.79587108759057,"y":601.3321357350919,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.9857661413097677}},{"x":377.5771522983419,"y":556.3455910120846,"smooth":false,"attach":null},{"x":411.0462028677642,"y":535.0736404833837,"smooth":false,"attach":null},{"x":451.141795007966,"y":531.6276435045318,"smooth":false,"attach":null},{"x":474.8923113235381,"y":550.8697601963746,"smooth":true,"attach":null},{"x":509.7480380008261,"y":515.0644354229607,"smooth":false,"attach":null},{"x":523.2371511181921,"y":417.7681268882175,"smooth":false,"attach":null},{"x":546.9109576916268,"y":414.8944958459215,"smooth":true,"attach":null},{"x":580.4331150056057,"y":416.90072696374625,"smooth":false,"attach":null},{"x":587.0065498318287,"y":449.4252737915408,"smooth":true,"attach":null},{"x":586.0093231840443,"y":515.0054286253777,"smooth":false,"attach":null},{"x":609.7834424971971,"y":513.0109988670695,"smooth":false,"attach":null},{"x":627.6155071694105,"y":460.4536442598187,"smooth":true,"attach":null},{"x":643.099073582345,"y":469.688208081571,"smooth":false,"attach":null},{"x":657.2608721307606,"y":505.4876321752266,"smooth":false,"attach":null},{"x":696.2530241340651,"y":560.3344505287009,"smooth":true,"attach":null},{"x":764,"y":576.5318164652567,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5949368942139444}}],"gates":[{"t":0.9470040752414494,"w":28},{"t":0.16662973372281567,"w":28}]}],"shapes":[{"type":"circle","role":"playable","x":572.1710332212191,"y":188.75429569486406,"w":227.46450151057394,"h":227.46450151057394,"rotation":0,"color":"#ffffff","gates":[{"t":0.13608812250506622,"w":22}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[],"regionStyles":[{"seed":{"x":439.2460517903825,"y":323.9491274377623},"paint":"#a0eef8"},{"seed":{"x":571.4978715170279,"y":188.15924922600618},"paint":"#f7f026"},{"seed":{"x":232.44485761816225,"y":383.1203314088136},"paint":"#5ec987"},{"seed":{"x":586.2291903259727,"y":604.8883701366982},"paint":"#756461"},{"seed":{"x":374.4026468707427,"y":800.2204798843385},"paint":"#dbc248"}]},{"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":128.48881807989613,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.12704507978007712}},{"x":291.29639464211954,"y":251.8233100453172,"smooth":true,"attach":null},{"x":155.37853307370034,"y":429.3511612537764,"smooth":true,"attach":null},{"x":477.3942290670915,"y":343.72639728096675,"smooth":true,"attach":null},{"x":220.2631734230247,"y":695.0115653323263,"smooth":true,"attach":null},{"x":608.1666371629196,"y":546.4560517371601,"smooth":true,"attach":null},{"x":263.98182569186287,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3131618484778336}}],"gates":[{"t":0.1592402953363197,"w":80,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.3250902849971173,"w":56,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.5611070298463683,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":413.26488464034935,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.5182209953850953}},{"x":764,"y":489.35517371601213,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5003852209501216}}],"gates":[{"t":0.21749701849508404,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":161.03145099427627,"y":863.4995751510573},"b":{"x":485.50775948545464,"y":883.213746223565},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":117.53345488149056,"y":555.2644837949666},"paint":"#e5b43d"},{"seed":{"x":554.5786269735291,"y":451.10740187992565},"paint":"#4f918a"},{"seed":{"x":648.775308754987,"y":178.02653118825853},"paint":"#496fa5"}]}];
+let playerIndex=0;
+let level=blankLevel();
 
 function ensureLevel(){
   level.palette=Object.assign(clone(DEFAULT),level.palette||{});
-  if(level.__legacyPaletteMode==null)level.__legacyPaletteMode=(!Array.isArray(level.regionStyles)||level.regionStyles.length===0)&&Array.isArray(level.palette.paints)&&level.palette.paints.length>0;
   level.dividers=Array.isArray(level.dividers)?level.dividers:[];
   level.shapes=Array.isArray(level.shapes)?level.shapes:[];
   level.portals=Array.isArray(level.portals)?level.portals:[];
@@ -92,270 +289,65 @@ function ensureLevel(){
     d.points=Array.isArray(d.points)?d.points:[];
     d.gates=Array.isArray(d.gates)?d.gates:[];
     if(!d.color)d.color='#ffffff';
+    for(const g of d.gates){g.mode=g.mode==='hinge'?'hinge':'open';g.hingeEnd=g.hingeEnd==='end'?'end':'start';g.swingSide=+g.swingSide===-1?-1:1;g.initialAngle=45;g.maxAngle=120}
     for(const p of d.points){if(p.smooth==null)p.smooth=false;if(p.attach===undefined)p.attach=null}
   }
   for(const s of level.shapes){
     s.type=s.type||'circle';s.role=s.role||'obstacle';s.color=s.color||'#ffffff';
-    s.gates=Array.isArray(s.gates)?s.gates:[];s.starPoints=s.starPoints||5;
+    s.gates=Array.isArray(s.gates)?s.gates:[];for(const g of s.gates){g.mode=g.mode==='hinge'?'hinge':'open';g.hingeEnd=g.hingeEnd==='end'?'end':'start';g.swingSide=+g.swingSide===-1?-1:1;g.initialAngle=45;g.maxAngle=120}s.starPoints=s.starPoints||5;
     if(s.lockRatio==null)s.lockRatio=false;
     if(!Number.isFinite(s.aspectRatio)||s.aspectRatio<=0)s.aspectRatio=(s.w||120)/(s.h||120);
     if(s.type==='circle'){s.h=s.w;s.aspectRatio=1}
   }
   for(const p of level.portals){p.radius=p.radius||13;p.color=p.color||'#ffffff'}
 }
-function rotateLocal(x,y,o){const a=rad(o.rotation||0),c=Math.cos(a),s=Math.sin(a);return{x:o.x+x*c-y*s,y:o.y+x*s+y*c}}
-function borderAttachment(p,b){
-  const ds=[
-    {edge:'left',d:Math.abs(p.x-b.x),t:(p.y-b.y)/b.h},
-    {edge:'right',d:Math.abs(p.x-(b.x+b.w)),t:(p.y-b.y)/b.h},
-    {edge:'top',d:Math.abs(p.y-b.y),t:(p.x-b.x)/b.w},
-    {edge:'bottom',d:Math.abs(p.y-(b.y+b.h)),t:(p.x-b.x)/b.w}
-  ].sort((a,b)=>a.d-b.d);
-  return{type:'border',edge:ds[0].edge,t:clamp(ds[0].t,0,1)}
-}
-function pointFromBorderAttachment(a,b){
-  if(a.edge==='left')return{x:b.x,y:b.y+b.h*a.t};
-  if(a.edge==='right')return{x:b.x+b.w,y:b.y+b.h*a.t};
-  if(a.edge==='top')return{x:b.x+b.w*a.t,y:b.y};
-  return{x:b.x+b.w*a.t,y:b.y+b.h};
-}
-function dividerPath(points){
-  if(!points.length)return'';
-  let d=`M${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`,p0=points[0];
-  for(let i=1;i<points.length;i++){
-    const p=points[i];
-    if(i<points.length-1&&p.smooth){
-      const n=points[i+1],mx=(p.x+n.x)/2,my=(p.y+n.y)/2;
-      d+=` Q${p.x.toFixed(2)} ${p.y.toFixed(2)} ${mx.toFixed(2)} ${my.toFixed(2)}`;
-      p0={x:mx,y:my};
-    }else{
-      d+=` L${p.x.toFixed(2)} ${p.y.toFixed(2)}`;p0=p;
-    }
+function migrateImported(o){
+  if(!o||!o.board)throw new Error('Not a Growing Paint level file.');
+  // Old node objects become ordinary prefilled shapes. Tunnels are intentionally retired.
+  const legacyWhites=Array.isArray(o.whites)?o.whites:(o.white?[o.white]:[]);
+  o.shapes=Array.isArray(o.shapes)?o.shapes:[];
+  const baseShapeIndex=o.shapes.length;
+  for(const w of legacyWhites){
+    o.shapes.push({type:w.type||'circle',role:'obstacle',x:w.x,y:w.y,w:w.w||120,h:w.h||w.w||120,rotation:w.rotation||0,color:'#ffffff',gates:[],starPoints:5,lockRatio:false,aspectRatio:1});
   }
-  return d;
-}
-function flattenDivider(d,step=2){
-  const pts=d.points;if(pts.length<2)return pts.map(p=>({x:p.x,y:p.y,seg:0}));
-  const out=[{x:pts[0].x,y:pts[0].y,seg:0}];let p0=pts[0];
-  for(let i=1;i<pts.length;i++){
-    const p=pts[i];
-    if(i<pts.length-1&&p.smooth){
-      const n=pts[i+1],end={x:(p.x+n.x)/2,y:(p.y+n.y)/2};
-      const approx=dist(p0,p)+dist(p,end),N=Math.max(4,Math.ceil(approx/step));
-      for(let k=1;k<=N;k++){const t=k/N,u=1-t;out.push({x:u*u*p0.x+2*u*t*p.x+t*t*end.x,y:u*u*p0.y+2*u*t*p.y+t*t*end.y,seg:i-1})}
-      p0=end;
-    }else{
-      const N=Math.max(1,Math.ceil(dist(p0,p)/step));
-      for(let k=1;k<=N;k++){const t=k/N;out.push({x:p0.x+(p.x-p0.x)*t,y:p0.y+(p.y-p0.y)*t,seg:i-1})}
-      p0=p;
-    }
-  }
-  return out;
-}
-function polyLength(poly){let L=0;for(let i=1;i<poly.length;i++)L+=dist(poly[i-1],poly[i]);return L}
-function polyMetrics(poly){const cum=new Float64Array(poly.length);let L=0;for(let i=1;i<poly.length;i++){L+=dist(poly[i-1],poly[i]);cum[i]=L}return{cum,L}}
-function pointAtDistance(poly,m,d){d=clamp(d,0,m.L);let lo=1,hi=poly.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(m.cum[mid]<d)lo=mid+1;else hi=mid}const i=lo,a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,t=(d-m.cum[i-1])/seg;return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}}
-function pointTangentAt(poly,t){const m=polyMetrics(poly),target=clamp(t,0,1)*m.L;let i=1;while(i<poly.length-1&&m.cum[i]<target)i++;const a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,s=(target-m.cum[i-1])/seg;return{p:{x:a.x+(b.x-a.x)*s,y:a.y+(b.y-a.y)*s},v:{x:b.x-a.x,y:b.y-a.y},length:m.L}}
-function nearestT(poly,p){const total=polyLength(poly)||1;let acc=0,best={d:1e99,t:0,p:poly[0]||p,seg:0};for(let i=1;i<poly.length;i++){const a=poly[i-1],b=poly[i],dx=b.x-a.x,dy=b.y-a.y,L=dist(a,b)||1,u=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(L*L),0,1),q={x:a.x+dx*u,y:a.y+dy*u},dd=(q.x-p.x)**2+(q.y-p.y)**2;if(dd<best.d)best={d:dd,t:(acc+L*u)/total,p:q,seg:b.seg??a.seg??0};acc+=L}return best}
-function gateIntervals(gates,L,closed=false){
-  const raw=[];
-  for(const g of gates||[]){
-    const c=clamp(g.t,0,1)*L,h=(g.w||28)/2;
-    if(!closed)raw.push([clamp(c-h,0,L),clamp(c+h,0,L)]);
-    else{
-      let a=c-h,b=c+h;
-      if(a<0){raw.push([0,b],[L+a,L])}
-      else if(b>L){raw.push([a,L],[0,b-L])}
-      else raw.push([a,b]);
-    }
-  }
-  raw.sort((a,b)=>a[0]-b[0]);const merged=[];
-  for(const iv of raw){if(!merged.length||iv[0]>merged[merged.length-1][1])merged.push(iv.slice());else merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],iv[1])}
-  return merged;
-}
-function subPolyline(poly,m,a,b){if(b-a<.01)return[];const out=[pointAtDistance(poly,m,a)];for(let i=1;i<poly.length-1;i++)if(m.cum[i]>a&&m.cum[i]<b)out.push({x:poly[i].x,y:poly[i].y});out.push(pointAtDistance(poly,m,b));return out}
-function visibleRunsFromPoly(poly,gates,closed=false){
-  const m=polyMetrics(poly),merged=gateIntervals(gates,m.L,closed),runs=[];let pos=0;
-  for(const[a,b]of merged){if(a>pos+.01)runs.push(subPolyline(poly,m,pos,a));pos=Math.max(pos,b)}
-  if(pos<m.L-.01)runs.push(subPolyline(poly,m,pos,m.L));
-  return runs.filter(r=>r.length>1)
-}
-function visibleDividerRuns(d){return visibleRunsFromPoly(flattenDivider(d,1.25),d.gates,false)}
-function runsPath(runs){let d='';for(const run of runs){d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;for(let i=1;i<run.length;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`}return d}
-function shapeBoundary(s,quality=160){
-  const pts=[],w=Math.max(20,s.w||120),h=Math.max(20,s.h||120),rx=w/2,ry=h/2,type=s.type||'circle';
-  if(type==='circle'){
-    const n=Math.max(64,quality);for(let i=0;i<n;i++){const a=i/n*Math.PI*2;pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
-  }else if(type==='semicircle'){
-    const n=Math.max(48,Math.round(quality*.7));
-    for(let i=0;i<=n;i++){const a=Math.PI+i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),h/2+h*Math.sin(a),s))}
-    pts.push(rotateLocal(-rx,h/2,s));
-  }else if(type==='quarter'){
-    const n=Math.max(36,Math.round(quality*.5)),corner={x:-rx,y:ry};
-    pts.push(rotateLocal(corner.x,corner.y,s));
-    for(let i=0;i<=n;i++){const a=-Math.PI/2+i/n*(Math.PI/2);pts.push(rotateLocal(corner.x+w*Math.cos(a),corner.y+h*Math.sin(a),s))}
-  }else if(type==='rectangle'){
-    pts.push(rotateLocal(-rx,-ry,s),rotateLocal(rx,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
-  }else if(type==='triangle'){
-    pts.push(rotateLocal(0,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
-  }else if(type==='star'){
-    const n=clamp(Math.round(s.starPoints||5),5,12),inner=.43;
-    for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,r=i%2?inner:1;pts.push(rotateLocal(rx*r*Math.cos(a),ry*r*Math.sin(a),s))}
-  }
-  return pts;
-}
-function shapeLoop(s,quality=200){const p=shapeBoundary(s,quality);return p.length?p.concat([{x:p[0].x,y:p[0].y}]):[]}
-function shapePath(s){const p=shapeBoundary(s,180);if(!p.length)return'';let d=`M${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;for(let i=1;i<p.length;i++)d+=` L${p[i].x.toFixed(2)} ${p[i].y.toFixed(2)}`;return d+' Z'}
-function visibleShapeRuns(s){return visibleRunsFromPoly(shapeLoop(s,260),s.gates||[],true)}
-function shapePointAt(si,t){const loop=shapeLoop(level.shapes[si],220);return loop.length?pointTangentAt(loop,t).p:null}
-function dividerRanks(){
-  const rank=new Array(level.dividers.length).fill(0);
-  for(let k=0;k<level.dividers.length*2;k++){
-    let changed=false;
-    for(let child=0;child<level.dividers.length;child++)for(const p of level.dividers[child].points){
-      const a=p.attach;if(a?.type==='divider'&&a.divider!==child&&rank[a.divider]<=rank[child]){rank[a.divider]=rank[child]+1;changed=true}
-    }
-    if(!changed)break;
-  }
-  return[...level.dividers.keys()].sort((a,b)=>rank[a]-rank[b]);
-}
-function resolveAttachments(){
-  ensureLevel();
-  for(let pass=0;pass<level.dividers.length+3;pass++){
-    for(let di=0;di<level.dividers.length;di++){
-      const d=level.dividers[di];
-      for(const pi of[0,d.points.length-1]){
-        const p=d.points[pi],a=p.attach;if(!a)continue;
-        if(a.type==='border'){const q=pointFromBorderAttachment(a,level.board);p.x=q.x;p.y=q.y}
-        else if(a.type==='divider'&&a.divider!==di&&level.dividers[a.divider]){const q=pointTangentAt(flattenDivider(level.dividers[a.divider],2),a.t).p;p.x=q.x;p.y=q.y}
-        else if(a.type==='shape'&&level.shapes[a.shape]){const q=shapePointAt(a.shape,a.t);if(q){p.x=q.x;p.y=q.y}else p.attach=null}
-        else if((a.type==='white'||a.type==='circle')&&level.shapes[a.node||0]){a.type='shape';a.shape=a.node||0;delete a.node;const q=shapePointAt(a.shape,a.t||0);if(q){p.x=q.x;p.y=q.y}}
-        else p.attach=null;
+  if(legacyWhites.length){
+    for(const d of o.dividers||[])for(const p of d.points||[]){
+      if(p.attach?.type==='white'||p.attach?.type==='circle'){
+        p.attach={type:'shape',shape:baseShapeIndex+(p.attach.node||0),t:p.attach.t??0};
       }
     }
   }
+  delete o.whites;delete o.white;delete o.circle;
+  o.regionStyles=Array.isArray(o.regionStyles)?o.regionStyles:[];
+  o.version=23;
+  level=o;ensureLevel();
 }
-function labelNearPoint(labels,GW,GH,sx,sy,p,maxWorld=30){
-  const cx=Math.round(p.x*sx),cy=Math.round(p.y*sy),maxR=Math.max(3,Math.round(maxWorld*Math.max(sx,sy)));
-  for(let r=0;r<=maxR;r++){
-    for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){
-      if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;
-      const x=cx+xx,y=cy+yy;if(x<0||y<0||x>=GW||y>=GH)continue;
-      const z=labels[y*GW+x];if(z>0)return z;
-    }
-  }
-  return 0;
-}
-function sampleGate(labels,GW,GH,sx,sy,pt){
-  const L=Math.hypot(pt.v.x,pt.v.y)||1,nx=-pt.v.y/L,ny=pt.v.x/L;
-  let a=0,b=0;
-  for(const off of[8,11,14,18,22,27,34]){
-    const p1={x:pt.p.x+nx*off,y:pt.p.y+ny*off},p2={x:pt.p.x-nx*off,y:pt.p.y-ny*off};
-    const x1=Math.round(p1.x*sx),y1=Math.round(p1.y*sy),x2=Math.round(p2.x*sx),y2=Math.round(p2.y*sy);
-    if(x1>=0&&y1>=0&&x1<GW&&y1<GH)a=labels[y1*GW+x1];
-    if(x2>=0&&y2>=0&&x2<GW&&y2<GH)b=labels[y2*GW+x2];
-    if(a&&b&&a!==b)break;
-  }
-  return{a,b}
-}
-function drawShapeToCanvas(x,s,fill,stroke,width=10){
-  const p=shapeBoundary(s,220);if(!p.length)return;
-  x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.closePath();
-  if(fill){x.fillStyle=fill;x.fill()}
-  if(stroke){x.strokeStyle=stroke;x.lineWidth=width;x.lineJoin='round';x.lineCap='butt';x.stroke()}
-}
-function syncRegionStyles(labels,sizes,comp,GW,GH,sx,sy){
-  ensureLevel();
-  const sxSum=new Float64Array(comp+1),sySum=new Float64Array(comp+1),ct=new Uint32Array(comp+1);
-  for(let i=0;i<labels.length;i++){const z=labels[i];if(!z)continue;sxSum[z]+=i%GW;sySum[z]+=(i/GW)|0;ct[z]++}
-  const byLabel=new Map(),used=new Set();
-  for(let si=0;si<level.regionStyles.length;si++){
-    const st=level.regionStyles[si];if(!st?.seed)continue;
-    const lab=labelNearPoint(labels,GW,GH,sx,sy,st.seed,10);
-    if(lab&&!byLabel.has(lab)){byLabel.set(lab,st);used.add(si)}
-  }
-  const next=[],styleByLabel={},styleIndexByLabel={};
-  for(let id=1;id<=comp;id++){
-    let st=byLabel.get(id);
-    if(!st){
-      const seed=ct[id]?{x:(sxSum[id]/ct[id])/sx,y:(sySum[id]/ct[id])/sy}:{x:level.board.x+20,y:level.board.y+20};
-      st={seed,paint:PAINTS[(id-1)%PAINTS.length]};
-    }
-    if(!st.paint)st.paint=PAINTS[(id-1)%PAINTS.length];
-    styleIndexByLabel[id]=next.length;styleByLabel[id]=st;next.push(st);
-  }
-  level.regionStyles=next;
-  return{styleByLabel,styleIndexByLabel};
-}
-const PLAYER_LEVELS=[{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":401.4514457452295,"y":612.4630517045707,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.22364706217654093}},{"x":206.17563179921783,"y":432.94805689914233,"smooth":true,"attach":null},{"x":130.46584437225428,"y":378.24056258816285,"smooth":false,"attach":null},{"x":94.84607903302917,"y":351.4753681698793,"smooth":true,"attach":null},{"x":36,"y":278.84450201497623,"smooth":false,"attach":{"type":"border","edge":"left","t":0.27206562040669874}}],"gates":[{"t":0.4,"w":24},{"t":0.7259674372930268,"w":28}],"color":"#ffffff"},{"points":[{"x":351.7169356519229,"y":432.75459325941955,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.6904102085965315}},{"x":402.4818131941167,"y":299.21572622434496,"smooth":true,"attach":null},{"x":395.1900039815634,"y":131.82166529408133,"smooth":true,"attach":null},{"x":359.667726114549,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.44459852488262225}}],"gates":[{"t":0.49,"w":30}],"color":"#ffffff"},{"points":[{"x":419.1905220950864,"y":464.5922746781116,"smooth":false,"attach":null},{"x":530.0138312586445,"y":423.84768419170246,"smooth":true,"attach":null},{"x":670.5201695867522,"y":327.7781265342151,"smooth":true,"attach":null},{"x":764,"y":319.2640124315805,"smooth":false,"attach":{"type":"border","edge":"right","t":0.31590456879780965}}],"gates":[{"t":0.5800000000000001,"w":36}],"color":"#ffffff"},{"points":[{"x":469.35459626777987,"y":562.9090802637585,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.07566233048634978}},{"x":488.67693719876866,"y":577.1039639949984,"smooth":false,"attach":null},{"x":535.5299421653676,"y":620.054221441963,"smooth":false,"attach":null},{"x":549.6643682007822,"y":631.2611624825107,"smooth":true,"attach":null},{"x":673.3139209669707,"y":685.4538512117738,"smooth":true,"attach":null},{"x":764,"y":699.1554979850238,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7279343795933013}}],"gates":[{"t":0.6875795338626839,"w":42}],"color":"#ffffff"},{"points":[{"x":411.540019838775,"y":580.611811516452,"smooth":false,"attach":null},{"x":402.4818131941167,"y":723.4242737756549,"smooth":true,"attach":null},{"x":436.4586389482655,"y":866.818669527897,"smooth":true,"attach":null},{"x":359.667726114549,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.44459852488262225}}],"gates":[{"t":0.3413890683632269,"w":24}],"color":"#ffffff"},{"points":[{"x":298.94947881862305,"y":517.7756337100974,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.2808624756224403}},{"x":201.23502915394874,"y":512.5771935855896,"smooth":true,"attach":null},{"x":95.42989540643433,"y":522.7361739399536,"smooth":true,"attach":null},{"x":36,"y":566.370588447888,"smooth":false,"attach":{"type":"border","edge":"left","t":0.583916039531332}}],"gates":[{"t":0.5800000000000001,"w":30}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":386,"y":520,"w":187.5149279796583,"h":187.5149279796583,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":383.2907218799335,"y":324.6211105150215,"smooth":false,"attach":null},{"x":342.41354133566324,"y":320.8544200637401,"smooth":false,"attach":null},{"x":204.77802691934028,"y":451.46805363195887,"smooth":true,"attach":null},{"x":95.4374981853243,"y":383.96920933048733,"smooth":true,"attach":null},{"x":36,"y":319.26401243158045,"smooth":false,"attach":{"type":"border","edge":"left","t":0.3159045687978096}}],"gates":[{"t":0.4,"w":24}],"color":"#ffffff"},{"points":[{"x":424.87950039817264,"y":277.28786659513594,"smooth":false,"attach":null},{"x":323.87646614907146,"y":275.0587570625834,"smooth":false,"attach":null},{"x":278.97217502894813,"y":125.07460163533466,"smooth":true,"attach":null},{"x":213.7439098899927,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.2441537223763636}}],"gates":[{"t":0.49,"w":30}],"color":"#ffffff"},{"points":[{"x":493.8705700904381,"y":254.4809080389631,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.8277101918843627}},{"x":462.85199474751437,"y":293.2127261740552,"smooth":true,"attach":null},{"x":540.2438546670631,"y":141.34832936882242,"smooth":false,"attach":null},{"x":553.7327998540516,"y":120.23610944299361,"smooth":true,"attach":null},{"x":645.1180479959418,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8367006153790408}}],"gates":[{"t":0.5800000000000001,"w":36}],"color":"#ffffff"},{"points":[{"x":514.9978344999091,"y":323.2296137339056,"smooth":false,"attach":null},{"x":547.945686138017,"y":375.590881757246,"smooth":true,"attach":null},{"x":575.4073403350143,"y":502.98385001434843,"smooth":true,"attach":null},{"x":693.2052500693982,"y":469.65905367438717,"smooth":true,"attach":null},{"x":764,"y":424.81697902211874,"smooth":false,"attach":{"type":"border","edge":"right","t":0.43038717898277523}}],"gates":[{"t":0.4,"w":42},{"t":0.8443193429231093,"w":28}],"color":"#ffffff"},{"points":[{"x":331.9415771331993,"y":639.0672800804667,"smooth":false,"attach":{"type":"divider","divider":5,"t":0.4176303908653875}},{"x":536.6304818586976,"y":767.1282635908441,"smooth":false,"attach":null},{"x":572.4999192362609,"y":634.0012047571522,"smooth":true,"attach":null},{"x":685.4212945499253,"y":583.3556866952789,"smooth":false,"attach":null},{"x":702.2040539678998,"y":731.6007689544904,"smooth":true,"attach":null},{"x":764,"y":816.7470721244138,"smooth":false,"attach":{"type":"border","edge":"right","t":0.8554740478572818}}],"gates":[],"color":"#ffffff"},{"points":[{"x":427.4113358506989,"y":428.2774749570011,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.288550998908408}},{"x":301.3596355216514,"y":709.4412170781284,"smooth":true,"attach":null},{"x":271.8131512108127,"y":826.084737746321,"smooth":false,"attach":null},{"x":268.86619625835687,"y":850.8313981770132,"smooth":true,"attach":null},{"x":285.05979068929366,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3421150971006781}}],"gates":[{"t":0.1924365045284876,"w":30}],"color":"#ffffff"},{"points":[{"x":358.1790858486581,"y":356.64006232774915,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.4668694164495628}},{"x":214.12555398464986,"y":573.2223448310856,"smooth":true,"attach":null},{"x":108.32042023713542,"y":583.3813251854496,"smooth":true,"attach":null},{"x":36,"y":566.370588447888,"smooth":false,"attach":{"type":"border","edge":"left","t":0.583916039531332}}],"gates":[{"t":0.4,"w":36}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":449.89762074409384,"y":337.2668544349071,"w":187.5149279796583,"h":187.5149279796583,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":305.12035989214417,"y":150.83489806866953,"smooth":false,"attach":null},{"x":286.94171055280293,"y":246.11438059824545,"smooth":false,"attach":null},{"x":271.9116173040575,"y":289.0557520625651,"smooth":false,"attach":null},{"x":206.17563179921783,"y":432.94805689914233,"smooth":true,"attach":null},{"x":94.84607903302917,"y":351.4753681698793,"smooth":true,"attach":null},{"x":36,"y":278.84450201497623,"smooth":false,"attach":{"type":"border","edge":"left","t":0.27206562040669874}}],"gates":[{"t":0.4,"w":24}],"color":"#ffffff"},{"points":[{"x":420.9620408790533,"y":172.9703147353362,"smooth":false,"attach":null},{"x":512.2837906505466,"y":322.26203131507873,"smooth":true,"attach":null},{"x":583.9361806166785,"y":211.64163090128756,"smooth":false,"attach":null},{"x":592.2046458020734,"y":150.44150258106276,"smooth":true,"attach":null},{"x":614.9678304094543,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7952854813316681}}],"gates":[{"t":0.49,"w":30}],"color":"#ffffff"},{"points":[{"x":390.77077015905735,"y":248.47947276311967,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.21875361232258872}},{"x":580.6077765494188,"y":540.2860191425754,"smooth":true,"attach":null},{"x":700.6232697642255,"y":568.0859686950772,"smooth":true,"attach":null},{"x":764,"y":621.4851652728976,"smooth":false,"attach":{"type":"border","edge":"right","t":0.6436932378230993}}],"gates":[{"t":0.5800000000000001,"w":36}],"color":"#ffffff"},{"points":[{"x":343.373181238708,"y":245.6446929908083,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.3002441132786804}},{"x":300.23487879277707,"y":709.6767896090424,"smooth":true,"attach":null},{"x":255.71652509169178,"y":852.0087244860173,"smooth":true,"attach":null},{"x":250.21202003663026,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2942472802700965}}],"gates":[{"t":0.4,"w":42}],"color":"#ffffff"},{"points":[{"x":325.93859269832353,"y":237.89760151302147,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.33268882222206536}},{"x":288.06756363739424,"y":326.04695180163463,"smooth":false,"attach":null},{"x":217.2653296526739,"y":586.3165458371959,"smooth":true,"attach":null},{"x":111.0751485537891,"y":600.6886659391434,"smooth":true,"attach":null},{"x":36,"y":579.7553930349178,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5984331811658544}}],"gates":[{"t":0.49,"w":24}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":372.4816910460065,"y":156.52315808297575,"w":187.5149279796583,"h":187.5149279796583,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":333.03774128823085,"y":489.4223048797872,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.5833332738351946}},{"x":206.17563179921783,"y":432.94805689914233,"smooth":true,"attach":null},{"x":94.84607903302917,"y":351.4753681698793,"smooth":true,"attach":null},{"x":36,"y":278.84450201497623,"smooth":false,"attach":{"type":"border","edge":"left","t":0.27206562040669874}}],"gates":[{"t":0.6565725494932017,"w":24}],"color":"#ffffff"},{"points":[{"x":411.84783126634267,"y":464.568978661989,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.8194443827432585}},{"x":512.2837906505466,"y":322.26203131507873,"smooth":true,"attach":null},{"x":592.2046458020734,"y":150.44150258106276,"smooth":true,"attach":null},{"x":614.9678304094543,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7952854813316681}}],"gates":[{"t":0.8321133993520935,"w":56}],"color":"#ffffff"},{"points":[{"x":443.4728278436003,"y":540.9184743088073,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.05555561725674139}},{"x":525.0848736325914,"y":546.4670511444921,"smooth":false,"attach":null},{"x":555.776296855135,"y":450.87848712446356,"smooth":false,"attach":null},{"x":611.9284127582882,"y":469.78943133047215,"smooth":false,"attach":null},{"x":584.3608980538442,"y":559.4320010729614,"smooth":false,"attach":null},{"x":649.4823756234545,"y":567.2333243919886,"smooth":false,"attach":null},{"x":669.1311454796933,"y":480.0328594420601,"smooth":false,"attach":null},{"x":726.820067898906,"y":491.326895565093,"smooth":false,"attach":null},{"x":713.6035318607933,"y":598.5950912017167,"smooth":false,"attach":null},{"x":764,"y":621.4851652728976,"smooth":false,"attach":{"type":"border","edge":"right","t":0.6436932378230993}}],"gates":[{"t":0.05742347972341915,"w":36},{"t":0.7335961511880015,"w":39}],"color":"#ffffff"},{"points":[{"x":367.0986698981645,"y":578.1723124851343,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.2999999999999999}},{"x":300.23487879277707,"y":709.6767896090424,"smooth":true,"attach":null},{"x":255.71652509169178,"y":852.0087244860173,"smooth":true,"attach":null},{"x":250.21202003663026,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2942472802700965}}],"gates":[{"t":0.14404558389251268,"w":42}],"color":"#ffffff"},{"points":[{"x":326.65878935533414,"y":534.7953338996841,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.46111118823803393}},{"x":217.2653296526739,"y":586.3165458371959,"smooth":true,"attach":null},{"x":111.0751485537891,"y":600.6886659391434,"smooth":true,"attach":null},{"x":36,"y":579.7553930349178,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5984331811658544}}],"gates":[{"t":0.14333291120836628,"w":45}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":386,"y":520,"w":122.33197814940559,"h":122.33197814940559,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":288.08595867093504,"y":474.861008676204,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.5687499999999994}},{"x":147.28194811182362,"y":428.4804184549356,"smooth":true,"attach":null},{"x":36,"y":319.26401243158045,"smooth":false,"attach":{"type":"border","edge":"left","t":0.3159045687978096}}],"gates":[{"t":0.6703187551474231,"w":24}],"color":"#ffffff"},{"points":[{"x":344.73989642544944,"y":420.3892983654019,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.6874999999999996}},{"x":336.30663533198174,"y":295.8690968272642,"smooth":true,"attach":null},{"x":278.97217502894813,"y":125.07460163533466,"smooth":true,"attach":null},{"x":213.7439098899927,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.2441537223763636}}],"gates":[{"t":0.49,"w":30}],"color":"#ffffff"},{"points":[{"x":697.4035576954743,"y":467.8249868691037,"smooth":false,"attach":{"type":"divider","divider":3,"t":0.7262021732157802}},{"x":648.755885270408,"y":319.1501251788269,"smooth":true,"attach":null},{"x":546.6225184067507,"y":204.7065003576538,"smooth":true,"attach":null},{"x":645.1180479959418,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8367006153790408}}],"gates":[],"color":"#ffffff"},{"points":[{"x":492.19401071596025,"y":501.47368033484497,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.9725108330430485}},{"x":575.4073403350143,"y":502.98385001434843,"smooth":true,"attach":null},{"x":693.2052500693982,"y":469.65905367438717,"smooth":true,"attach":null},{"x":764,"y":424.81697902211874,"smooth":false,"attach":{"type":"border","edge":"right","t":0.43038717898277523}}],"gates":[{"t":0.4,"w":42}],"color":"#ffffff"},{"points":[{"x":465.72090610547747,"y":592.5703357770522,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.11753248702380517}},{"x":572.4999192362609,"y":634.0012047571522,"smooth":true,"attach":null},{"x":702.2040539678998,"y":731.6007689544904,"smooth":true,"attach":null},{"x":764,"y":816.7470721244138,"smooth":false,"attach":{"type":"border","edge":"right","t":0.8554740478572818}}],"gates":[{"t":0.49,"w":24}],"color":"#ffffff"},{"points":[{"x":238.3134555394448,"y":564.2716376801951,"smooth":false,"attach":{"type":"divider","divider":6,"t":0.18751279487901046}},{"x":301.3596355216514,"y":709.4412170781284,"smooth":true,"attach":null},{"x":268.86619625835687,"y":850.8313981770132,"smooth":true,"attach":null},{"x":285.05979068929366,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3421150971006781}}],"gates":[{"t":0.8654590120776968,"w":30},{"t":0.15655114343249718,"w":28}],"color":"#ffffff"},{"points":[{"x":280.43059216067576,"y":541.8397947226363,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.46753248702380573}},{"x":214.12555398464986,"y":573.2223448310856,"smooth":true,"attach":null},{"x":108.32042023713542,"y":583.3813251854496,"smooth":true,"attach":null},{"x":36,"y":566.370588447888,"smooth":false,"attach":{"type":"border","edge":"left","t":0.583916039531332}}],"gates":[{"t":0.4,"w":36}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":386,"y":520,"w":215.63569302988378,"h":215.63569302988378,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"points":[{"x":199.29766075400642,"y":209.3757171883641,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.5687499999999994}},{"x":108.30853486455145,"y":159.02740522174537,"smooth":true,"attach":null},{"x":36,"y":319.26401243158045,"smooth":false,"attach":{"type":"border","edge":"left","t":0.3159045687978096}}],"gates":[{"t":0.6703187551474231,"w":24}],"color":"#ffffff"},{"points":[{"x":261.19198039412964,"y":152.91087556349163,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.6957779034248542}},{"x":213.7439098899927,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.2441537223763636}}],"gates":[{"t":0.5567707893812008,"w":30}],"color":"#ffffff"},{"points":[{"x":695.3891744087892,"y":467.2117391496901,"smooth":false,"attach":{"type":"divider","divider":3,"t":0.7262021732157802}},{"x":648.755885270408,"y":319.1501251788269,"smooth":true,"attach":null},{"x":546.6225184067507,"y":204.7065003576538,"smooth":true,"attach":null},{"x":645.1180479959418,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8367006153790408}}],"gates":[],"color":"#ffffff"},{"points":[{"x":579.272455056295,"y":641.7658222176264,"smooth":false,"attach":{"type":"divider","divider":4,"t":0.6116916510037868}},{"x":673.7303882532098,"y":533.613868025751,"smooth":true,"attach":null},{"x":693.2052500693982,"y":469.65905367438717,"smooth":true,"attach":null},{"x":764,"y":424.81697902211874,"smooth":false,"attach":{"type":"border","edge":"right","t":0.43038717898277523}}],"gates":[{"t":0.3019323106231499,"w":42}],"color":"#ffffff"},{"points":[{"x":355.2426058650125,"y":302.7315808297568,"smooth":false,"attach":null},{"x":572.4999192362609,"y":634.0012047571522,"smooth":true,"attach":null},{"x":702.2040539678998,"y":731.6007689544904,"smooth":true,"attach":null},{"x":764,"y":816.7470721244138,"smooth":false,"attach":{"type":"border","edge":"right","t":0.8554740478572818}}],"gates":[{"t":0.2671057063803562,"w":47},{"t":0.6969948504760123,"w":28}],"color":"#ffffff"},{"points":[{"x":205.50251308576347,"y":448.90243727418226,"smooth":false,"attach":{"type":"divider","divider":6,"t":0.15486625300933457}},{"x":301.3596355216514,"y":709.4412170781284,"smooth":true,"attach":null},{"x":268.86619625835687,"y":850.8313981770132,"smooth":true,"attach":null},{"x":285.05979068929366,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3421150971006781}}],"gates":[{"t":0.8654590120776968,"w":30},{"t":0.33309536628369785,"w":28}],"color":"#ffffff"},{"points":[{"x":249.36311949594338,"y":351.1145037495958,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.323195699876564}},{"x":141.75503304134008,"y":591.0284781831188,"smooth":false,"attach":null},{"x":112.42717632759127,"y":502.69916845493566,"smooth":false,"attach":null},{"x":115.83050421224695,"y":383.79604792560804,"smooth":true,"attach":null},{"x":36,"y":566.370588447888,"smooth":false,"attach":{"type":"border","edge":"left","t":0.583916039531332}}],"gates":[{"t":0.2825271650771603,"w":36}],"color":"#ffffff"}],"portals":[],"shapes":[{"type":"circle","role":"obstacle","x":297.2117020830713,"y":254.5147085121602,"w":215.63569302988378,"h":215.63569302988378,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[]},{"version":21,"level":37,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"portals":[{"a":{"x":81.9481118236305,"y":760.8525572246066},"b":{"x":701.962921050058,"y":191.00947782546496},"radius":16,"color":"#ffffff"}],"dividers":[{"points":[{"x":151.0333333333333,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.15801282051282048}},{"x":139.33333333333331,"y":341.48,"smooth":true,"attach":null},{"x":170.83333333333331,"y":654.96,"smooth":true,"attach":null},{"x":165.4333333333333,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.17779304029304027}}],"gates":[{"t":0.3,"w":28}],"color":"#ffffff"},{"points":[{"x":286.7166666666666,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.3443910256410256}},{"x":301.66666666666663,"y":341.48,"smooth":true,"attach":null},{"x":261.41666666666663,"y":654.96,"smooth":true,"attach":null},{"x":268.3166666666666,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3191163003663003}}],"gates":[{"t":0.69,"w":36},{"t":0.20162285483280823,"w":37}],"color":"#ffffff"},{"points":[{"x":390.2,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.48653846153846153}},{"x":372,"y":341.48,"smooth":true,"attach":null},{"x":421,"y":654.96,"smooth":true,"attach":null},{"x":412.6,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5173076923076924}}],"gates":[{"t":0.43,"w":24}],"color":"#ffffff"},{"points":[{"x":527.6333333333332,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.6753205128205126}},{"x":539.3333333333333,"y":341.48,"smooth":true,"attach":null},{"x":507.83333333333326,"y":654.96,"smooth":true,"attach":null},{"x":513.2333333333332,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.6555402930402929}}],"gates":[{"t":0.78,"w":42}],"color":"#ffffff"},{"points":[{"x":634.6166666666668,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8222756410256412}},{"x":619.6666666666667,"y":341.48,"smooth":true,"attach":null},{"x":659.9166666666667,"y":654.96,"smooth":true,"attach":null},{"x":653.0166666666668,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.8475503663003664}}],"gates":[{"t":0.56,"w":30}],"color":"#ffffff"}],"shapes":[],"regionStyles":[]},{"version":21,"level":37,"target":97,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234","paints":["#e5b43d","#4f918a","#496fa5","#e4624d","#bf718f","#7b69a8","#d1844f"]},"board":{"x":36,"y":28,"w":728,"h":922},"portals":[{"a":{"x":203.38703015282942,"y":884.1932590634442},"b":{"x":694.5005015636985,"y":245.86362348942598},"radius":16,"color":"#ffffff"}],"dividers":[{"points":[{"x":764,"y":404.06674848942595,"smooth":false,"attach":{"type":"border","edge":"right","t":0.4078815059538242}},{"x":627.7984304006609,"y":326.13647092145015,"smooth":false,"attach":null},{"x":582.7285065203281,"y":252.14784743202418,"smooth":false,"attach":null},{"x":529.4919454770757,"y":260.2081759818731,"smooth":false,"attach":null},{"x":483.2359709683129,"y":181.20397469788517,"smooth":true,"attach":null},{"x":440.6502625833481,"y":221.33449773413895,"smooth":false,"attach":null},{"x":332.73145689502564,"y":349.4087518882175,"smooth":false,"attach":null},{"x":220.91225585649377,"y":384.1047488670695,"smooth":true,"attach":null},{"x":105.15135422198618,"y":452.7119524169184,"smooth":true,"attach":null},{"x":36,"y":468.85621223564954,"smooth":false,"attach":{"type":"border","edge":"left","t":0.4781520740082967}}],"gates":[{"t":0.8659186451401104,"w":28}],"color":"#ffffff"},{"points":[{"x":36,"y":490.7241314199396,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5018699906940777}},{"x":331.993863220629,"y":553.0707137462235,"smooth":true,"attach":null},{"x":488.12867698044573,"y":581.6221604803101,"smooth":false,"attach":{"type":"divider","divider":2,"t":0.3760843427050486}}],"gates":[{"t":0.381151387512832,"w":36}],"color":"#ffffff"},{"points":[{"x":764,"y":532.8844882930514,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5475970588861728}},{"x":390.34637398949667,"y":568.7311178247734,"smooth":true,"attach":null},{"x":451.8970909305482,"y":734.2038802870092,"smooth":true,"attach":null},{"x":315.4717649141441,"y":782.6897658610272,"smooth":true,"attach":null},{"x":412.6,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5173076923076924}}],"gates":[{"t":0.5759916026044511,"w":24}],"color":"#ffffff"},{"points":[{"x":764,"y":699.1833459214502,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7279645834289047}},{"x":699.5810467929427,"y":780.8546544561934,"smooth":true,"attach":null},{"x":592.8482917330501,"y":818.3298716012085,"smooth":true,"attach":null},{"x":574.8392045789816,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7401637425535461}}],"gates":[{"t":0.78,"w":42}],"color":"#ffffff"},{"points":[{"x":354.83488064688714,"y":323.17718369011317,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.611117319424433}},{"x":420.304478668791,"y":353.24419373111783,"smooth":false,"attach":null},{"x":494.78963828406205,"y":327.8299660120846,"smooth":false,"attach":null},{"x":552.4930666194607,"y":347.2609044561933,"smooth":false,"attach":null},{"x":632.326013633795,"y":328.7270124189394,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.16598275825812667}}],"gates":[{"t":0.8481397403000362,"w":30}],"color":"#ffffff"}],"shapes":[{"type":"circle","role":"obstacle","x":233.51035581518846,"y":147.4096487915408,"w":137.4054947129909,"h":137.4054947129909,"rotation":0,"color":"#f7ff85","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":1.0}],"regionStyles":[{"seed":{"x":380.31781470240236,"y":193.2778778057856},"paint":"#8bd2fd"},{"seed":{"x":488.10262028667944,"y":288.3658054109985},"paint":"#e1f0f9"},{"seed":{"x":455.7474392922388,"y":453.55001334236505},"paint":"#606162"},{"seed":{"x":209.14483904765345,"y":733.488685766586},"paint":"#67a268"},{"seed":{"x":556.0856630704656,"y":733.3318414108688},"paint":"#5cdb75"},{"seed":{"x":687.0571558082993,"y":862.9815799233528},"paint":"#438466"}]},{"version":21,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":590.8409648791541,"smooth":false,"attach":{"type":"border","edge":"left","t":0.6104565779600369}},{"x":91.93957632619343,"y":585.3002265861027,"smooth":true,"attach":null},{"x":150.75824629727975,"y":613.0334214501511,"smooth":true,"attach":null},{"x":358.1223815424559,"y":635.7628398791541,"smooth":true,"attach":null},{"x":438.1424440903995,"y":666.2339501510573,"smooth":true,"attach":null},{"x":539.4642119549184,"y":668.8361499244712,"smooth":true,"attach":null},{"x":629.9699061780847,"y":730.315332326284,"smooth":true,"attach":null},{"x":764,"y":757.0218089123866,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7906961051110484}}],"gates":[{"t":0.7427744818833376,"w":28}]},{"color":"#ffffff","points":[{"x":203.59370763990466,"y":618.0389642867608,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.22725279241872295}},{"x":204.6025845282351,"y":404.42078927492446,"smooth":false,"attach":null},{"x":146.16746326783502,"y":384.0516427492447,"smooth":true,"attach":null},{"x":109.86015223933438,"y":352.31778700906347,"smooth":true,"attach":null},{"x":112.367970732283,"y":220.51430324773412,"smooth":true,"attach":null},{"x":147.76656635392695,"y":236.67626510574019,"smooth":true,"attach":null},{"x":156.0748215023308,"y":330.939624244713,"smooth":true,"attach":null},{"x":199.35091756653094,"y":351.87523602719034,"smooth":false,"attach":null},{"x":211.39434708207943,"y":193.7016144259819,"smooth":false,"attach":null},{"x":211.9431167758305,"y":137.85758119335347,"smooth":false,"attach":null},{"x":224.19897326960526,"y":99.86310422960725,"smooth":true,"attach":null},{"x":251.7436714462737,"y":131.47894637462235,"smooth":true,"attach":null},{"x":256.08662300112115,"y":174.36508685800604,"smooth":true,"attach":null},{"x":268.3424794948959,"y":408.4273508308157,"smooth":false,"attach":null},{"x":317.6727444385437,"y":410.9469410876133,"smooth":true,"attach":null},{"x":321.6793532778663,"y":271.4430702416918,"smooth":true,"attach":null},{"x":340.5912550893964,"y":246.44189010574019,"smooth":true,"attach":null},{"x":354.26329143801263,"y":302.7520770392749,"smooth":true,"attach":null},{"x":363.0613087862158,"y":382.6531816465257,"smooth":true,"attach":null},{"x":326.0931138254558,"y":452.818164652568,"smooth":true,"attach":null},{"x":267.26264235557915,"y":457.97535876132935,"smooth":false,"attach":null},{"x":273.77182174423245,"y":626.6173981736738,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.32103288562990706}}],"gates":[{"t":0.954874296376502,"w":28}]},{"color":"#ffffff","points":[{"x":272.79587108759057,"y":601.3321357350919,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.9857661413097677}},{"x":377.5771522983419,"y":556.3455910120846,"smooth":false,"attach":null},{"x":411.0462028677642,"y":535.0736404833837,"smooth":false,"attach":null},{"x":451.141795007966,"y":531.6276435045318,"smooth":false,"attach":null},{"x":474.8923113235381,"y":550.8697601963746,"smooth":true,"attach":null},{"x":509.7480380008261,"y":515.0644354229607,"smooth":false,"attach":null},{"x":523.2371511181921,"y":417.7681268882175,"smooth":false,"attach":null},{"x":546.9109576916268,"y":414.8944958459215,"smooth":true,"attach":null},{"x":580.4331150056057,"y":416.90072696374625,"smooth":false,"attach":null},{"x":587.0065498318287,"y":449.4252737915408,"smooth":true,"attach":null},{"x":586.0093231840443,"y":515.0054286253777,"smooth":false,"attach":null},{"x":609.7834424971971,"y":513.0109988670695,"smooth":false,"attach":null},{"x":627.6155071694105,"y":460.4536442598187,"smooth":true,"attach":null},{"x":643.099073582345,"y":469.688208081571,"smooth":false,"attach":null},{"x":657.2608721307606,"y":505.4876321752266,"smooth":false,"attach":null},{"x":696.2530241340651,"y":560.3344505287009,"smooth":true,"attach":null},{"x":764,"y":576.5318164652567,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5949368942139444}}],"gates":[{"t":0.9470040752414494,"w":28},{"t":0.16662973372281567,"w":28}]}],"shapes":[{"type":"circle","role":"playable","x":572.1710332212191,"y":188.75429569486406,"w":227.46450151057394,"h":227.46450151057394,"rotation":0,"color":"#ffffff","gates":[{"t":0.13608812250506622,"w":22}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[],"regionStyles":[{"seed":{"x":439.2460517903825,"y":323.9491274377623},"paint":"#a0eef8"},{"seed":{"x":571.4978715170279,"y":188.15924922600618},"paint":"#f7f026"},{"seed":{"x":232.44485761816225,"y":383.1203314088136},"paint":"#5ec987"},{"seed":{"x":586.2291903259727,"y":604.8883701366982},"paint":"#756461"},{"seed":{"x":374.4026468707427,"y":800.2204798843385},"paint":"#dbc248"}]}];
-let playerIndex=0,level=null;
 
 function pushHistory(){history.push(clone(level));if(history.length>100)history.shift();future=[];updateUndoRedo()}
 function updateUndoRedo(){$('undoBtn').disabled=!history.length;$('redoBtn').disabled=!future.length}
 
-// Curve model: each segment is cubic. At a smooth interior vertex the incoming/outgoing tangents align.
-// At a corner vertex each adjacent segment approaches on its own chord, giving a genuine sharp angle.
-function segmentControls(points,i){
-  const p0=points[i],p1=points[i+1],seg=dist(p0,p1)||1,k=.30;let c0,c1;
-  if(p0.smooth&&i>0){const prev=points[i-1],vx=p1.x-prev.x,vy=p1.y-prev.y,L=Math.hypot(vx,vy)||1,h=Math.min(dist(prev,p0),seg)*.34;c0={x:p0.x+vx/L*h,y:p0.y+vy/L*h}}else c0={x:p0.x+(p1.x-p0.x)*k,y:p0.y+(p1.y-p0.y)*k};
-  if(p1.smooth&&i+1<points.length-1){const next=points[i+2],vx=next.x-p0.x,vy=next.y-p0.y,L=Math.hypot(vx,vy)||1,h=Math.min(seg,dist(p1,next))*.34;c1={x:p1.x-vx/L*h,y:p1.y-vy/L*h}}else c1={x:p1.x-(p1.x-p0.x)*k,y:p1.y-(p1.y-p0.y)*k};
-  return{c0,c1};
-}
-function dividerPath(points){if(points.length<2)return'';let d=`M${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;for(let i=0;i<points.length-1;i++){const p1=points[i+1],{c0,c1}=segmentControls(points,i);d+=` C${c0.x.toFixed(2)} ${c0.y.toFixed(2)} ${c1.x.toFixed(2)} ${c1.y.toFixed(2)} ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`}return d}
-function flattenDivider(d,step=4){const pts=d.points,out=[{x:pts[0].x,y:pts[0].y,seg:0}];for(let i=0;i<pts.length-1;i++){const p0=pts[i],p1=pts[i+1],{c0,c1}=segmentControls(pts,i),approx=dist(p0,c0)+dist(c0,c1)+dist(c1,p1),n=Math.max(3,Math.ceil(approx/step));for(let k=1;k<=n;k++){const t=k/n,u=1-t;out.push({x:u*u*u*p0.x+3*u*u*t*c0.x+3*u*t*t*c1.x+t*t*t*p1.x,y:u*u*u*p0.y+3*u*u*t*c0.y+3*u*t*t*c1.y+t*t*t*p1.y,seg:i})}}return out}
-function polyLength(p){let L=0;for(let i=1;i<p.length;i++)L+=dist(p[i-1],p[i]);return L}
-function polyMetrics(poly){const cum=new Float64Array(poly.length);let L=0;for(let i=1;i<poly.length;i++){L+=dist(poly[i-1],poly[i]);cum[i]=L}return{cum,L}}
-function pointAtDistance(poly,m,d){d=clamp(d,0,m.L);let lo=1,hi=poly.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(m.cum[mid]<d)lo=mid+1;else hi=mid}const i=lo,a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,t=(d-m.cum[i-1])/seg;return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}}
-function pointTangentAt(poly,t){const m=polyMetrics(poly),target=clamp(t,0,1)*m.L;let i=1;while(i<poly.length-1&&m.cum[i]<target)i++;const a=poly[i-1],b=poly[i],seg=m.cum[i]-m.cum[i-1]||1,s=(target-m.cum[i-1])/seg;return{p:{x:a.x+(b.x-a.x)*s,y:a.y+(b.y-a.y)*s},v:{x:b.x-a.x,y:b.y-a.y},length:m.L}}
-function nearestT(poly,p){const total=polyLength(poly)||1;let acc=0,best={d:1e99,t:0,p:poly[0],seg:0};for(let i=1;i<poly.length;i++){const a=poly[i-1],b=poly[i],dx=b.x-a.x,dy=b.y-a.y,L=dist(a,b)||1,u=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(L*L),0,1),q={x:a.x+dx*u,y:a.y+dy*u},dd=(q.x-p.x)**2+(q.y-p.y)**2;if(dd<best.d)best={d:dd,t:(acc+L*u)/total,p:q,seg:b.seg??a.seg??0};acc+=L}return best}
-function gateIntervals(d,poly){const L=polyLength(poly),raw=d.gates.map(g=>[clamp(g.t*L-g.w/2,0,L),clamp(g.t*L+g.w/2,0,L)]).sort((a,b)=>a[0]-b[0]),merged=[];for(const iv of raw){if(!merged.length||iv[0]>merged[merged.length-1][1])merged.push(iv.slice());else merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],iv[1])}return{L,merged}}
-function subPolyline(poly,m,a,b){if(b-a<.01)return[];const out=[pointAtDistance(poly,m,a)];for(let i=1;i<poly.length-1;i++)if(m.cum[i]>a&&m.cum[i]<b)out.push({x:poly[i].x,y:poly[i].y});out.push(pointAtDistance(poly,m,b));return out}
-function visibleRuns(d,step=1.25){const poly=flattenDivider(d,step),m=polyMetrics(poly),{merged}=gateIntervals(d,poly),runs=[];let pos=0;for(const[a,b]of merged){if(a>pos+.01)runs.push(subPolyline(poly,m,pos,a));pos=Math.max(pos,b)}if(pos<m.L-.01)runs.push(subPolyline(poly,m,pos,m.L));return runs.filter(r=>r.length>1)}
-function runsPath(runs){let d='';for(const run of runs){d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;for(let i=1;i<run.length;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`}return d}
-
-function createsAttachCycle(child,target){let stack=[target],seen=new Set();while(stack.length){const d=stack.pop();if(d===child)return true;if(seen.has(d))continue;seen.add(d);for(const p of level.dividers[d].points)if(p.attach?.type==='divider')stack.push(p.attach.divider)}return false}
-function resolveAttachments(){
-  for(let pass=0;pass<level.dividers.length+3;pass++){
-    for(let di=0;di<level.dividers.length;di++){
-      const d=level.dividers[di];
-      for(const pi of[0,d.points.length-1]){
-        const p=d.points[pi],a=p.attach;if(!a)continue;
-        if(a.type==='white'||a.type==='circle'){
-          const node=clamp(a.node??0,0,Math.max(0,level.whites.length-1)),o=level.whites[node];
-          if(!o)continue;
-          const wp=whiteBoundary(o,160),wc=wp.concat([wp[0]]);
-          if(a.type==='circle'){
-            const oldAngle=a.angle??0,q={x:o.x+o.w/2*Math.cos(rad(oldAngle)),y:o.y+o.h/2*Math.sin(rad(oldAngle))},hit=nearestT(wc,q);
-            a.type='white';a.node=node;a.t=hit.t;delete a.angle;
-          }
-          const q=pointTangentAt(wc,a.t).p;p.x=q.x;p.y=q.y;
-        }else if(a.type==='border'){
-          const q=pointFromBorderAttachment(a,level.board);p.x=q.x;p.y=q.y;
-        }else if(a.type==='divider'&&a.divider!==di&&level.dividers[a.divider]){
-          const q=pointTangentAt(flattenDivider(level.dividers[a.divider],2),a.t).p;p.x=q.x;p.y=q.y;
-        }
-      }
-    }
-  }
-}
-function snapEndpoint(pos,di){const b=level.board,candidates=[],wh=whiteHit(pos);candidates.push({d:wh.d,p:wh.p,attach:{type:'white',t:wh.t}});const ba=borderAttachment(pos,b),bq=pointFromBorderAttachment(ba,b);candidates.push({d:dist(pos,bq),p:bq,attach:ba});for(let j=0;j<level.dividers.length;j++){if(j===di||createsAttachCycle(di,j))continue;const hit=nearestT(flattenDivider(level.dividers[j],2),pos);candidates.push({d:Math.sqrt(hit.d),p:hit.p,attach:{type:'divider',divider:j,t:hit.t}})}candidates.sort((a,b)=>a.d-b.d);return candidates[0].d<=22?candidates[0]:{d:999,p:pos,attach:null}}
-function dividerRanks(){const rank=new Array(level.dividers.length).fill(0);for(let k=0;k<level.dividers.length*2;k++){let changed=false;for(let child=0;child<level.dividers.length;child++){for(const p of level.dividers[child].points){const a=p.attach;if(a?.type==='divider'&&a.divider!==child&&rank[a.divider]<=rank[child]){rank[a.divider]=rank[child]+1;changed=true}}}if(!changed)break}return[...level.dividers.keys()].sort((a,b)=>rank[a]-rank[b])}
-
-
-function labelNearPoint(labels,GW,GH,sx,sy,p,maxR=28){
-  const cx=Math.round(p.x*sx),cy=Math.round(p.y*sy);
-  for(let r=0;r<=Math.max(2,Math.round(maxR*sx));r++){
-    for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){
-      if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;
-      const x=cx+xx,y=cy+yy;if(x<0||y<0||x>=GW||y>=GH)continue;
-      const z=labels[y*GW+x];if(z>0)return z;
-    }
-  }
-  return 0;
-}
-
-/* v21 runtime geometry override */
+/* ---------- geometry ---------- */
 function rotateLocal(x,y,o){const a=rad(o.rotation||0),c=Math.cos(a),s=Math.sin(a);return{x:o.x+x*c-y*s,y:o.y+x*s+y*c}}
+function shapeRatio(s){
+  if(s.type==='circle')return 1;
+  return Number.isFinite(s.aspectRatio)&&s.aspectRatio>0?s.aspectRatio:Math.max(.01,(s.w||120)/(s.h||120));
+}
+function resizeShapeWidth(s,newW,ratio=shapeRatio(s)){
+  let w=clamp(+newW||30,30,500);
+  if(s.type==='circle'){s.w=w;s.h=w;s.aspectRatio=1;return}
+  if(s.lockRatio){
+    let h=w/ratio;if(h>500){h=500;w=h*ratio}if(h<30){h=30;w=h*ratio}
+    s.w=clamp(w,30,500);s.h=clamp(h,30,500);s.aspectRatio=ratio;
+  }else{s.w=w;s.aspectRatio=s.w/Math.max(1,s.h)}
+}
+function resizeShapeHeight(s,newH,ratio=shapeRatio(s)){
+  let h=clamp(+newH||30,30,500);
+  if(s.type==='circle'){s.h=h;s.w=h;s.aspectRatio=1;return}
+  if(s.lockRatio){
+    let w=h*ratio;if(w>500){w=500;h=w/ratio}if(w<30){w=30;h=w/ratio}
+    s.w=clamp(w,30,500);s.h=clamp(h,30,500);s.aspectRatio=ratio;
+  }else{s.h=h;s.aspectRatio=s.w/Math.max(1,s.h)}
+}
 function borderAttachment(p,b){
   const ds=[
     {edge:'left',d:Math.abs(p.x-b.x),t:(p.y-b.y)/b.h},
@@ -371,6 +363,7 @@ function pointFromBorderAttachment(a,b){
   if(a.edge==='top')return{x:b.x+b.w*a.t,y:b.y};
   return{x:b.x+b.w*a.t,y:b.y+b.h};
 }
+
 function dividerPath(points){
   if(!points.length)return'';
   let d=`M${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`,p0=points[0];
@@ -426,6 +419,21 @@ function gateIntervals(gates,L,closed=false){
   return merged;
 }
 function subPolyline(poly,m,a,b){if(b-a<.01)return[];const out=[pointAtDistance(poly,m,a)];for(let i=1;i<poly.length-1;i++)if(m.cum[i]>a&&m.cum[i]<b)out.push({x:poly[i].x,y:poly[i].y});out.push(pointAtDistance(poly,m,b));return out}
+function concatPolyline(a,b){
+  if(!a.length)return b.slice();if(!b.length)return a.slice();
+  const out=a.slice(),p=out[out.length-1],q=b[0],start=Math.hypot(p.x-q.x,p.y-q.y)<.01?1:0;
+  for(let i=start;i<b.length;i++)out.push(b[i]);
+  return out
+}
+function gateLeafClosedPath(poly,g,closed=false){
+  const m=polyMetrics(poly),L=m.L;if(L<.01)return[];
+  const c=clamp(g.t,0,1)*L,h=Math.min((g.w||28)/2,L/2);
+  if(!closed)return subPolyline(poly,m,clamp(c-h,0,L),clamp(c+h,0,L));
+  let a=c-h,b=c+h;
+  if(a>=0&&b<=L)return subPolyline(poly,m,a,b);
+  if(a<0)return concatPolyline(subPolyline(poly,m,L+a,L),subPolyline(poly,m,0,b));
+  return concatPolyline(subPolyline(poly,m,a,L),subPolyline(poly,m,0,b-L))
+}
 function visibleRunsFromPoly(poly,gates,closed=false){
   const m=polyMetrics(poly),merged=gateIntervals(gates,m.L,closed),runs=[];let pos=0;
   for(const[a,b]of merged){if(a>pos+.01)runs.push(subPolyline(poly,m,pos,a));pos=Math.max(pos,b)}
@@ -434,6 +442,7 @@ function visibleRunsFromPoly(poly,gates,closed=false){
 }
 function visibleDividerRuns(d){return visibleRunsFromPoly(flattenDivider(d,1.25),d.gates,false)}
 function runsPath(runs){let d='';for(const run of runs){d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;for(let i=1;i<run.length;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`}return d}
+
 function shapeBoundary(s,quality=160){
   const pts=[],w=Math.max(20,s.w||120),h=Math.max(20,s.h||120),rx=w/2,ry=h/2,type=s.type||'circle';
   if(type==='circle'){
@@ -459,7 +468,14 @@ function shapeBoundary(s,quality=160){
 function shapeLoop(s,quality=200){const p=shapeBoundary(s,quality);return p.length?p.concat([{x:p[0].x,y:p[0].y}]):[]}
 function shapePath(s){const p=shapeBoundary(s,180);if(!p.length)return'';let d=`M${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;for(let i=1;i<p.length;i++)d+=` L${p[i].x.toFixed(2)} ${p[i].y.toFixed(2)}`;return d+' Z'}
 function visibleShapeRuns(s){return visibleRunsFromPoly(shapeLoop(s,260),s.gates||[],true)}
+function shapeHit(si,pos){const loop=shapeLoop(level.shapes[si],220),hit=nearestT(loop,pos);return{d:Math.sqrt(hit.d),p:hit.p,t:hit.t}}
 function shapePointAt(si,t){const loop=shapeLoop(level.shapes[si],220);return loop.length?pointTangentAt(loop,t).p:null}
+
+function createsAttachCycle(child,target){
+  let stack=[target],seen=new Set();
+  while(stack.length){const d=stack.pop();if(d===child)return true;if(seen.has(d))continue;seen.add(d);for(const p of level.dividers[d].points)if(p.attach?.type==='divider')stack.push(p.attach.divider)}
+  return false
+}
 function dividerRanks(){
   const rank=new Array(level.dividers.length).fill(0);
   for(let k=0;k<level.dividers.length*2;k++){
@@ -487,6 +503,16 @@ function resolveAttachments(){
     }
   }
 }
+function snapEndpoint(pos,di){
+  const b=level.board,candidates=[];
+  const ba=borderAttachment(pos,b),bq=pointFromBorderAttachment(ba,b);candidates.push({d:dist(pos,bq),p:bq,attach:ba});
+  for(let j=0;j<level.dividers.length;j++){if(j===di||createsAttachCycle(di,j))continue;const hit=nearestT(flattenDivider(level.dividers[j],2),pos);candidates.push({d:Math.sqrt(hit.d),p:hit.p,attach:{type:'divider',divider:j,t:hit.t}})}
+  for(let si=0;si<level.shapes.length;si++){const h=shapeHit(si,pos);candidates.push({d:h.d,p:h.p,attach:{type:'shape',shape:si,t:h.t}})}
+  candidates.sort((a,b)=>a.d-b.d);
+  return candidates[0]&&candidates[0].d<=22?candidates[0]:{d:999,p:pos,attach:null}
+}
+
+/* ---------- compiler ---------- */
 function labelNearPoint(labels,GW,GH,sx,sy,p,maxWorld=30){
   const cx=Math.round(p.x*sx),cy=Math.round(p.y*sy),maxR=Math.max(3,Math.round(maxWorld*Math.max(sx,sy)));
   for(let r=0;r<=maxR;r++){
@@ -497,24 +523,6 @@ function labelNearPoint(labels,GW,GH,sx,sy,p,maxWorld=30){
     }
   }
   return 0;
-}
-function sampleGate(labels,GW,GH,sx,sy,pt){
-  const L=Math.hypot(pt.v.x,pt.v.y)||1,nx=-pt.v.y/L,ny=pt.v.x/L;
-  let a=0,b=0;
-  for(const off of[8,11,14,18,22,27,34]){
-    const p1={x:pt.p.x+nx*off,y:pt.p.y+ny*off},p2={x:pt.p.x-nx*off,y:pt.p.y-ny*off};
-    const x1=Math.round(p1.x*sx),y1=Math.round(p1.y*sy),x2=Math.round(p2.x*sx),y2=Math.round(p2.y*sy);
-    if(x1>=0&&y1>=0&&x1<GW&&y1<GH)a=labels[y1*GW+x1];
-    if(x2>=0&&y2>=0&&x2<GW&&y2<GH)b=labels[y2*GW+x2];
-    if(a&&b&&a!==b)break;
-  }
-  return{a,b}
-}
-function drawShapeToCanvas(x,s,fill,stroke,width=10){
-  const p=shapeBoundary(s,220);if(!p.length)return;
-  x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.closePath();
-  if(fill){x.fillStyle=fill;x.fill()}
-  if(stroke){x.strokeStyle=stroke;x.lineWidth=width;x.lineJoin='round';x.lineCap='butt';x.stroke()}
 }
 function syncRegionStyles(labels,sizes,comp,GW,GH,sx,sy){
   ensureLevel();
@@ -538,6 +546,24 @@ function syncRegionStyles(labels,sizes,comp,GW,GH,sx,sy){
   }
   level.regionStyles=next;
   return{styleByLabel,styleIndexByLabel};
+}
+function drawShapeToCanvas(x,s,fill,stroke,width=10){
+  const p=shapeBoundary(s,220);if(!p.length)return;
+  x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.closePath();
+  if(fill){x.fillStyle=fill;x.fill()}
+  if(stroke){x.strokeStyle=stroke;x.lineWidth=width;x.lineJoin='round';x.lineCap='butt';x.stroke()}
+}
+function sampleGate(labels,GW,GH,sx,sy,pt){
+  const L=Math.hypot(pt.v.x,pt.v.y)||1,nx=-pt.v.y/L,ny=pt.v.x/L;
+  let a=0,b=0;
+  for(const off of[8,11,14,18,22,27,34]){
+    const p1={x:pt.p.x+nx*off,y:pt.p.y+ny*off},p2={x:pt.p.x-nx*off,y:pt.p.y-ny*off};
+    const x1=Math.round(p1.x*sx),y1=Math.round(p1.y*sy),x2=Math.round(p2.x*sx),y2=Math.round(p2.y*sy);
+    if(x1>=0&&y1>=0&&x1<GW&&y1<GH)a=labels[y1*GW+x1];
+    if(x2>=0&&y2>=0&&x2<GW&&y2<GH)b=labels[y2*GW+x2];
+    if(a&&b&&a!==b)break;
+  }
+  return{a,b}
 }
 function compileLevel(highRes=false){
   ensureLevel();resolveAttachments();
@@ -583,7 +609,7 @@ function compileLevel(highRes=false){
     const d=level.dividers[di],poly=flattenDivider(d,2);if(poly.length<2)continue;
     for(let gi=0;gi<d.gates.length;gi++){
       const g=d.gates[gi],pt=pointTangentAt(poly,g.t),ab=sampleGate(labels,GW,GH,sx,sy,pt);
-      const info={kind:'divider',divider:di,gate:gi,a:ab.a,b:ab.b,p:pt.p,v:pt.v,w:g.w,t:g.t};
+      const info={kind:'divider',divider:di,gate:gi,key:`d:${di}:${gi}`,a:ab.a,b:ab.b,p:pt.p,v:pt.v,w:g.w,t:g.t,mode:g.mode||'open',hingeEnd:g.hingeEnd||'start',swingSide:+g.swingSide===-1?-1:1,initialAngle:45,maxAngle:120,color:d.color||'#fff',closedPath:gateLeafClosedPath(poly,g,false)};
       gateInfos.push(info);if(ab.a&&ab.b&&ab.a!==ab.b){gateCount[ab.a]++;gateCount[ab.b]++;addAdj(ab.a,ab.b);addAdj(ab.b,ab.a)}
     }
   }
@@ -592,7 +618,7 @@ function compileLevel(highRes=false){
     const loop=shapeLoop(s,260);if(loop.length<2)continue;
     for(let gi=0;gi<s.gates.length;gi++){
       const g=s.gates[gi],pt=pointTangentAt(loop,g.t),ab=sampleGate(labels,GW,GH,sx,sy,pt);
-      const info={kind:'shape',shape:si,gate:gi,a:ab.a,b:ab.b,p:pt.p,v:pt.v,w:g.w,t:g.t};
+      const info={kind:'shape',shape:si,gate:gi,key:`s:${si}:${gi}`,a:ab.a,b:ab.b,p:pt.p,v:pt.v,w:g.w,t:g.t,mode:g.mode||'open',hingeEnd:g.hingeEnd||'start',swingSide:+g.swingSide===-1?-1:1,initialAngle:45,maxAngle:120,color:s.color||'#fff',closedPath:gateLeafClosedPath(loop,g,true)};
       gateInfos.push(info);if(ab.a&&ab.b&&ab.a!==ab.b){gateCount[ab.a]++;gateCount[ab.b]++;addAdj(ab.a,ab.b);addAdj(ab.b,ab.a)}
     }
   }
@@ -607,7 +633,7 @@ function compileLevel(highRes=false){
   const activeIds=[],excludedIds=[];
   for(let id=1;id<=comp;id++)(gateCount[id]>0?activeIds:excludedIds).push(id);
   const activeMap=new Map(activeIds.map((id,i)=>[id,i+1]));
-  const activeColors=activeIds.map((id,i)=>level.__legacyPaletteMode?(level.palette.paints?.[i]||styleByLabel[id]?.paint||PAINTS[i%PAINTS.length]):(styleByLabel[id]?.paint||level.palette.paints?.[i]||PAINTS[i%PAINTS.length]));
+  const activeColors=activeIds.map(id=>styleByLabel[id]?.paint||PAINTS[(id-1)%PAINTS.length]);
 
   // extend zone ownership underneath visible wall strokes, but not into static obstacle shapes.
   const obstacle=document.createElement('canvas');obstacle.width=GW;obstacle.height=GH;const ox=obstacle.getContext('2d',{willReadFrequently:true});
@@ -662,8 +688,10 @@ function compileLevel(highRes=false){
       vx.lineWidth=10;for(const run of visibleShapeRuns(s)){vx.beginPath();vx.moveTo(run[0].x,run[0].y);for(let k=1;k<run.length;k++)vx.lineTo(run[k].x,run[k].y);vx.stroke()}
     }else drawShapeToCanvas(vx,s,'#fff',null,0);
   }
-  vx.lineWidth=5;for(const p of level.portals)for(const q0 of[p.a,p.b]){vx.beginPath();vx.arc(q0.x,q0.y,p.radius||13,0,Math.PI*2);vx.stroke()}
   vx.lineWidth=10;vx.strokeRect(b.x,b.y,b.w,b.h);vx.restore();
+  const wallPixels=vx.getImageData(0,0,GW,GH).data,doorWallMask=new Uint8Array(GW*GH);
+  for(let i=0;i<doorWallMask.length;i++)doorWallMask[i]=wallPixels[i*4+3]>24?1:0;
+  vx.save();vx.scale(sx,sy);vx.strokeStyle='#fff';vx.lineWidth=5;for(const p of level.portals)for(const q0 of[p.a,p.b]){vx.beginPath();vx.arc(q0.x,q0.y,p.radius||13,0,Math.PI*2);vx.stroke()}vx.restore();
   const od=vx.getImageData(0,0,GW,GH).data,visibility=new Uint8Array(GW*GH);
   for(let i=0;i<visibility.length;i++)visibility[i]=regionMap[i]>0?255-od[i*4+3]:0;
 
@@ -680,26 +708,22 @@ function compileLevel(highRes=false){
 
   const total=sizes.reduce((a,b)=>a+(b||0),0),regionAreas=[];
   for(let id=1;id<=comp;id++)regionAreas.push({id,pct:total?100*sizes[id]/total:0,active:activeMap.has(id),activeIndex:activeMap.get(id)||0,paint:styleByLabel[id]?.paint||PAINTS[(id-1)%PAINTS.length],seed:styleByLabel[id]?.seed});
-  compiled={valid:errors.length===0,errors,GW,GH,labels,regionMap,visibility,tinyRegions,totalRegions:comp,activeCount:activeIds.length,activeIds,excludedIds,activeMap,activeColors,gateInfos,portalInfos,portalCellMap,portalSeeds,regionAreas,styleByLabel,styleIndexByLabel};
-  buildPreview();renderHeader();return compiled;
+  compiled={valid:errors.length===0,errors,GW,GH,labels,regionMap,visibility,doorWallMask,tinyRegions,totalRegions:comp,activeCount:activeIds.length,activeIds,excludedIds,activeMap,activeColors,gateInfos,portalInfos,portalCellMap,portalSeeds,regionAreas,styleByLabel,styleIndexByLabel};
+  buildPreview();renderHeader();renderInspector();return compiled;
 }
+
 function buildPreview(){
   if(!compiled)return;
-  const{GW,GH,regionMap}=compiled,N=GW*GH;
-  const c=document.createElement('canvas');c.width=GW;c.height=GH;
-  const x=c.getContext('2d'),im=x.createImageData(GW,GH);
-  const base=im.data,ownerTemplate=new Int16Array(N);ownerTemplate.fill(-99);
-  const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;
-  for(let i=0;i<N;i++){
-    const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h;
-    const cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;
-    if(z>0)ownerTemplate[i]=-1;else if(z===-1)ownerTemplate[i]=-2;
-    base[j]=cc[0];base[j+1]=cc[1];base[j+2]=cc[2];base[j+3]=255;
+  const c=document.createElement('canvas');c.width=compiled.GW;c.height=compiled.GH;const x=c.getContext('2d'),im=x.createImageData(c.width,c.height),out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=compiled.GW/W,sy=compiled.GH/H;
+  const pristineBlank=level.dividers.length===0&&level.shapes.length===0&&level.portals.length===0;
+  for(let i=0;i<compiled.regionMap.length;i++){
+    const z=compiled.regionMap[i],px=i%compiled.GW,py=(i/compiled.GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?(pristineBlank?unf:ex):(insideBoard?white:out)),j=i*4;
+    im.data[j]=cc[0];im.data[j+1]=cc[1];im.data[j+2]=cc[2];im.data[j+3]=255;
   }
-  compiled.ownerTemplate=ownerTemplate;
-  compiled.basePixels=new Uint8ClampedArray(base);
   x.putImageData(im,0,0);previewCanvas=c;
 }
+
+/* ---------- render ---------- */
 function renderVector(){
   ensureLevel();resolveAttachments();const b=level.board;let lines='',playShapes='',obstacles='',portals='';
   for(const di of dividerRanks()){
@@ -711,22 +735,652 @@ function renderVector(){
     }else obstacles+=`<path d="${shapePath(s)}" fill="${s.color||'#fff'}"/>`;
   }
   for(const p of level.portals)for(const q of[p.a,p.b])portals+=`<circle cx="${q.x}" cy="${q.y}" r="${p.radius||13}" fill="none" stroke="${p.color||'#fff'}" stroke-width="5"/>`;
-  vector.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><clipPath id="boardClip"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/></clipPath></defs><g clip-path="url(#boardClip)">${lines}${playShapes}${obstacles}${portals}</g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-width="10"/></svg>`;
+  // Hinged-door visuals live entirely in this SVG vector layer. Their raster
+  // footprints remain simulation-only and are never used to construct visible geometry.
+  vector.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><clipPath id="boardClip"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/></clipPath></defs><g clip-path="url(#boardClip)">${lines}${playShapes}${obstacles}${portals}<g id="hingeDoorLayer">${hingeDoorMarkup()}</g></g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-width="10"/></svg>`;
 }
-function renderEditor(){resolveAttachments();editorSvg.innerHTML='';if(mode!=='edit')return;for(let di=0;di<level.dividers.length;di++)editorSvg.appendChild(svgEl('path',{d:dividerPath(level.dividers[di].points),class:'selectLine','data-line':di}));editorSvg.appendChild(svgEl('path',{d:whitePath(),fill:'transparent',stroke:'transparent','stroke-width':20,'data-white':'1',style:'pointer-events:auto;cursor:pointer'}));const di=selected.d??0;if(['divider','point','gate'].includes(selected.type)&&level.dividers[di]){const d=level.dividers[di];for(let pi=0;pi<d.points.length;pi++){const p=d.points[pi];if(pi>0){const a=d.points[pi-1];editorSvg.appendChild(svgEl('line',{x1:a.x,y1:a.y,x2:p.x,y2:p.y,class:'helper'}))}const attrs={'data-role':'point','data-d':di,'data-p':pi,class:`h-point ${p.smooth?'h-smooth':'h-corner'}`};if(p.smooth)editorSvg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:(pi===0||pi===d.points.length-1)?8:7,...attrs}));else editorSvg.appendChild(svgEl('rect',{x:p.x-6.5,y:p.y-6.5,width:13,height:13,rx:1.2,...attrs}))}d.gates.forEach((g,gi)=>{const q=pointTangentAt(flattenDivider(d,2),g.t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:8,class:'h-gate','data-role':'gate','data-d':di,'data-g':gi}))})}if(selected.type==='point'){const p=level.dividers[selected.d].points[selected.p];editorSvg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:12,class:'selectedRing'}))}if(selected.type==='gate'){const g=level.dividers[selected.d].gates[selected.g],q=pointTangentAt(flattenDivider(level.dividers[selected.d],2),g.t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:12,class:'selectedRing'}))}if(selected.type==='white'){const o=level.white;editorSvg.appendChild(svgEl('circle',{cx:o.x,cy:o.y,r:9,class:'h-point','data-role':'whiteMove'}));const wr=rotateLocal(o.w/2,0,o),hr=rotateLocal(0,o.h/2,o),rr=rotateLocal(0,-o.h/2-42,o);editorSvg.appendChild(svgEl('circle',{cx:wr.x,cy:wr.y,r:8,class:'h-point h-smooth','data-role':'whiteWidth'}));editorSvg.appendChild(svgEl('circle',{cx:hr.x,cy:hr.y,r:8,class:'h-point h-smooth','data-role':'whiteHeight'}));editorSvg.appendChild(svgEl('circle',{cx:rr.x,cy:rr.y,r:8,class:'h-gate','data-role':'whiteRotate'}));editorSvg.appendChild(svgEl('line',{x1:o.x,y1:o.y,x2:rr.x,y2:rr.y,class:'helper'}))}if(compiled?.tinyRegions?.length){for(const tr of compiled.tinyRegions){editorSvg.appendChild(svgEl('circle',{cx:tr.x,cy:tr.y,r:13,fill:'rgba(223,84,61,.14)',stroke:'#df543d','stroke-width':2,'pointer-events':'none'}));editorSvg.appendChild(svgEl('line',{x1:tr.x-7,y1:tr.y,x2:tr.x+7,y2:tr.y,stroke:'#df543d','stroke-width':2,'pointer-events':'none'}));editorSvg.appendChild(svgEl('line',{x1:tr.x,y1:tr.y-7,x2:tr.x,y2:tr.y+7,stroke:'#df543d','stroke-width':2,'pointer-events':'none'}))}}}
-function attachmentLabel(a){if(!a)return'Free endpoint';if(a.type==='white'||a.type==='circle')return'Attached to white object';if(a.type==='border')return`Attached to ${a.edge} border`;if(a.type==='divider')return`Attached to divider ${a.divider+1}`;return''}
-function renderHeader(){$('levelValue').textContent=`LEVEL ${level.level}`;$('sublevel').textContent='';$('targetReadout').textContent=Number(level.target).toFixed(1)+'%';$('targetInput').value=Number(level.target).toFixed(1);$('seedCount').value=String(level.dividers.length)}
+function svgEl(name,attrs={}){const e=document.createElementNS('http://www.w3.org/2000/svg',name);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e}
+function renderEditor(){
+  editorSvg.innerHTML='';if(mode!=='edit')return;
+  const b=level.board;
+  editorSvg.appendChild(svgEl('rect',{x:b.x,y:b.y,width:b.w,height:b.h,fill:'rgba(0,0,0,.001)','data-role':'regionPick',style:'pointer-events:all;cursor:default'}));
+
+  for(let di=0;di<level.dividers.length;di++)editorSvg.appendChild(svgEl('path',{d:dividerPath(level.dividers[di].points),class:'selectLine','data-line':di}));
+  for(let si=0;si<level.shapes.length;si++)editorSvg.appendChild(svgEl('path',{d:shapePath(level.shapes[si]),class:'selectShape','data-shape':si}));
+  for(let pi=0;pi<level.portals.length;pi++){const p=level.portals[pi];for(const end of['a','b']){const q=p[end];editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:Math.max(18,(p.radius||13)+9),fill:'rgba(0,0,0,.001)',stroke:'transparent','data-role':'portalMove','data-portal':pi,'data-end':end,style:'pointer-events:all;cursor:grab;touch-action:none'}))}}
+
+  const di=selected.d??-1;
+  if(['divider','point','gate'].includes(selected.type)&&level.dividers[di]){
+    const d=level.dividers[di];
+    for(let pi=0;pi<d.points.length;pi++){
+      const p=d.points[pi];if(pi>0){const a=d.points[pi-1];editorSvg.appendChild(svgEl('line',{x1:a.x,y1:a.y,x2:p.x,y2:p.y,class:'helper'}))}
+      const attrs={'data-role':'point','data-d':di,'data-p':pi,class:`h-point ${p.smooth?'h-smooth':'h-corner'}`};
+      if(p.smooth)editorSvg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:(pi===0||pi===d.points.length-1)?8:7,...attrs}));
+      else editorSvg.appendChild(svgEl('rect',{x:p.x-6.5,y:p.y-6.5,width:13,height:13,rx:1.2,...attrs}));
+    }
+    d.gates.forEach((g,gi)=>{const q=pointTangentAt(flattenDivider(d,2),g.t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:8,class:'h-gate','data-role':'gate','data-d':di,'data-g':gi}))});
+  }
+
+  if(selected.type==='point'&&level.dividers[selected.d]?.points[selected.p]){
+    const p=level.dividers[selected.d].points[selected.p];editorSvg.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:12,class:'selectedRing'}));
+  }
+  if(selected.type==='gate'&&level.dividers[selected.d]?.gates[selected.g]){
+    const q=pointTangentAt(flattenDivider(level.dividers[selected.d],2),level.dividers[selected.d].gates[selected.g].t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:12,class:'selectedRing'}));
+  }
+
+  const si=selected.shape??-1;
+  if(['shape','shapeGate'].includes(selected.type)&&level.shapes[si]){
+    const s=level.shapes[si],center={x:s.x,y:s.y},wr=rotateLocal((s.w||120)/2,0,s),hr=rotateLocal(0,(s.h||120)/2,s),rr=rotateLocal(0,-(s.h||120)/2-42,s);
+    editorSvg.appendChild(svgEl('circle',{cx:center.x,cy:center.y,r:9,class:'h-point','data-role':'shapeMove','data-shape':si}));
+    editorSvg.appendChild(svgEl('circle',{cx:wr.x,cy:wr.y,r:8,class:'h-point h-smooth','data-role':'shapeWidth','data-shape':si}));
+    editorSvg.appendChild(svgEl('circle',{cx:hr.x,cy:hr.y,r:8,class:'h-point h-smooth','data-role':'shapeHeight','data-shape':si}));
+    editorSvg.appendChild(svgEl('circle',{cx:rr.x,cy:rr.y,r:8,class:'h-gate','data-role':'shapeRotate','data-shape':si}));
+    editorSvg.appendChild(svgEl('line',{x1:s.x,y1:s.y,x2:rr.x,y2:rr.y,class:'helper'}));
+    if(s.role==='playable')s.gates.forEach((g,gi)=>{const q=pointTangentAt(shapeLoop(s,240),g.t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:8,class:'h-gate','data-role':'shapeGate','data-shape':si,'data-g':gi}))});
+  }
+  if(selected.type==='shapeGate'&&level.shapes[selected.shape]?.gates[selected.g]){
+    const q=pointTangentAt(shapeLoop(level.shapes[selected.shape],240),level.shapes[selected.shape].gates[selected.g].t).p;editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:12,class:'selectedRing'}));
+  }
+
+  if(selected.type==='portal'&&level.portals[selected.portal]){
+    const p=level.portals[selected.portal];
+    editorSvg.appendChild(svgEl('line',{x1:p.a.x,y1:p.a.y,x2:p.b.x,y2:p.b.y,stroke:'#df543d','stroke-width':1.5,'stroke-dasharray':'6 6','pointer-events':'none',opacity:.55}));
+    for(const end of['a','b']){const q=p[end];editorSvg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:11,class:'h-gate','data-role':'portalMove','data-portal':selected.portal,'data-end':end,style:'cursor:grab;pointer-events:all'}))}
+  }
+  if(selected.type==='region'&&selected.seed)editorSvg.appendChild(svgEl('circle',{cx:selected.seed.x,cy:selected.seed.y,r:6,class:'regionDot'}));
+  if(compiled?.tinyRegions)for(const tr of compiled.tinyRegions){
+    editorSvg.appendChild(svgEl('circle',{cx:tr.x,cy:tr.y,r:13,fill:'rgba(223,84,61,.14)',stroke:'#df543d','stroke-width':2,'pointer-events':'none'}));
+    editorSvg.appendChild(svgEl('line',{x1:tr.x-7,y1:tr.y,x2:tr.x+7,y2:tr.y,stroke:'#df543d','stroke-width':2,'pointer-events':'none'}));
+    editorSvg.appendChild(svgEl('line',{x1:tr.x,y1:tr.y-7,x2:tr.x,y2:tr.y+7,stroke:'#df543d','stroke-width':2,'pointer-events':'none'}));
+  }
+}
+function attachmentLabel(a){
+  if(!a)return'Free endpoint';
+  if(a.type==='border')return`Attached to ${a.edge} border`;
+  if(a.type==='divider')return`Attached to line ${a.divider+1}`;
+  if(a.type==='shape')return`Attached to shape ${a.shape+1}`;
+  return'Attached';
+}
+function currentGate(){
+  if(selected.type==='gate')return level.dividers[selected.d]?.gates[selected.g];
+  if(selected.type==='shapeGate')return level.shapes[selected.shape]?.gates[selected.g];
+  return null
+}
+
+function hingeInfoForSelection(){
+  if(!compiled)return null;
+  if(selected.type==='gate')return compiled.gateInfos.find(x=>x.kind==='divider'&&x.divider===selected.d&&x.gate===selected.g)||null;
+  if(selected.type==='shapeGate')return compiled.gateInfos.find(x=>x.kind==='shape'&&x.shape===selected.shape&&x.gate===selected.g)||null;
+  return null;
+}
+function rotateScreen(x,y,a){const c=Math.cos(a),q=Math.sin(a);return{x:x*c-y*q,y:x*q+y*c}}
+function hingeDoorGeometry(info,angle){
+  const L0=Math.hypot(info.v.x,info.v.y)||1,ux0=info.v.x/L0,uy0=info.v.y/L0,w=info.w||28;
+  let closed=(info.closedPath||[]).map(p=>({x:p.x,y:p.y}));
+  if(closed.length<2)closed=[
+    {x:info.p.x-ux0*w*.5,y:info.p.y-uy0*w*.5},
+    {x:info.p.x+ux0*w*.5,y:info.p.y+uy0*w*.5}
+  ];
+  const hinge=info.hingeEnd==='end'?closed[closed.length-1]:closed[0];
+  // A hinged leaf is rigid: its physical centreline is the chord between the
+  // two gate endpoints, not the sampled curve cut out of the parent wall.
+  // Keeping the original endpoint order preserves the hingeEnd reversal below.
+  const free=info.hingeEnd==='end'?closed[0]:closed[closed.length-1];
+  closed=info.hingeEnd==='end'?[free,hinge]:[hinge,free];
+  const signed=(+info.swingSide===-1?-1:1)*angle*Math.PI/180;
+  const points=closed.map(p=>{
+    const r=rotateScreen(p.x-hinge.x,p.y-hinge.y,signed);
+    return{x:hinge.x+r.x,y:hinge.y+r.y}
+  });
+  const travel=info.hingeEnd==='end'?points.slice().reverse():points.slice();
+  const cum=new Float64Array(travel.length);let len=0;
+  for(let i=1;i<travel.length;i++){len+=Math.hypot(travel[i].x-travel[i-1].x,travel[i].y-travel[i-1].y);cum[i]=len}
+  const tip=travel[travel.length-1],dx=tip.x-hinge.x,dy=tip.y-hinge.y;
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const p of points){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y)}
+  return{hinge,tip,points,travel,cum,dx,dy,len:len||w,minX,maxX,minY,maxY}
+}
+function doorGeomSample(g,t){
+  t=clamp(t,0,1);const target=t*g.len,pts=g.travel,cum=g.cum;
+  if(pts.length<2)return{p:g.hinge,v:{x:g.dx,y:g.dy}};
+  let i=1;while(i<pts.length-1&&cum[i]<target)i++;
+  const a=pts[i-1],b=pts[i],seg=(cum[i]-cum[i-1])||1,u=clamp((target-cum[i-1])/seg,0,1);
+  return{p:{x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u},v:{x:b.x-a.x,y:b.y-a.y}}
+}
+
+const DOOR_WIDTH=10,DOOR_HALF=DOOR_WIDTH*.5;
+const HINGE_FIXED_DT=1/120;
+const HINGE_TORQUE_TAU=.075;
+const HINGE_VELOCITY_TAU=.040;
+
+function rasterDoorCells(g){
+  const cells=new Set();
+  if(!compiled||!g?.travel?.length)return cells;
+  const{GW,GH}=compiled,cellX=W/GW,cellY=H/GH,cell=Math.min(cellX,cellY);
+  // Dense centreline/cross-section sampling in simulation space.
+  // Samples are closer than half a sim cell in both axes, so the result is
+  // contiguous while the first/last cross-sections remain true butt caps.
+  const sampleStep=cell*.42;
+  const alongN=Math.max(1,Math.ceil(g.len/sampleStep));
+  const crossN=Math.max(2,Math.ceil(DOOR_WIDTH/sampleStep));
+
+  for(let ai=0;ai<=alongN;ai++){
+    const s=doorGeomSample(g,ai/alongN),vl=Math.hypot(s.v.x,s.v.y)||1,nx=-s.v.y/vl,ny=s.v.x/vl;
+    for(let ci=0;ci<=crossN;ci++){
+      const off=-DOOR_HALF+DOOR_WIDTH*ci/crossN;
+      const wx=s.p.x+nx*off,wy=s.p.y+ny*off;
+      const x=Math.floor(wx/cellX),y=Math.floor(wy/cellY);
+      if(x>=0&&y>=0&&x<GW&&y<GH)cells.add(y*GW+x);
+    }
+  }
+  return cells
+}
+function installHingeFootprint(st,next){
+  if(!hingeCoverCount)return;
+  for(const i of st.coverCells||[])if(hingeCoverCount[i])hingeCoverCount[i]--;
+  for(const i of next)hingeCoverCount[i]++;
+  st.coverCells=next
+}
+function settledNeighbourSources(i){
+  const out=new Set(),{GW,GH}=compiled,x=i%GW,y=(i/GW)|0;
+  for(let yy=Math.max(0,y-1);yy<=Math.min(GH-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(GW-1,x+1);xx++){
+    if(xx===x&&yy===y)continue;
+    const j=yy*GW+xx,sid=owner[j];
+    if(sid<0)continue;
+    if(fmmParentTransitionAllowed(j,i))out.add(sid)
+  }
+  return out
+}
+function revalidateDoorTransitionBand(band,now){
+  if(!owner||!arrival||!trialSid||!trialParent)return new Set();
+  const candidates=[];
+  for(const i of band){
+    if(i<0||i>=owner.length||compiled.regionMap[i]<=0||owner[i]!==-1)continue;
+    arrival[i]=Infinity;trialSid[i]=-1;trialParent[i]=-1;candidates.push(i)
+  }
+  // Rebuild this local frontier exactly once under the new topology. The floor
+  // prevents an old neighbour arrival time from making newly opened space fill
+  // retroactively on the movement tick.
+  const unresolved=new Set();doorRelaxFloor=now;
+  for(const i of candidates){
+    const sids=settledNeighbourSources(i);
+    for(const sid of sids)relaxCell(i,sid);
+    if(!sids.size)unresolved.add(i)
+  }
+  doorRelaxFloor=-1;return unresolved
+}
+
+function pointDoorDistSq(px,py,g){
+  const pts=g.travel?.length?g.travel:g.points;
+  let best=Infinity;
+  for(let i=1;i<pts.length;i++){
+    const a=pts[i-1],b=pts[i],dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy;
+    if(L2<1e-9)continue;
+    const raw=((px-a.x)*dx+(py-a.y)*dy)/L2;
+    // The free tip is a butt cap: points beyond its tangent do not belong
+    // to the physical door. The hinge end may remain rounded into the wall.
+    if(i===pts.length-1&&raw>1)continue;
+    const t=clamp(raw,0,1),qx=a.x+dx*t,qy=a.y+dy*t,d2=(px-qx)**2+(py-qy)**2;
+    if(d2<best)best=d2;
+  }
+  return best
+}
+function segDoorDistSq(a,b,g){
+  const pts=g.travel?.length?g.travel:g.points;
+  // Exact centreline crossing first.
+  for(let i=1;i<pts.length;i++)if(segsCross(a,b,pts[i-1],pts[i]))return 0;
+  // FMM steps are sub-pixel-world sized, so endpoint + midpoint sampling
+  // gives a stable thick-door test without reintroducing a round free-tip cap.
+  const m={x:(a.x+b.x)*.5,y:(a.y+b.y)*.5};
+  return Math.min(pointDoorDistSq(a.x,a.y,g),pointDoorDistSq(b.x,b.y,g),pointDoorDistSq(m.x,m.y,g))
+}
+function hingeAngleForInfo(info){return mode==='play'?(hingeStates.get(info.key)?.angle??info.initialAngle??45):(info.initialAngle??45)}
+function hingeDrawInfos(){
+  if(mode==='play'&&compiled)return compiled.gateInfos||[];
+  const infos=[];
+  for(let di=0;di<level.dividers.length;di++){
+    const d=level.dividers[di],poly=flattenDivider(d,2);if(poly.length<2)continue;
+    for(let gi=0;gi<d.gates.length;gi++){
+      const g=d.gates[gi];if((g.mode||'open')!=='hinge')continue;const pt=pointTangentAt(poly,g.t);
+      infos.push({kind:'divider',divider:di,gate:gi,key:`d:${di}:${gi}`,p:pt.p,v:pt.v,w:g.w,t:g.t,mode:'hinge',hingeEnd:g.hingeEnd||'start',swingSide:+g.swingSide===-1?-1:1,initialAngle:45,maxAngle:120,color:d.color||'#fff',closedPath:gateLeafClosedPath(poly,g,false)});
+    }
+  }
+  for(let si=0;si<level.shapes.length;si++){
+    const sh=level.shapes[si];if(sh.role!=='playable')continue;const loop=shapeLoop(sh,260);if(loop.length<2)continue;
+    for(let gi=0;gi<sh.gates.length;gi++){
+      const g=sh.gates[gi];if((g.mode||'open')!=='hinge')continue;const pt=pointTangentAt(loop,g.t);
+      infos.push({kind:'shape',shape:si,gate:gi,key:`s:${si}:${gi}`,p:pt.p,v:pt.v,w:g.w,t:g.t,mode:'hinge',hingeEnd:g.hingeEnd||'start',swingSide:+g.swingSide===-1?-1:1,initialAngle:45,maxAngle:120,color:sh.color||'#fff',closedPath:gateLeafClosedPath(loop,g,true)});
+    }
+  }
+  return infos;
+}
+
+function hingeVisualClosedGeometry(info){
+  let poly=null,g=null,closed=false;
+
+  if(info.kind==='divider'){
+    const d=level.dividers[info.divider];
+    g=d?.gates?.[info.gate];
+    if(d&&g)poly=flattenDivider(d,1.25); // same source as visibleDividerRuns()
+  }else if(info.kind==='shape'){
+    const s=level.shapes[info.shape];
+    g=s?.gates?.[info.gate];
+    if(s&&g){poly=shapeLoop(s,260);closed=true} // same source as visibleShapeRuns()
+  }
+
+  let points=(poly&&g)?gateLeafClosedPath(poly,g,closed):[];
+  if(points.length<2){
+    // Fallback remains vector geometry, never raster geometry.
+    const base=hingeDoorGeometry(info,0);
+    points=base.points.map(p=>({x:p.x,y:p.y}));
+  }
+
+  const hinge=info.hingeEnd==='end'?points[points.length-1]:points[0];
+  return{points,hinge}
+}
+function fullPrecisionPath(points){
+  if(!points?.length)return'';
+  let d=`M${points[0].x} ${points[0].y}`;
+  for(let i=1;i<points.length;i++)d+=` L${points[i].x} ${points[i].y}`;
+  return d
+}
+function rotatedDoorVisualPoints(visual,signedAngle){
+  const a=signedAngle*Math.PI/180,c=Math.cos(a),s=Math.sin(a),h=visual.hinge;
+  return visual.points.map(p=>{
+    const x=p.x-h.x,y=p.y-h.y;
+    return{x:h.x+x*c-y*s,y:h.y+x*s+y*c}
+  })
+}
+function rigidDoorVisualPoints(visual,signedAngle){
+  if(!visual?.points?.length)return[];
+  const h=visual.hinge,a=visual.points[0],b=visual.points[visual.points.length-1];
+  // Use the endpoint opposite the hinge. A door is one rigid plank even when
+  // its closed gap was cut from a sampled curved wall.
+  const da=(a.x-h.x)**2+(a.y-h.y)**2,db=(b.x-h.x)**2+(b.y-h.y)**2;
+  return rotatedDoorVisualPoints({hinge:h,points:[h,da>db?a:b]},signedAngle)
+}
+
+function hingeDoorMarkup(){
+  let h='';
+  for(const info of hingeDrawInfos()){
+    if(info.mode!=='hinge')continue;
+
+    const angle=hingeAngleForInfo(info),visual=hingeDoorGeometry(info,angle),col=info.color||'#fff';
+    if(visual.points.length>=2){
+      const d=fullPrecisionPath(visual.points);
+
+      // Write already-rotated vector coordinates. Avoiding an SVG transform keeps
+      // animated leaves out of browser transform caches that can resample them as
+      // low-resolution composited textures while they move.
+      h+=`<path data-hinge-door="${info.key}" d="${d}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="butt" stroke-linejoin="round" shape-rendering="geometricPrecision"/>`;
+    }
+
+    // Small SVG hinge pin only.
+    h+=`<circle cx="${visual.hinge.x}" cy="${visual.hinge.y}" r="1.8" fill="#7f898f" stroke="#a4abad" stroke-width="0.55"/>`;
+  }
+  return h
+}
+function updateHingeDoorLayer(){
+  const layer=vector.querySelector('#hingeDoorLayer');
+  if(layer){
+    for(const info of hingeDrawInfos()){
+      if(info.mode!=='hinge')continue;
+      const el=layer.querySelector(`[data-hinge-door="${info.key}"]`);
+      if(!el)continue;
+
+      const angle=hingeAngleForInfo(info),visual=hingeDoorGeometry(info,angle);
+      // Re-rasterize native SVG geometry at the current full-precision position
+      // instead of transforming a previously rasterized door image.
+      el.setAttribute('d',fullPrecisionPath(visual.points));
+    }
+  }
+
+  const out=$('gateAngleOut');
+  const motion=$('hingeMotionReadout');
+  if(out&&['gate','shapeGate'].includes(selected.type)){
+    const info=hingeInfoForSelection();
+    if(info?.mode==='hinge'){
+      const st=hingeStates.get(info.key);
+      const a=(mode==='play'&&st)?st.angle:(info.initialAngle||45);
+      out.textContent=a.toFixed(1)+'°';
+      if(motion){
+        motion.textContent=(mode==='play'&&st)
+          ? `raw ${st.rawTorque.toFixed(2)}°/s · filtered ${st.filteredTorque.toFixed(2)}°/s · velocity ${st.angularVelocity.toFixed(2)}°/s · angle ${st.angle.toFixed(3)}° · physics ${(HINGE_FIXED_DT*1000).toFixed(2)} ms`
+          : '';
+      }
+    }else if(motion)motion.textContent='';
+  }else if(motion)motion.textContent='';
+}
+function pointSegDistSq(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy;if(L2<1e-9)return(px-ax)**2+(py-ay)**2;
+  const t=clamp(((px-ax)*dx+(py-ay)*dy)/L2,0,1),qx=ax+dx*t,qy=ay+dy*t;return(px-qx)**2+(py-qy)**2;
+}
+function orient(ax,ay,bx,by,cx,cy){return(bx-ax)*(cy-ay)-(by-ay)*(cx-ax)}
+function segsCross(a,b,c,d){
+  const eps=1e-8,o1=orient(a.x,a.y,b.x,b.y,c.x,c.y),o2=orient(a.x,a.y,b.x,b.y,d.x,d.y),o3=orient(c.x,c.y,d.x,d.y,a.x,a.y),o4=orient(c.x,c.y,d.x,d.y,b.x,b.y);
+  const on=(p,q,r)=>Math.min(p.x,q.x)-eps<=r.x&&r.x<=Math.max(p.x,q.x)+eps&&Math.min(p.y,q.y)-eps<=r.y&&r.y<=Math.max(p.y,q.y)+eps;
+  if(((o1>eps&&o2<-eps)||(o1<-eps&&o2>eps))&&((o3>eps&&o4<-eps)||(o3<-eps&&o4>eps)))return true;
+  if(Math.abs(o1)<=eps&&on(a,b,c))return true;if(Math.abs(o2)<=eps&&on(a,b,d))return true;if(Math.abs(o3)<=eps&&on(c,d,a))return true;if(Math.abs(o4)<=eps&&on(c,d,b))return true;return false;
+}
+function segSegDistSq(a,b,c,d){
+  if(segsCross(a,b,c,d))return 0;
+  return Math.min(pointSegDistSq(a.x,a.y,c.x,c.y,d.x,d.y),pointSegDistSq(b.x,b.y,c.x,c.y,d.x,d.y),pointSegDistSq(c.x,c.y,a.x,a.y,b.x,b.y),pointSegDistSq(d.x,d.y,a.x,a.y,b.x,b.y));
+}
+function doorAngleHitsStaticWall(info,angle){
+  const mask=compiled?.doorWallMask;if(!mask)return false;
+  const g=hingeDoorGeometry(info,angle),cells=rasterDoorCells(g),{GW}=compiled;
+  const jointIgnore=DOOR_HALF+4;
+  for(const i of cells){
+    const x=i%GW,y=(i/GW)|0,wx=(x+.5)*W/compiled.GW,wy=(y+.5)*H/compiled.GH;
+    if(Math.hypot(wx-g.hinge.x,wy-g.hinge.y)<=jointIgnore)continue;
+    if(mask[i])return true
+  }
+  return false
+}
+function hingeClearMaxAngle(info){
+  const hard=info.maxAngle||120,start=info.initialAngle||45;
+  let last=start,hit=-1;
+  for(let a=start+1;a<=hard;a+=1){if(doorAngleHitsStaticWall(info,a)){hit=a;break}last=a}
+  if(hit<0)return hard;
+  let lo=last,hi=hit;for(let n=0;n<6;n++){const m=(lo+hi)/2;if(doorAngleHitsStaticWall(info,m))hi=m;else lo=m}
+  return Math.max(start,lo);
+}
+function setHingeCover(st){
+  installHingeFootprint(st,rasterDoorCells(st.geom))
+}
+function initHingeStates(){
+  hingeStates=new Map();hingeCoverCount=new Uint8Array(compiled.GW*compiled.GH);
+  hingeLastUpdateTime=0;hingePhysicsTime=0;hingeAccumulator=0;hingeDebugData=new Map();
+  for(const info of compiled.gateInfos){
+    if(info.mode!=='hinge')continue;
+    const maxAngle=hingeClearMaxAngle(info),angle=Math.min(info.initialAngle||45,maxAngle),geom=hingeDoorGeometry(info,angle);
+    const coverCells=rasterDoorCells(geom);
+    const st={
+      info,angle,maxAngle,latchedClosed:false,geom,coverCells:new Set(),lastMotionTime:-1e9,
+      rawTorque:0,filteredTorque:0,angularVelocity:0,blockedEdges:rigidDoorBlockedEdges(geom),
+      topologyGeom:geom,topologyAngle:angle
+    };
+    hingeStates.set(info.key,st);installHingeFootprint(st,coverCells);
+    hingeDebugData.set(info.key,{previous:new Set(),current:new Set(coverCells),swept:new Set(coverCells),wake:new Set(),unfilled:new Set()})
+  }
+}
+function segmentIntersectsRigidDoor(a,b,g){
+  if(!g?.hinge||!g?.tip)return false;
+  const ux0=g.tip.x-g.hinge.x,uy0=g.tip.y-g.hinge.y,L=Math.hypot(ux0,uy0);if(L<1e-9)return false;
+  const ux=ux0/L,uy=uy0/L,nx=-uy,ny=ux;
+  const local=p=>{const x=p.x-g.hinge.x,y=p.y-g.hinge.y;return{u:x*ux+y*uy,v:x*nx+y*ny}};
+  const p=local(a),q=local(b),du=q.u-p.u,dv=q.v-p.v;
+  // Liang-Barsky clip against the exact butt-capped leaf rectangle.
+  let lo=0,hi=1;
+  const clip=(d,min,max,start)=>{
+    if(Math.abs(d)<1e-12)return start>=min&&start<=max;
+    let a=(min-start)/d,b=(max-start)/d;if(a>b){const z=a;a=b;b=z}
+    lo=Math.max(lo,a);hi=Math.min(hi,b);return lo<=hi
+  };
+  return clip(du,0,L,p.u)&&clip(dv,-DOOR_HALF,DOOR_HALF,p.v)
+}
+function transitionEdgeKey(a,b){
+  const n=compiled.regionMap.length,lo=Math.min(a,b),hi=Math.max(a,b);
+  return lo*n+hi
+}
+function rigidDoorBlockedEdges(g){
+  const out=new Set();if(!compiled||!g)return out;
+  const{GW,GH}=compiled,cellX=W/GW,cellY=H/GH,pad=DOOR_HALF+Math.max(cellX,cellY)*1.5;
+  const x0=clamp(Math.floor((g.minX-pad)/cellX),0,GW-1),x1=clamp(Math.ceil((g.maxX+pad)/cellX),0,GW-1);
+  const y0=clamp(Math.floor((g.minY-pad)/cellY),0,GH-1),y1=clamp(Math.ceil((g.maxY+pad)/cellY),0,GH-1);
+  const dirs=[[1,0],[0,1],[1,1],[-1,1]];
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const i=y*GW+x,a={x:(x+.5)*cellX,y:(y+.5)*cellY};
+    for(const[ox,oy]of dirs){
+      const xx=x+ox,yy=y+oy;if(xx<0||yy<0||xx>=GW||yy>=GH)continue;
+      const j=yy*GW+xx,b={x:(xx+.5)*cellX,y:(yy+.5)*cellY};
+      if(segmentIntersectsRigidDoor(a,b,g))out.add(transitionEdgeKey(i,j))
+    }
+  }
+  return out
+}
+function changedDoorEdgeCells(before,after){
+  const cells=new Set(),n=compiled.regionMap.length,add=key=>{const a=Math.floor(key/n),b=key-a*n;cells.add(a);cells.add(b)};
+  for(const key of before)if(!after.has(key))add(key);
+  for(const key of after)if(!before.has(key))add(key);
+  return cells
+}
+function doorBlocksWorldSegment(a,b){
+  if(!hingePhysicsActive||!hingeStates?.size)return false;
+  for(const st of hingeStates.values())if(segmentIntersectsRigidDoor(a,b,st.geom))return true;
+  return false
+}
+function doorBlocksStep(from,to){
+  if(!hingePhysicsActive||!compiled||!hingeStates?.size)return false;
+  const key=transitionEdgeKey(from,to);
+  for(const st of hingeStates.values())if(st.blockedEdges?.has(key))return true;
+  return false
+}
+function ownerSampleWorld(wx,wy){
+  if(!owner||!compiled)return{sid:-99,i:-1};const x=Math.floor(wx*compiled.GW/W),y=Math.floor(wy*compiled.GH/H);if(x<0||y<0||x>=compiled.GW||y>=compiled.GH)return{sid:-99,i:-1};const i=y*compiled.GW+x;return{sid:owner[i],i};
+}
+function refreshDoorNeighborhood(st,oldGeom,newGeom,now){
+  // Retained as a compatibility shim for any older call site.
+  // v4.5 performs movement bookkeeping atomically inside setHingeAngle().
+  return
+}
+function setHingeAngle(st,newAngle,now){
+  newAngle=clamp(newAngle,0,st.maxAngle);
+  if(Math.abs(newAngle-st.angle)<1e-9)return false;
+
+  const newGeom=hingeDoorGeometry(st.info,newAngle);
+  st.angle=newAngle;st.geom=newGeom;st.lastMotionTime=now;
+
+  // Motion/torque/rendering remain continuous at 120 Hz. The discrete paint
+  // graph only needs rebuilding after the leaf has moved a fraction of a cell.
+  const topo=st.topologyGeom||newGeom,cell=Math.min(W/compiled.GW,H/compiled.GH);
+  const tipMove=Math.hypot(newGeom.tip.x-topo.tip.x,newGeom.tip.y-topo.tip.y);
+  const terminal=newAngle<=1e-7||Math.abs(newAngle-st.maxAngle)<=1e-7;
+  if(!terminal&&tipMove<cell*.32)return true;
+
+  const previous=new Set(st.coverCells||[]),beforeEdges=st.blockedEdges||rigidDoorBlockedEdges(topo);
+  const current=rasterDoorCells(newGeom),afterEdges=rigidDoorBlockedEdges(newGeom);
+  st.blockedEdges=afterEdges;st.topologyGeom=newGeom;st.topologyAngle=newAngle;
+
+  let footprintChanged=current.size!==(st.coverCells?.size||0);
+  if(!footprintChanged){
+    for(const i of current)if(!st.coverCells.has(i)){footprintChanged=true;break}
+  }
+
+  // The raster footprint is retained only for visibility/accuracy bookkeeping;
+  // it no longer decides whether paint may cross the door.
+  if(footprintChanged)installHingeFootprint(st,current);
+
+  const changed=changedDoorEdgeCells(beforeEdges,afterEdges);
+  if(changed.size){
+    // Rebuild only endpoints of graph transitions whose legal status changed.
+    // No swept dilation, tip wake, retries or render-time paint extension.
+    const unfilled=revalidateDoorTransitionBand(changed,now),swept=new Set(previous);
+    for(const i of current)swept.add(i);
+    hingeDebugData.set(st.info.key,{
+      previous,
+      current:new Set(current),
+      swept,
+      wake:changed,
+      unfilled
+    });
+  }
+
+  return true
+}
+function hingeRawTorque(st){
+  const g=st.geom,L=g.len||st.info.w||28,contact=6.5;
+  let sum=0,weight=0;
+
+  // More spatial samples reduce one-cell torque flicker at slow movement.
+  for(let k=1;k<=11;k++){
+    const t=.12+.84*k/11,s=doorGeomSample(g,t),vl=Math.hypot(s.v.x,s.v.y)||1,nx=-s.v.y/vl,ny=s.v.x/vl;
+    const plus=ownerSampleWorld(s.p.x+nx*contact,s.p.y+ny*contact);
+    const minus=ownerSampleWorld(s.p.x-nx*contact,s.p.y-ny*contact);
+    const lever=Math.max(.16,t);
+
+    if(plus.sid>=0){
+      const v=SPEED*Math.max(.55,speedField[plus.i]||1),w=lever;
+      sum+=(-v/(L*lever))*w;weight+=w
+    }
+    if(minus.sid>=0){
+      const v=SPEED*Math.max(.55,speedField[minus.i]||1),w=lever;
+      sum+=( v/(L*lever))*w;weight+=w
+    }
+  }
+
+  if(!weight)return 0;
+  const omegaScreen=sum/weight;
+  return omegaScreen*180/Math.PI/(+st.info.swingSide===-1?-1:1)
+}
+function stepHingePhysics(st,dt,now){
+  if(st.latchedClosed){
+    st.rawTorque=0;st.filteredTorque=0;st.angularVelocity=0;
+    return
+  }
+
+  const raw=hingeRawTorque(st);
+  st.rawTorque=raw;
+
+  // Time-based low-pass filter: independent of frame rate.
+  const alpha=1-Math.exp(-dt/HINGE_TORQUE_TAU);
+  st.filteredTorque+=(raw-st.filteredTorque)*alpha;
+
+  // Angular velocity follows the filtered goo pressure smoothly. This is
+  // deliberately first-order rather than inertial: there is no independent
+  // door motor or momentum beyond the short anti-jitter response.
+  const beta=1-Math.exp(-dt/HINGE_VELOCITY_TAU);
+  st.angularVelocity+=(st.filteredTorque-st.angularVelocity)*beta;
+
+  // Prevent tiny numerical tails from making a visually stationary door creep.
+  if(Math.abs(raw)<.01&&Math.abs(st.filteredTorque)<.012&&Math.abs(st.angularVelocity)<.012){
+    st.filteredTorque=0;st.angularVelocity=0;return
+  }
+
+  let next=st.angle+st.angularVelocity*dt;
+
+  if(next<=0){
+    next=0;
+    if(st.angularVelocity<0){
+      setHingeAngle(st,0,now);
+      st.angularVelocity=0;st.filteredTorque=0;st.latchedClosed=true;
+      return
+    }
+  }else if(next>=st.maxAngle){
+    next=st.maxAngle;
+    if(st.angularVelocity>0){
+      setHingeAngle(st,next,now);
+      st.angularVelocity=0;
+      // Do not preserve positive pressure at the mechanical stop. If opposing
+      // goo later arrives, the door can immediately respond in the other direction.
+      st.filteredTorque=Math.min(0,st.filteredTorque);
+      return
+    }
+  }
+
+  setHingeAngle(st,next,now)
+}
+function updateHinges(now){
+  if(!hingePhysicsActive||!hingeStates?.size){
+    hingeLastUpdateTime=now;hingePhysicsTime=now;hingeAccumulator=0;return
+  }
+  if(!hingeLastUpdateTime){
+    hingeLastUpdateTime=now;hingePhysicsTime=now;hingeAccumulator=0;return
+  }
+
+  const elapsed=clamp(now-hingeLastUpdateTime,0,.05);
+  hingeLastUpdateTime=now;
+  hingeAccumulator+=elapsed;
+
+  // Fixed 120 Hz hinge physics even though the main FMM remains on its existing
+  // efficient schedule. This removes frame-time-dependent slow-door stepping.
+  let guard=0;
+  while(hingeAccumulator>=HINGE_FIXED_DT&&guard++<12){
+    hingePhysicsTime+=HINGE_FIXED_DT;
+    hingeAccumulator-=HINGE_FIXED_DT;
+    for(const st of hingeStates.values())stepHingePhysics(st,HINGE_FIXED_DT,hingePhysicsTime)
+  }
+}
+
+function selectedRegionStyle(){
+  if(selected.type!=='region'||!compiled)return null;
+  const idx=compiled.styleIndexByLabel[selected.label];return idx==null?null:level.regionStyles[idx]
+}
+function renderHeader(){
+  $('levelValue').textContent=`LEVEL ${playerIndex+1}`;
+  $('sublevel').textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
+  $('targetReadout').textContent=Number(level.target).toFixed(1)+'%';
+  $('targetInput').value=Number(level.target).toFixed(1);
+  const prev=$('prevBtn'),next=$('nextBtn');
+  if(prev)prev.disabled=playerIndex<=0;
+  if(next)next.disabled=playerIndex>=PLAYER_LEVELS.length-1;
+}
 function renderInspector(){
-  $('pointControls').classList.add('hidden');$('gateControls').classList.add('hidden');$('whiteControls').classList.add('hidden');
-  if(selected.type==='point'){const p=level.dividers[selected.d].points[selected.p];$('selectionText').textContent=`Divider ${selected.d+1} · vertex ${selected.p+1}`;$('pointControls').classList.remove('hidden');$('pointType').textContent=p.smooth?'SMOOTH':'CORNER';$('attachmentText').textContent=attachmentLabel(p.attach)}
-  else if(selected.type==='gate'){const g=level.dividers[selected.d].gates[selected.g];$('selectionText').textContent=`Divider ${selected.d+1} · gate ${selected.g+1}`;$('gateControls').classList.remove('hidden');$('gateT').value=g.t;$('gateW').value=g.w;$('gateTOut').textContent=Math.round(g.t*100)+'%';$('gateWOut').textContent=Math.round(g.w)+' px'}
-  else if(selected.type==='white'){const o=level.white;$('selectionText').textContent='White non-fillable object';$('whiteControls').classList.remove('hidden');$('whiteType').value=o.type;$('whiteW').value=Math.round(o.w);$('whiteH').value=Math.round(o.h);$('whiteRot').value=Math.round(o.rotation||0);$('whiteWOut').textContent=Math.round(o.w)+' px';$('whiteHOut').textContent=Math.round(o.h)+' px';$('whiteRotOut').textContent=Math.round(o.rotation||0)+'°'}
-  else $('selectionText').textContent=`Divider ${(selected.d??0)+1} · click line to add vertex`;
+  for(const id of['dividerControls','pointControls','gateControls','shapeControls','portalControls','regionControls'])$(id).classList.add('hidden');
+  $('selectionText').textContent='Blank board. Add or select an object.';
+
+  if(selected.type==='divider'&&level.dividers[selected.d]){
+    $('selectionText').textContent=`Line ${selected.d+1}`;$('dividerControls').classList.remove('hidden');$('lineColor').value=level.dividers[selected.d].color||'#ffffff';
+  }else if(selected.type==='point'&&level.dividers[selected.d]?.points[selected.p]){
+    const p=level.dividers[selected.d].points[selected.p];$('selectionText').textContent=`Line ${selected.d+1} · vertex ${selected.p+1}`;$('pointControls').classList.remove('hidden');$('pointType').textContent=p.smooth?'SMOOTH':'CORNER';$('attachmentText').textContent=attachmentLabel(p.attach);
+  }else if(['gate','shapeGate'].includes(selected.type)&&currentGate()){
+    const g=currentGate();$('selectionText').textContent=selected.type==='gate'?`Line ${selected.d+1} · gate ${selected.g+1}`:`Shape ${selected.shape+1} · gate ${selected.g+1}`;$('gateControls').classList.remove('hidden');$('gateOwnerLabel').textContent=selected.type==='gate'?'Line gate':'Shape gate';$('gateT').value=g.t;$('gateW').value=g.w;$('gateMode').value=g.mode||'open';$('gateHingeEnd').value=g.hingeEnd||'start';$('gateSwingSide').value=String(+g.swingSide===-1?-1:1);$('hingeGateControls').classList.toggle('hidden',(g.mode||'open')!=='hinge');$('gateTOut').textContent=Math.round(g.t*100)+'%';$('gateWOut').textContent=Math.round(g.w)+' px';$('hingeDebugToggle').checked=hingeDebugEnabled;$('hingeDebugLegend').style.display=hingeDebugEnabled?'block':'none';const hi=hingeInfoForSelection(),hs=hi?hingeStates.get(hi.key):null;$('gateAngleOut').textContent=((mode==='play'&&hs)?hs.angle:45).toFixed(1)+'°';
+  }else if(selected.type==='shape'&&level.shapes[selected.shape]){
+    const s=level.shapes[selected.shape];$('selectionText').textContent=`Shape ${selected.shape+1}`;$('shapeControls').classList.remove('hidden');$('shapeType').value=s.type;$('shapeRole').value=s.role;$('shapeColor').value=s.color||'#ffffff';$('shapeRatioLock').checked=s.type==='circle'||!!s.lockRatio;$('shapeRatioLock').disabled=s.type==='circle';$('shapeW').value=s.w;$('shapeH').value=s.h;$('shapeRot').value=s.rotation||0;$('shapeWOut').textContent=Math.round(s.w)+' px';$('shapeHOut').textContent=Math.round(s.h)+' px';$('shapeRotOut').textContent=Math.round(s.rotation||0)+'°';$('starControls').classList.toggle('hidden',s.type!=='star');$('starPoints').value=s.starPoints||5;$('starPointsOut').textContent=s.starPoints||5;$('shapePlayableNote').textContent=s.role==='playable'?'Playable shape: its outline is a wall. Add gates to let paint enter/leave its enclosed region.':'Prefilled obstacle: static artwork/flow block, excluded from Accuracy.';
+  }else if(selected.type==='portal'&&level.portals[selected.portal]){
+    const p=level.portals[selected.portal];$('selectionText').textContent=`Portal pair ${selected.portal+1} · endpoint ${(selected.end||'a').toUpperCase()}`;$('portalControls').classList.remove('hidden');$('portalIndexOut').textContent=`${selected.portal+1} / ${level.portals.length}`;$('portalRadius').value=p.radius||13;$('portalColor').value=p.color||'#ffffff';$('portalRadiusOut').textContent=`${Math.round(p.radius||13)} px · ${portalChargeDelay(p.radius||13).toFixed(2)} s charge`;
+  }else if(selected.type==='region'&&selectedRegionStyle()){
+    const st=selectedRegionStyle(),r=compiled.regionAreas.find(x=>x.id===selected.label);$('selectionText').textContent=`Region ${selected.label}`;$('regionControls').classList.remove('hidden');$('regionStatus').textContent=r?.active?'ACTIVE':'EXCLUDED';$('regionColor').value=st.paint;
+  }
+
   $('outsideColor').value=level.palette.outside;$('unfilledColor').value=level.palette.unfilled;$('excludedColor').value=level.palette.excluded;
-  const pc=$('paintColorRows');pc.innerHTML='';const n=Math.max(compiled?.activeCount||0,level.dividers.length);for(let i=0;i<n;i++){const row=document.createElement('div');row.className='row';row.innerHTML=`<label>Paint ${i+1}</label>`;const inp=document.createElement('input');inp.type='color';inp.value=level.palette.paints[i]||PAINTS[i%PAINTS.length];inp.oninput=e=>{level.palette.paints[i]=e.target.value;if(mode==='play')resetFill();else renderAll()};row.appendChild(inp);pc.appendChild(row)}
-  const areas=$('areas');areas.innerHTML='';if(compiled)for(const r of compiled.regionAreas){const color=r.active?(level.palette.paints[(r.activeIndex-1)%level.palette.paints.length]||'#999'):level.palette.excluded,row=document.createElement('div');row.className='swatchRow';row.innerHTML=`<span class="swatch" style="background:${color}"></span><span><div class="bar"><i style="width:${Math.min(100,r.pct*2.2)}%"></i></div><div class="smallNote" style="margin-top:2px">${r.active?`Active ${r.activeIndex}`:'Excluded'} · Region ${r.id}</div></span><span class="pct">${r.pct.toFixed(1)}%</span>`;areas.appendChild(row)}
-  const v=$('validation');if(!compiled)v.innerHTML='Validating…';else if(compiled.valid)v.innerHTML=`<div class="ok">✓ VALID LEVEL</div><div class="smallNote">${compiled.activeCount} active · ${compiled.excludedIds.length} excluded. Accuracy uses only visible painted active area.</div>`;else v.innerHTML=`<div class="bad">✕ INVALID</div>${compiled.errors.map(e=>`<div class="smallNote" style="margin-top:5px">${e}</div>`).join('')}`;$('playBtn').disabled=!compiled?.valid;
+  const areas=$('areas');areas.innerHTML='';
+  for(const r of compiled?.regionAreas||[]){
+    const row=document.createElement('div');row.className='swatchRow'+(selected.type==='region'&&selected.label===r.id?' selected':'');row.dataset.region=r.id;
+    row.innerHTML=`<span class="swatch" style="background:${r.paint}"></span><span><div class="bar"><i style="width:${Math.min(100,r.pct*2.3)}%"></i></div><div class="smallNote" style="margin-top:2px">${r.active?`Active ${r.activeIndex}`:'Excluded'} · Region ${r.id}</div></span><span class="pct">${r.pct.toFixed(1)}%</span>`;
+    row.onclick=()=>{selected={type:'region',label:r.id,seed:{...r.seed}};renderEditor();renderInspector()};
+    areas.appendChild(row);
+  }
+
+  const val=$('validation');
+  if(!compiled)val.innerHTML='Validating…';
+  else if(compiled.valid)val.innerHTML=`<div class="ok">✓ VALID LEVEL</div><div class="smallNote">${compiled.activeCount} active · ${compiled.excludedIds.length} excluded · ${level.dividers.length} line${level.dividers.length===1?'':'s'} · ${level.shapes.length} shape${level.shapes.length===1?'':'s'} · ${level.portals.length} portal pair${level.portals.length===1?'':'s'} · ${(compiled.gateInfos||[]).filter(g=>g.mode==='hinge').length} hinged gate${(compiled.gateInfos||[]).filter(g=>g.mode==='hinge').length===1?'':'s'}.</div>`;
+  else val.innerHTML=`<div class="bad">✕ NOT PLAYABLE YET</div>`+compiled.errors.map(e=>`<div class="smallNote" style="margin-top:5px">${e}</div>`).join('');
+  $('playBtn').disabled=!compiled?.valid;
 }
+
+/* ---------- paint/game ---------- */
+
+function drawHingeDebugOverlay(){
+  if(!hingeDebugCanvas)return;
+  if(hingeDebugCanvas.width!==paint.width||hingeDebugCanvas.height!==paint.height){
+    hingeDebugCanvas.width=paint.width;hingeDebugCanvas.height=paint.height
+  }
+  const g=hingeDebugCtx;g.clearRect(0,0,hingeDebugCanvas.width,hingeDebugCanvas.height);
+  if(!hingeDebugEnabled||mode!=='play'||!compiled)return;
+
+  const dx=+paint.dataset.dx||0,dy=+paint.dataset.dy||0,dw=+paint.dataset.dw||paint.width,dh=+paint.dataset.dh||paint.height;
+  const cw=dw/compiled.GW,ch=dh/compiled.GH;
+  const selectedInfo=hingeInfoForSelection(),onlyKey=selectedInfo?.mode==='hinge'?selectedInfo.key:null;
+  const drawSet=(set,color)=>{
+    if(!set?.size)return;
+    g.fillStyle=color;
+    for(const i of set){
+      const x=i%compiled.GW,y=(i/compiled.GW)|0;
+      g.fillRect(dx+x*cw,dy+y*ch,Math.max(1,cw),Math.max(1,ch))
+    }
+  };
+
+  for(const[key,d]of hingeDebugData){
+    if(onlyKey&&key!==onlyKey)continue;
+    drawSet(d.previous,'rgba(40,120,216,.20)');
+    drawSet(d.swept,'rgba(229,139,36,.16)');
+    drawSet(d.wake,'rgba(139,85,197,.20)');
+    drawSet(d.current,'rgba(223,84,61,.26)');
+    drawSet(d.unfilled,'rgba(22,163,74,.56)');
+  }
+}
+
 function drawPaint(){
   const dx=+paint.dataset.dx||0,dy=+paint.dataset.dy||0,dw=+paint.dataset.dw||paint.width,dh=+paint.dataset.dh||paint.height;
   ctx.fillStyle=level.palette.outside;
@@ -738,30 +1392,37 @@ function drawPaint(){
     ctx.drawImage(src,dx,dy,dw,dh);
     if(mode==='play')drawCollisionInterfaces();
   }
+  drawHingeDebugOverlay()
 }
-function renderAll(){renderVector();renderHeader();drawPaint()}
-function setMode(m){if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}else{destroyPlayerLevelState();mode='edit';compileLevel(false);$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}$('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()}
+function renderAll(){renderVector();renderEditor();renderHeader();renderInspector();drawPaint()}
+function setMode(m){
+  if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}
+  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY'}
+  $('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()
+}
 function resetFill(){
-  cancelPlayPointers();if(!compiled?.valid)return;
-  buildWallDistance();
-  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;
-  collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];
-  const{GW,GH}=compiled,N=GW*GH;
-  owner=compiled.ownerTemplate?compiled.ownerTemplate.slice():new Int16Array(N);
-  if(!compiled.ownerTemplate)owner.fill(-1);
+  if(!compiled?.valid)return;
+  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;
+  const{GW,GH,regionMap}=compiled,N=GW*GH;
+  owner=new Int16Array(N);owner.fill(-99);
   arrival=new Float32Array(N);arrival.fill(Infinity);
   trialSid=new Int16Array(N);trialSid.fill(-1);
+  trialParent=new Int32Array(N);trialParent.fill(-1);
   speedField=new Float32Array(N);speedField.fill(1);
   portalLeakField=new Float32Array(N);portalLeakField.fill(-1);
-  simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');
-  simImage=sctx.createImageData(GW,GH);
-  if(compiled.basePixels)simImage.data.set(compiled.basePixels);
+  initHingeStates();hingePhysicsActive=false;buildWallDistance();hingePhysicsActive=true;
+  simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);
   sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);
   portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));
   finished=false;clock0=performance.now()/1000;
-  sctx.putImageData(simImage,0,0);
-  dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
-  $('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';drawPaint();
+  const out=hex(level.palette.outside),unf=hex(level.palette.unfilled),ex=hex(level.palette.excluded),white=[255,255,255],b=level.board,sx=GW/W,sy=GH/H;
+  for(let i=0;i<N;i++){
+    const z=regionMap[i],px=i%GW,py=(i/GW)|0,wx=px/sx,wy=py/sy,insideBoard=wx>=b.x&&wx<=b.x+b.w&&wy>=b.y&&wy<=b.y+b.h,cc=z>0?unf:(z===-1?ex:(insideBoard?white:out)),j=i*4;
+    if(z>0)owner[i]=-1;else if(z===-1)owner[i]=-2;
+    simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
+  }
+  sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  $('accuracy').textContent='100.00%';$('accuracyLabel').textContent='ACCURACY';updateHingeDoorLayer();drawPaint();
 }
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
 function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
@@ -808,8 +1469,9 @@ function stepAllowed(from,to){
   const a=regionMap[from],b=regionMap[to];if(a<=0||b<=0)return false;
   const x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
   if(Math.abs(x1-x0)+Math.abs(y1-y0)!==1)return false;
-  if(a===b)return true;
-  return gateAllows(a,b,(x0+x1)/2,(y0+y1)/2);
+  const topologyOK=a===b||gateAllows(a,b,(x0+x1)/2,(y0+y1)/2);if(!topologyOK)return false;
+  if(doorBlocksStep(from,to))return false;
+  return true;
 }
 function buildWallDistance(){
   if(!compiled?.regionMap)return;
@@ -884,10 +1546,17 @@ function diagonalAllowed(from,to){
   const{GW,regionMap}=compiled,x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
   if(Math.abs(x1-x0)!==1||Math.abs(y1-y0)!==1)return false;
   const z=regionMap[to];if(z<=0||regionMap[from]!==z)return false;
-  // Require both orthogonal corner cells to be the same free region. This keeps
-  // the diagonal stencil out of walls, gates and tight corners.
-  const c1=y0*GW+x1,c2=y1*GW+x0;
-  return regionMap[c1]===z&&regionMap[c2]===z;
+  const c1=y0*GW+x1,c2=y1*GW+x0;if(regionMap[c1]!==z||regionMap[c2]!==z)return false;
+  if(doorBlocksStep(from,to))return false;
+  return true;
+}
+function fmmParentTransitionAllowed(from,to){
+  const{GW}=compiled;
+  const x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
+  const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0);
+  if(dx+dy===1)return stepAllowed(from,to);
+  if(dx===1&&dy===1)return diagonalAllowed(from,to);
+  return false;
 }
 function solveEikonal(a,b,h){
   const af=Number.isFinite(a),bf=Number.isFinite(b);
@@ -944,14 +1613,15 @@ function fmmCandidate(ni,sid){
   const diagonal=solveEikonal(d1,d2,h*Math.SQRT2);
   const nt=Math.min(cardinal,diagonal);
   if(!Number.isFinite(nt))return null;
-  return{t:nt,speed:nextM,leak:nextLeak};
+  return{t:nt,speed:nextM,leak:nextLeak,parent};
 }
 function relaxCell(ni,sid){
   const c=fmmCandidate(ni,sid);if(!c)return;
+  if(doorRelaxFloor>=0&&c.t<doorRelaxFloor){const cellDt=(W/compiled.GW)/(SPEED*Math.max(.55,c.speed||1));c.t=doorRelaxFloor+cellDt}
   const old=arrival[ni],oldSid=trialSid[ni],eps=1e-7;
   if(c.t>old+eps)return;
   if(Math.abs(c.t-old)<=eps&&oldSid>=0&&sid>=oldSid)return;
-  arrival[ni]=c.t;trialSid[ni]=sid;speedField[ni]=c.speed;portalLeakField[ni]=c.leak;
+  arrival[ni]=c.t;trialSid[ni]=sid;trialParent[ni]=c.parent??-1;speedField[ni]=c.speed;portalLeakField[ni]=c.leak;
   heapPush({i:ni,sid,t:c.t});
 }
 function relaxAround(i,sid){
@@ -994,13 +1664,13 @@ function startFill(gx,gy){
       if(d>seedR)continue;
       const nt=now+d/SPEED;
       if(nt+1e-7<arrival[ii]){
-        arrival[ii]=nt;trialSid[ii]=sid;speedField[ii]=1;portalLeakField[ii]=-1;
+        arrival[ii]=nt;trialSid[ii]=sid;trialParent[ii]=-1;speedField[ii]=1;portalLeakField[ii]=-1;
         heapPush({i:ii,sid,t:nt});
       }
     }
   }else{
     // Near walls, gates or portals use the normal constrained solver immediately.
-    arrival[i]=now;trialSid[i]=sid;speedField[i]=1;portalLeakField[i]=-1;
+    arrival[i]=now;trialSid[i]=sid;trialParent[i]=-1;speedField[i]=1;portalLeakField[i]=-1;
     heapPush({i,sid,t:now});
   }
 }
@@ -1016,14 +1686,14 @@ function seedPortalBloom(info,fromA,sid,fireTime,currentSpeed){
     const ii=y*GW+x;if(regionMap[ii]!==destZone||owner[ii]!==-1)continue;
     const nt=fireTime+.015*Math.hypot(nx,ny);
     if(nt+1e-7<arrival[ii]){
-      arrival[ii]=nt;trialSid[ii]=sid;speedField[ii]=Math.max(.72,currentSpeed*.86);portalLeakField[ii]=0;
+      arrival[ii]=nt;trialSid[ii]=sid;trialParent[ii]=-1;speedField[ii]=Math.max(.72,currentSpeed*.86);portalLeakField[ii]=0;
       heapPush({i:ii,sid,t:nt});planted++;
     }
   }
   if(!planted){
     const dest=fromA?info.bSeed:info.aSeed;
     if(dest!=null&&dest>=0&&owner[dest]===-1&&fireTime+1e-7<arrival[dest]){
-      arrival[dest]=fireTime;trialSid[dest]=sid;speedField[dest]=Math.max(.72,currentSpeed*.86);portalLeakField[dest]=0;
+      arrival[dest]=fireTime;trialSid[dest]=sid;trialParent[dest]=-1;speedField[dest]=Math.max(.72,currentSpeed*.86);portalLeakField[dest]=0;
       heapPush({i:dest,sid,t:fireTime});
     }
   }
@@ -1171,7 +1841,7 @@ function normalSmoothInterface(points,passes=2){
       const along=dx*tx+dy*ty;
       dx-=along*tx;dy-=along*ty;
 
-      // Slightly stronger than v39, but only in the normal direction so we do
+      // Slightly stronger than v47, but only in the normal direction so we do
       // not drag points along the interface or shrink the overall curve.
       const strength=pass===0?.92:.72;
       dst[i].x=p.x+dx*strength;
@@ -1284,7 +1954,7 @@ function drawSmoothInterfaceChain(chain,dx,dy,sx,sy,dpr){
   if(!cPlus||!cMinus)return;
 
   const center=[],plus=[],minus=[];
-  // A touch wider than v39 so the smoothed vector seam fully hides the remaining
+  // A touch wider than v47 so the smoothed vector seam fully hides the remaining
   // categorical cell edge beneath it, but still uses solid colours only.
   const cover=Math.max(1.75*dpr,2.55*Math.max(sx,sy));
 
@@ -1378,25 +2048,37 @@ function flushSimImage(){
   dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
 }
 function advance(now){
+  currentSimNow=now;
   while(heap.length&&heap[0].t<=now){
     const e=heapPop();
     if(trialSid[e.i]!==e.sid||Math.abs(arrival[e.i]-e.t)>.00001)continue;
     if(owner[e.i]!==-1)continue;
-    owner[e.i]=e.sid;
-    const s=sources[e.sid],c=s.rgb,j=e.i*4;
+    const p=trialParent[e.i];
+    if(p>=0&&!fmmParentTransitionAllowed(p,e.i)){
+      arrival[e.i]=Infinity;trialSid[e.i]=-1;trialParent[e.i]=-1;
+      // The door may invalidate one parent while another settled neighbour is
+      // already legal. Recompute immediately so the cell cannot become a
+      // permanent speck merely because that neighbour settled in the past.
+      doorRelaxFloor=now;
+      for(const sid of settledNeighbourSources(e.i))relaxCell(e.i,sid);
+      doorRelaxFloor=-1;continue;
+    }
+    owner[e.i]=e.sid;trialParent[e.i]=-1;
+    const src=sources[e.sid],c=src.rgb,j=e.i*4;
     simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255;
-    markDirty(e.i);
-    noteCollisionBlocks(e.i,e.sid);
-    triggerPortal(e.i,e.sid,e.t);
-    relaxAround(e.i,e.sid);
+    markDirty(e.i);noteCollisionBlocks(e.i,e.sid);triggerPortal(e.i,e.sid,e.t);relaxAround(e.i,e.sid);
   }
-  processPortalFires(now);
+  updateHinges(now);processPortalFires(now);
 }
+function hingesRecentlyMoving(){for(const st of hingeStates.values())if(currentSimNow-st.lastMotionTime<.10)return true;return false}
 function hasPendingPortals(){
   return portalPairState.some(st=>st&&st.locked&&!st.fired&&!st.cancelled);
 }
 
-function accuracy(){let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w)continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a}
+function accuracy(){
+  let filled=0,correct=0;for(let i=0;i<compiled.regionMap.length;i++){const w=compiled.visibility[i];if(!w||hingeCoverCount?.[i])continue;const z=compiled.regionMap[i],sid=owner[i];if(z<=0||sid<0)continue;filled+=w;if(sources[sid].id===z)correct+=w}
+  const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a
+}
 function advanceSmoothly(targetNow){
   if(targetNow<simAdvanceCursor){simAdvanceCursor=targetNow;return}
   const MAX_STEP=.016;
@@ -1408,7 +2090,7 @@ function advanceSmoothly(targetNow){
   advance(simAdvanceCursor);
 }
 function loop(ms){
-  if(mode==='play'&&owner&&!orientationBlocked){
+  if(mode==='play'&&owner){
     const baseNow=ms/1000-clock0;
     let all=true;
     for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}
@@ -1426,112 +2108,300 @@ function loop(ms){
     }
 
     advanceSmoothly(simNow);
+    updateHingeDoorLayer();
     flushSimImage();
     drawPaint();
     if(ms-lastStats>90){lastStats=ms;accuracy()}
-    if(all&&heap.length===0&&!hasPendingPortals()&&!finished){
+    if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
       finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
     }
   }
   requestAnimationFrame(loop)
 }
-function isTouchDevice(){return (window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||(navigator.maxTouchPoints||0)>0}
-function layoutStage(){const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);paint.width=Math.max(1,Math.round(r.width*dpr));paint.height=Math.max(1,Math.round(r.height*dpr));let s,dw,dh,dx,dy;const mobilePortrait=isTouchDevice()&&window.innerHeight>=window.innerWidth;if(mobilePortrait){const b=level.board,screenPad=2*dpr,logicalSide=4;s=Math.min((paint.width-screenPad*2)/(b.w+logicalSide*2),(paint.height-screenPad*2)/H);dw=W*s;dh=H*s;dx=(paint.width-b.w*s)/2-b.x*s;dy=screenPad}else{const px=14*dpr,py=6*dpr;s=Math.min((paint.width-px*2)/W,(paint.height-py*2)/H);dw=W*s;dh=H*s;dx=(paint.width-dw)/2;dy=py}Object.assign(paint.dataset,{dx,dy,dw,dh});for(const el of[vector,editorSvg]){el.style.left=(dx/dpr)+'px';el.style.top=(dy/dpr)+'px';el.style.width=(dw/dpr)+'px';el.style.height=(dh/dpr)+'px'}drawPaint()}
+
+/* ---------- layout/editor interactions ---------- */
+function layoutStage(){
+  const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);paint.width=Math.max(1,Math.round(r.width*dpr));paint.height=Math.max(1,Math.round(r.height*dpr));hingeDebugCanvas.width=paint.width;hingeDebugCanvas.height=paint.height;
+  const px=14*dpr,py=6*dpr,s=Math.min((paint.width-px*2)/W,(paint.height-py*2)/H),dw=W*s,dh=H*s,dx=(paint.width-dw)/2,dy=py;
+  Object.assign(paint.dataset,{dx,dy,dw,dh});for(const el of[vector,editorSvg]){el.style.left=(dx/dpr)+'px';el.style.top=(dy/dpr)+'px';el.style.width=(dw/dpr)+'px';el.style.height=(dh/dpr)+'px'}drawPaint()
+}
 function clientWorld(e){const r=editorSvg.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+function regionAtWorld(p){
+  if(!compiled)return 0;const x=Math.round(p.x*compiled.GW/W),y=Math.round(p.y*compiled.GH/H);if(x<0||y<0||x>=compiled.GW||y>=compiled.GH)return 0;
+  let z=compiled.labels[y*compiled.GW+x];if(z)return z;return labelNearPoint(compiled.labels,compiled.GW,compiled.GH,compiled.GW/W,compiled.GH/H,p,12)
+}
 function addVertexAt(di,pos){const d=level.dividers[di],hit=nearestT(flattenDivider(d,1.2),pos),idx=clamp((hit.seg??0)+1,1,d.points.length-1);d.points.splice(idx,0,{x:hit.p.x,y:hit.p.y,smooth:false,attach:null});selected={type:'point',d:di,p:idx}}
-function deleteSelectedVertex(){if(selected.type!=='point')return;const{d,p}=selected,pts=level.dividers[d].points;if(p<=0||p>=pts.length-1)return;pushHistory();pts.splice(p,1);selected={type:'divider',d};resolveAttachments();compileLevel(false);renderAll()}
-function toggleSelectedVertex(){if(selected.type!=='point')return;const{d,p}=selected,pts=level.dividers[d].points;if(p<=0||p>=pts.length-1)return;pushHistory();pts[p].smooth=!pts[p].smooth;compileLevel(false);renderAll()}
+function deleteSelectedVertex(){
+  if(selected.type!=='point')return;const{d,p}=selected,pts=level.dividers[d].points;if(p<=0||p>=pts.length-1)return;
+  pushHistory();pts.splice(p,1);selected={type:'divider',d};resolveAttachments();compileLevel(false);renderAll()
+}
+function toggleSelectedVertex(){
+  if(selected.type!=='point')return;const{d,p}=selected,pts=level.dividers[d].points;if(p<=0||p>=pts.length-1)return;
+  pushHistory();pts[p].smooth=!pts[p].smooth;compileLevel(false);renderAll()
+}
+function deleteLine(di){
+  if(di<0||!level.dividers[di])return;pushHistory();
+  for(const d of level.dividers)for(const p of d.points){
+    if(p.attach?.type==='divider'){
+      if(p.attach.divider===di)p.attach=null;
+      else if(p.attach.divider>di)p.attach.divider--;
+    }
+  }
+  level.dividers.splice(di,1);selected={type:'none'};resolveAttachments();compileLevel(false);renderAll()
+}
+function deleteShape(si){
+  if(si<0||!level.shapes[si])return;pushHistory();
+  for(const d of level.dividers)for(const p of d.points){
+    if(p.attach?.type==='shape'){
+      if(p.attach.shape===si)p.attach=null;
+      else if(p.attach.shape>si)p.attach.shape--;
+    }
+  }
+  level.shapes.splice(si,1);selected={type:'none'};resolveAttachments();compileLevel(false);renderAll()
+}
 
 editorSvg.addEventListener('pointerdown',e=>{
-  if(mode!=='edit')return;const t=e.target,p=clientWorld(e);
-  if(t.dataset.line!==undefined){const di=+t.dataset.line;const activeLine=['divider','point','gate'].includes(selected.type)&&selected.d===di;if(!activeLine){selected={type:'divider',d:di};renderEditor();renderInspector();return}e.preventDefault();editorSvg.setPointerCapture(e.pointerId);drag={role:'lineTap',d:di,start:p,moved:false};return}
-  if(t.dataset.white){selected={type:'white'};renderEditor();renderInspector();return}
-  const role=t.dataset.role;if(!role)return;e.preventDefault();editorSvg.setPointerCapture(e.pointerId);pushHistory();
-  if(role==='point')selected={type:'point',d:+t.dataset.d,p:+t.dataset.p};else if(role==='gate')selected={type:'gate',d:+t.dataset.d,g:+t.dataset.g};else if(role.startsWith('white'))selected={type:'white'};
-  drag={role,d:+(t.dataset.d||0),p:+(t.dataset.p||0),g:+(t.dataset.g||0),start:p,snapshot:clone(level),moved:false};renderEditor();renderInspector();
+  if(mode!=='edit')return;const t=e.target,p=clientWorld(e);const role=t.dataset.role;
+  if(role==='regionPick'){
+    const z=regionAtWorld(p);if(z){const r=compiled.regionAreas.find(x=>x.id===z);selected={type:'region',label:z,seed:r?.seed?{...r.seed}:{x:p.x,y:p.y}};renderEditor();renderInspector()}return;
+  }
+  if(role){
+    e.preventDefault();editorSvg.setPointerCapture(e.pointerId);pushHistory();
+    if(role==='point')selected={type:'point',d:+t.dataset.d,p:+t.dataset.p};
+    else if(role==='gate')selected={type:'gate',d:+t.dataset.d,g:+t.dataset.g};
+    else if(role==='shapeGate')selected={type:'shapeGate',shape:+t.dataset.shape,g:+t.dataset.g};
+    else if(role.startsWith('shape'))selected={type:'shape',shape:+t.dataset.shape};
+    else if(role==='portalMove')selected={type:'portal',portal:+t.dataset.portal,end:t.dataset.end||'a'};
+    drag={role,d:+(t.dataset.d||0),p:+(t.dataset.p||0),g:+(t.dataset.g||0),shape:+(t.dataset.shape||0),portal:+(t.dataset.portal||0),end:t.dataset.end||'a',start:p,snapshot:clone(level),moved:false};
+    renderEditor();renderInspector();return;
+  }
+  if(t.dataset.line!==undefined){
+    const di=+t.dataset.line,active=['divider','point','gate'].includes(selected.type)&&selected.d===di;
+    if(!active){selected={type:'divider',d:di};renderEditor();renderInspector();return}
+    e.preventDefault();editorSvg.setPointerCapture(e.pointerId);drag={role:'lineTap',d:di,start:p,moved:false};return;
+  }
+  if(t.dataset.shape!==undefined){
+    const si=+t.dataset.shape;e.preventDefault();editorSvg.setPointerCapture(e.pointerId);pushHistory();selected={type:'shape',shape:si};
+    drag={role:'shapeMove',shape:si,start:p,snapshot:clone(level),moved:false};renderEditor();renderInspector();return;
+  }
 });
 editorSvg.addEventListener('pointermove',e=>{
   if(!drag)return;const p=clientWorld(e);if(dist(p,drag.start)>2)drag.moved=true;if(drag.role==='lineTap')return;
-  if(drag.role==='point'){const d=level.dividers[drag.d],pt=d.points[drag.p],endpoint=(drag.p===0||drag.p===d.points.length-1);if(endpoint){const s=snapEndpoint(p,drag.d);pt.x=s.p.x;pt.y=s.p.y;pt.attach=s.attach}else{pt.x=p.x;pt.y=p.y;pt.attach=null}}
-  else if(drag.role==='gate'){const d=level.dividers[drag.d],hit=nearestT(flattenDivider(d,2),p);d.gates[drag.g].t=hit.t}
-  else if(drag.role==='whiteMove'){const s=drag.snapshot.white;level.white.x=clamp(s.x+(p.x-drag.start.x),level.board.x+30,level.board.x+level.board.w-30);level.white.y=clamp(s.y+(p.y-drag.start.y),level.board.y+30,level.board.y+level.board.h-30)}
-  else if(drag.role==='whiteWidth'){const o=level.white,a=-rad(o.rotation||0),dx=p.x-o.x,dy=p.y-o.y,lx=dx*Math.cos(a)-dy*Math.sin(a);o.w=clamp(Math.abs(lx)*2,40,420);if(o.type==='circle')o.h=o.w}
-  else if(drag.role==='whiteHeight'){const o=level.white,a=-rad(o.rotation||0),dx=p.x-o.x,dy=p.y-o.y,ly=dx*Math.sin(a)+dy*Math.cos(a);o.h=clamp(Math.abs(ly)*2,40,420);if(o.type==='circle')o.w=o.h}
-  else if(drag.role==='whiteRotate'){level.white.rotation=Math.round(deg(Math.atan2(p.y-level.white.y,p.x-level.white.x))+90)}
-  resolveAttachments();renderVector();renderEditor();renderInspector();
+  if(drag.role==='point'){
+    const d=level.dividers[drag.d],pt=d.points[drag.p],endpoint=drag.p===0||drag.p===d.points.length-1;
+    if(endpoint){const s=snapEndpoint(p,drag.d);pt.x=s.p.x;pt.y=s.p.y;pt.attach=s.attach}else{pt.x=p.x;pt.y=p.y;pt.attach=null}
+  }else if(drag.role==='gate'){
+    level.dividers[drag.d].gates[drag.g].t=nearestT(flattenDivider(level.dividers[drag.d],2),p).t;
+  }else if(drag.role==='shapeGate'){
+    level.shapes[drag.shape].gates[drag.g].t=nearestT(shapeLoop(level.shapes[drag.shape],240),p).t;
+  }else if(drag.role==='shapeMove'){
+    const s0=drag.snapshot.shapes[drag.shape],s=level.shapes[drag.shape];
+    s.x=clamp(s0.x+(p.x-drag.start.x),level.board.x+10,level.board.x+level.board.w-10);s.y=clamp(s0.y+(p.y-drag.start.y),level.board.y+10,level.board.y+level.board.h-10);
+  }else if(drag.role==='shapeWidth'){
+    const s=level.shapes[drag.shape],s0=drag.snapshot.shapes[drag.shape],a=-rad(s.rotation||0),dx=p.x-s.x,dy=p.y-s.y,lx=dx*Math.cos(a)-dy*Math.sin(a);resizeShapeWidth(s,Math.abs(lx)*2,shapeRatio(s0));
+  }else if(drag.role==='shapeHeight'){
+    const s=level.shapes[drag.shape],s0=drag.snapshot.shapes[drag.shape],a=-rad(s.rotation||0),dx=p.x-s.x,dy=p.y-s.y,ly=dx*Math.sin(a)+dy*Math.cos(a);resizeShapeHeight(s,Math.abs(ly)*2,shapeRatio(s0));
+  }else if(drag.role==='shapeRotate'){
+    const s=level.shapes[drag.shape];s.rotation=Math.round(deg(Math.atan2(p.y-s.y,p.x-s.x))+90);
+  }else if(drag.role==='portalMove'){
+    const q=level.portals[drag.portal][drag.end],b=level.board;q.x=clamp(p.x,b.x+8,b.x+b.w-8);q.y=clamp(p.y,b.y+8,b.y+b.h-8);
+  }
+  resolveAttachments();renderVector();renderEditor();renderInspector()
 });
-function endPointer(e){if(!drag)return;const d0=drag,p=clientWorld(e);drag=null;if(d0.role==='lineTap'){if(!d0.moved&&performance.now()>suppressLineTapUntil){pushHistory();addVertexAt(d0.d,p);compileLevel(false);renderAll()}return}if(d0.role==='point'&&!d0.moved){const now=performance.now(),key=d0.d+':'+d0.p;if(lastPointTap.key===key&&now-lastPointTap.time<430){lastPointTap={key:'',time:0};suppressLineTapUntil=now+350;selected={type:'point',d:d0.d,p:d0.p};const pts=level.dividers[d0.d].points;if(d0.p>0&&d0.p<pts.length-1)pts[d0.p].smooth=!pts[d0.p].smooth;resolveAttachments();compileLevel(false);renderAll();return}lastPointTap={key,time:now}}resolveAttachments();compileLevel(false);renderAll()}
-editorSvg.addEventListener('pointerup',endPointer);editorSvg.addEventListener('pointercancel',()=>{if(drag){drag=null;resolveAttachments();compileLevel(false);renderAll()}});
-// Smooth/corner double-click is handled with pointer timing in endPointer for reliable mouse/touch behaviour.
-window.addEventListener('keydown',e=>{if(mode!=='edit'||!['Delete','Backspace'].includes(e.key))return;const tag=document.activeElement?.tagName;if(['INPUT','SELECT','TEXTAREA'].includes(tag))return;if(selected.type==='point'){e.preventDefault();deleteSelectedVertex()}});
+function endPointer(e){
+  if(!drag)return;const d0=drag,p=clientWorld(e);drag=null;
+  if(d0.role==='lineTap'){if(!d0.moved&&performance.now()>suppressLineTapUntil){pushHistory();addVertexAt(d0.d,p);compileLevel(false);renderAll()}return}
+  if(d0.role==='point'&&!d0.moved){
+    const now=performance.now(),key=d0.d+':'+d0.p;
+    if(lastPointTap.key===key&&now-lastPointTap.time<430){lastPointTap={key:'',time:0};suppressLineTapUntil=now+350;selected={type:'point',d:d0.d,p:d0.p};const pts=level.dividers[d0.d].points;if(d0.p>0&&d0.p<pts.length-1)pts[d0.p].smooth=!pts[d0.p].smooth;compileLevel(false);renderAll();return}
+    lastPointTap={key,time:now};
+  }
+  resolveAttachments();compileLevel(false);renderAll()
+}
+editorSvg.addEventListener('pointerup',endPointer);
+editorSvg.addEventListener('pointercancel',()=>{if(drag){drag=null;resolveAttachments();compileLevel(false);renderAll()}});
 
-function playPointFromEvent(e){const r=paint.getBoundingClientRect(),dpr=paint.width/r.width,px=(e.clientX-r.left)*dpr,py=(e.clientY-r.top)*dpr,dx=+paint.dataset.dx,dy=+paint.dataset.dy,dw=+paint.dataset.dw,dh=+paint.dataset.dh,inside=px>=dx&&px<dx+dw&&py>=dy&&py<dy+dh;return{clientX:e.clientX,clientY:e.clientY,inside,gx:inside?(px-dx)/dw*compiled.GW:0,gy:inside?(py-dy)/dh*compiled.GH:0,moved:false}}
-function cancelPlayPointers(){playPointers.clear();playGesture=false}
-stage.addEventListener('pointerdown',e=>{if(mode!=='play'||!compiled?.valid||orientationBlocked)return;e.preventDefault();const p=playPointFromEvent(e);playPointers.set(e.pointerId,p);if(playPointers.size>1){playGesture=true;for(const q of playPointers.values())q.moved=true}try{stage.setPointerCapture(e.pointerId)}catch(_){}});
-stage.addEventListener('pointermove',e=>{const p=playPointers.get(e.pointerId);if(!p)return;if(Math.hypot(e.clientX-p.clientX,e.clientY-p.clientY)>8)p.moved=true;if(playPointers.size>1)playGesture=true});
-stage.addEventListener('pointerup',e=>{const p=playPointers.get(e.pointerId);if(!p)return;e.preventDefault();const gesture=playGesture||playPointers.size>1;playPointers.delete(e.pointerId);if(!gesture&&!p.moved&&p.inside&&!orientationBlocked)startFill(p.gx,p.gy);if(playPointers.size===0)playGesture=false;else playGesture=true});
-stage.addEventListener('pointercancel',e=>{playPointers.delete(e.pointerId);if(playPointers.size===0)playGesture=false;else playGesture=true});
+window.addEventListener('keydown',e=>{
+  if(mode!=='edit'||!['Delete','Backspace'].includes(e.key))return;
+  const tag=document.activeElement?.tagName;if(['INPUT','SELECT','TEXTAREA'].includes(tag))return;
+  if(selected.type==='point'){e.preventDefault();deleteSelectedVertex()}
+  else if(selected.type==='divider'){e.preventDefault();deleteLine(selected.d)}
+  else if(selected.type==='shape'){e.preventDefault();deleteShape(selected.shape)}
+});
 
+function playTap(e){
+  if(mode!=='play'||!compiled?.valid||e.button>0)return;
+  const r=paint.getBoundingClientRect(),dpr=paint.width/r.width,px=(e.clientX-r.left)*dpr,py=(e.clientY-r.top)*dpr,dx=+paint.dataset.dx,dy=+paint.dataset.dy,dw=+paint.dataset.dw,dh=+paint.dataset.dh;
+  if(px<dx||px>=dx+dw||py<dy||py>=dy+dh)return;
+  startFill((px-dx)/dw*compiled.GW,(py-dy)/dh*compiled.GH)
+}
+paint.addEventListener('pointerdown',playTap);
+stage.addEventListener('pointerdown',e=>{if(e.target===paint)return;playTap(e)});
+
+/* ---------- controls ---------- */
 $('editBtn').onclick=()=>setMode('edit');$('playBtn').onclick=()=>setMode('play');$('resetFillBtn').onclick=resetFill;$('retryBtn').onclick=resetFill;$('backEditBtn').onclick=()=>setMode('edit');
-$('seedCount').onchange=e=>{pushHistory();const n=+e.target.value,lev=level.level,tar=level.target,pal=clone(level.palette),white=clone(level.white);level=makeLevel(n);level.level=lev;level.target=tar;level.palette=pal;level.white=white; // reattach new starts to current white object
-for(const d of level.dividers){const p=d.points[0],hit=whiteHit(p);p.attach={type:'white',t:hit.t};p.x=hit.p.x;p.y=hit.p.y}selected={type:'divider',d:0};compileLevel(false);renderAll()};
-$('targetInput').onchange=e=>{pushHistory();level.target=clamp(+e.target.value||99.2,90,100);renderHeader()};
-$('addGateBtn').onclick=()=>{if(!['divider','point','gate'].includes(selected.type))return;const d=selected.d??0;pushHistory();level.dividers[d].gates.push({t:.5,w:28});selected={type:'gate',d,g:level.dividers[d].gates.length-1};compileLevel(false);renderAll()};
-$('deleteGateBtn').onclick=()=>{if(selected.type!=='gate')return;const{d,g}=selected;pushHistory();level.dividers[d].gates.splice(g,1);selected={type:'divider',d};compileLevel(false);renderAll()};
+$('prevBtn').onclick=()=>{if(playerIndex>0)loadPlayerLevel(playerIndex-1)};
+$('nextBtn').onclick=()=>{if(playerIndex<PLAYER_LEVELS.length-1)loadPlayerLevel(playerIndex+1)};
+$('targetInput').onchange=e=>{pushHistory();level.target=clamp(+e.target.value||99.2,80,100);renderHeader()};
+
+$('addLineBtn').onclick=()=>{
+  pushHistory();const b=level.board,i=level.dividers.length,cx=b.x+b.w/2,cy=b.y+b.h/2,shift=((i%5)-2)*18;
+  level.dividers.push({color:'#ffffff',points:[{x:cx-105+shift,y:cy-45,smooth:false,attach:null},{x:cx+105+shift,y:cy+45,smooth:false,attach:null}],gates:[]});
+  selected={type:'divider',d:level.dividers.length-1};compileLevel(false);renderAll()
+};
+$('deleteLineBtn').onclick=()=>{if(selected.type==='divider')deleteLine(selected.d)};
+$('lineColor').oninput=e=>{if(selected.type!=='divider')return;level.dividers[selected.d].color=e.target.value;renderVector();renderInspector()};
+
+$('addGateBtn').onclick=()=>{
+  if(['divider','point','gate'].includes(selected.type)&&level.dividers[selected.d]){
+    pushHistory();const d=level.dividers[selected.d];d.gates.push({t:.5,w:28,mode:'open',hingeEnd:'start',swingSide:1,initialAngle:45,maxAngle:120});selected={type:'gate',d:selected.d,g:d.gates.length-1}
+  }else if(['shape','shapeGate'].includes(selected.type)&&level.shapes[selected.shape]?.role==='playable'){
+    pushHistory();const s=level.shapes[selected.shape];s.gates.push({t:.5,w:28,mode:'open',hingeEnd:'start',swingSide:1,initialAngle:45,maxAngle:120});selected={type:'shapeGate',shape:selected.shape,g:s.gates.length-1}
+  }else return;
+  compileLevel(false);renderAll()
+};
+$('deleteGateBtn').onclick=()=>{
+  if(selected.type==='gate'){pushHistory();const d=selected.d;level.dividers[d].gates.splice(selected.g,1);selected={type:'divider',d}}
+  else if(selected.type==='shapeGate'){pushHistory();const shape=selected.shape;level.shapes[shape].gates.splice(selected.g,1);selected={type:'shape',shape}}
+  else return;
+  compileLevel(false);renderAll()
+};
+$('gateT').oninput=e=>{const g=currentGate();if(!g)return;g.t=+e.target.value;renderVector();renderEditor();renderInspector()};
+$('gateT').onchange=()=>{compileLevel(false);renderAll()};
+$('gateW').oninput=e=>{const g=currentGate();if(!g)return;g.w=+e.target.value;renderVector();renderEditor();renderInspector()};
+$('gateW').onchange=()=>{compileLevel(false);renderAll()};
+
+$('gateMode').onchange=e=>{const g=currentGate();if(!g)return;pushHistory();g.mode=e.target.value==='hinge'?'hinge':'open';g.initialAngle=45;g.maxAngle=120;compileLevel(false);renderAll()};
+$('gateHingeEnd').onchange=e=>{const g=currentGate();if(!g)return;pushHistory();g.hingeEnd=e.target.value==='end'?'end':'start';compileLevel(false);renderAll()};
+$('gateSwingSide').onchange=e=>{const g=currentGate();if(!g)return;pushHistory();g.swingSide=+e.target.value===-1?-1:1;compileLevel(false);renderAll()};
+$('hingeDebugToggle').onchange=e=>{hingeDebugEnabled=!!e.target.checked;$('hingeDebugLegend').style.display=hingeDebugEnabled?'block':'none';drawPaint()};
+
+
 $('toggleVertexBtn').onclick=toggleSelectedVertex;$('deleteVertexBtn').onclick=deleteSelectedVertex;
-$('gateT').oninput=e=>{if(selected.type!=='gate')return;level.dividers[selected.d].gates[selected.g].t=+e.target.value;renderVector();renderEditor();renderInspector()};$('gateT').onchange=()=>{compileLevel(false);renderAll()};
-$('gateW').oninput=e=>{if(selected.type!=='gate')return;level.dividers[selected.d].gates[selected.g].w=+e.target.value;renderVector();renderEditor();renderInspector()};$('gateW').onchange=()=>{compileLevel(false);renderAll()};
-$('whiteType').onchange=e=>{pushHistory();const o=level.white;o.type=e.target.value;if(o.type==='circle')o.h=o.w;else if(o.type==='semicircle'&&Math.abs(o.h-o.w)<3)o.h=o.w/2;else if(o.type==='quarter'&&Math.abs(o.h-o.w)<3)o.h=o.w;resolveAttachments();compileLevel(false);renderAll()};
-$('whiteW').oninput=e=>{level.white.w=+e.target.value;if(level.white.type==='circle')level.white.h=level.white.w;resolveAttachments();renderVector();renderEditor();renderInspector()};$('whiteW').onchange=()=>{compileLevel(false);renderAll()};
-$('whiteH').oninput=e=>{level.white.h=+e.target.value;if(level.white.type==='circle')level.white.w=level.white.h;resolveAttachments();renderVector();renderEditor();renderInspector()};$('whiteH').onchange=()=>{compileLevel(false);renderAll()};
-$('whiteRot').oninput=e=>{level.white.rotation=+e.target.value;resolveAttachments();renderVector();renderEditor();renderInspector()};$('whiteRot').onchange=()=>{compileLevel(false);renderAll()};
+
+$('addShapeBtn').onclick=()=>{
+  pushHistory();const b=level.board,i=level.shapes.length;
+  level.shapes.push({type:'circle',role:'obstacle',x:b.x+b.w/2+((i%4)-1.5)*35,y:b.y+b.h/2+((i%3)-1)*45,w:125,h:125,rotation:0,color:'#ffffff',gates:[],starPoints:5,lockRatio:false,aspectRatio:1});
+  selected={type:'shape',shape:level.shapes.length-1};compileLevel(false);renderAll()
+};
+$('deleteShapeBtn').onclick=()=>{if(selected.type==='shape')deleteShape(selected.shape)};
+$('shapeType').onchange=e=>{if(selected.type!=='shape')return;pushHistory();const s=level.shapes[selected.shape];s.type=e.target.value;if(s.type==='circle'){s.h=s.w;s.aspectRatio=1}else s.aspectRatio=s.w/Math.max(1,s.h);compileLevel(false);renderAll()};
+$('shapeRole').onchange=e=>{if(selected.type!=='shape')return;pushHistory();level.shapes[selected.shape].role=e.target.value;compileLevel(false);renderAll()};
+$('shapeColor').oninput=e=>{if(selected.type!=='shape')return;level.shapes[selected.shape].color=e.target.value;renderVector();renderInspector()};
+$('shapeRatioLock').onchange=e=>{if(selected.type!=='shape')return;pushHistory();const s=level.shapes[selected.shape];if(s.type==='circle'){s.lockRatio=false;s.aspectRatio=1}else{s.lockRatio=e.target.checked;s.aspectRatio=s.w/Math.max(1,s.h)}renderInspector()};
+$('shapeW').oninput=e=>{if(selected.type!=='shape')return;const s=level.shapes[selected.shape];resizeShapeWidth(s,+e.target.value);resolveAttachments();renderVector();renderEditor();renderInspector()};$('shapeW').onchange=()=>{compileLevel(false);renderAll()};
+$('shapeH').oninput=e=>{if(selected.type!=='shape')return;const s=level.shapes[selected.shape];resizeShapeHeight(s,+e.target.value);resolveAttachments();renderVector();renderEditor();renderInspector()};$('shapeH').onchange=()=>{compileLevel(false);renderAll()};
+$('shapeRot').oninput=e=>{if(selected.type!=='shape')return;level.shapes[selected.shape].rotation=+e.target.value;resolveAttachments();renderVector();renderEditor();renderInspector()};$('shapeRot').onchange=()=>{compileLevel(false);renderAll()};
+$('starPoints').oninput=e=>{if(selected.type!=='shape')return;level.shapes[selected.shape].starPoints=+e.target.value;resolveAttachments();renderVector();renderEditor();renderInspector()};$('starPoints').onchange=()=>{compileLevel(false);renderAll()};
+
+$('addPortalBtn').onclick=()=>{
+  pushHistory();const i=level.portals.length,b=level.board,cx=b.x+b.w/2,cy=b.y+b.h/2,shift=(i%4)*24;
+  level.portals.push({a:{x:clamp(cx-150+shift,b.x+20,b.x+b.w-20),y:clamp(cy-110+shift,b.y+20,b.y+b.h-20)},b:{x:clamp(cx+150-shift,b.x+20,b.x+b.w-20),y:clamp(cy+110-shift,b.y+20,b.y+b.h-20)},radius:13,color:'#ffffff'});
+  selected={type:'portal',portal:i,end:'a'};compileLevel(false);renderAll()
+};
+$('deletePortalBtn').onclick=()=>{if(selected.type!=='portal')return;pushHistory();level.portals.splice(selected.portal,1);selected={type:'none'};compileLevel(false);renderAll()};
+$('portalRadius').oninput=e=>{if(selected.type!=='portal')return;level.portals[selected.portal].radius=+e.target.value;renderVector();renderEditor();renderInspector()};$('portalRadius').onchange=()=>{compileLevel(false);renderAll()};
+$('portalColor').oninput=e=>{if(selected.type!=='portal')return;level.portals[selected.portal].color=e.target.value;renderVector();renderInspector()};
+
+$('regionColor').oninput=e=>{
+  const st=selectedRegionStyle();if(!st)return;
+  st.paint=e.target.value;
+  const ai=compiled?.activeMap?.get(selected.label);
+  if(ai)compiled.activeColors[ai-1]=st.paint;
+  const ra=compiled?.regionAreas?.find(r=>r.id===selected.label);if(ra)ra.paint=st.paint;
+  renderInspector();
+};
+$('applyPaletteBtn').onclick=()=>{
+  if(!compiled)return;
+  const pal=QUICK_PALETTES[$('palettePreset').value]||QUICK_PALETTES.bauhaus;
+  pushHistory();
+  let j=0;
+  for(const id of compiled.activeIds){
+    const idx=compiled.styleIndexByLabel?.[id];
+    if(idx==null||!level.regionStyles[idx])continue;
+    level.regionStyles[idx].paint=pal[j%pal.length];
+    j++;
+  }
+  // No geometry changed, so do not recompile and risk remapping region seeds.
+  compiled.activeColors=compiled.activeIds.map(id=>compiled.styleByLabel[id]?.paint||PAINTS[(id-1)%PAINTS.length]);
+  for(const r of compiled.regionAreas)r.paint=compiled.styleByLabel[r.id]?.paint||r.paint;
+  renderInspector();
+};
 [['outsideColor','outside'],['unfilledColor','unfilled'],['excludedColor','excluded']].forEach(([id,key])=>{$(id).oninput=e=>{level.palette[key]=e.target.value;buildPreview();if(mode==='play')resetFill();renderAll()}});
-$('undoBtn').onclick=()=>{if(!history.length)return;future.push(clone(level));level=history.pop();selected={type:'divider',d:0};updateUndoRedo();resolveAttachments();compileLevel(false);renderAll()};$('redoBtn').onclick=()=>{if(!future.length)return;history.push(clone(level));level=future.pop();selected={type:'divider',d:0};updateUndoRedo();resolveAttachments();compileLevel(false);renderAll()};
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(level,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`growing-paint-level-${level.level}-v07.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
-$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const o=JSON.parse(await f.text());if(!o?.dividers||!o.board)throw new Error('Not a level file');pushHistory();if(!o.white&&o.circle)o.white={type:'circle',x:o.circle.x,y:o.circle.y,w:o.circle.r*2,h:o.circle.r*2,rotation:0};delete o.circle;level=o;if(!level.palette)level.palette=clone(DEFAULT);if(!level.white)level.white={type:'circle',x:386,y:520,w:224,h:224,rotation:0};for(const d of level.dividers)for(const p of d.points){if(p.attach===undefined)p.attach=null;if(p.attach?.type==='circle'){const q={x:level.white.x+level.white.w/2*Math.cos(rad(p.attach.angle||0)),y:level.white.y+level.white.h/2*Math.sin(rad(p.attach.angle||0))},hit=whiteHit(q);p.attach={type:'white',t:hit.t}}}selected={type:'divider',d:0};resolveAttachments();compileLevel(false);renderAll()}catch(err){alert('Could not import: '+err.message)}e.target.value=''};
-function checkOrientation(){const shouldBlock=mode==='play'&&isTouchDevice()&&window.innerWidth>window.innerHeight;const now=performance.now()/1000;if(shouldBlock&&!orientationBlocked){orientationBlocked=true;orientationPauseStart=now;cancelPlayPointers()}else if(!shouldBlock&&orientationBlocked){orientationBlocked=false;if(owner&&orientationPauseStart)clock0+=now-orientationPauseStart;orientationPauseStart=0;cancelPlayPointers()}$('orientation').classList.toggle('show',shouldBlock)}
-window.addEventListener('resize',()=>{layoutStage();checkOrientation()});
-function destroyPlayerLevelState(){
-  cancelPlayPointers();
-  owner=null;arrival=null;trialSid=null;speedField=null;portalLeakField=null;
-  simCanvas=null;sctx=null;simImage=null;heap=[];sources=[];started=null;finished=false;
-  portalPairState=[];endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;
-  dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+
+$('undoBtn').onclick=()=>{if(!history.length)return;future.push(clone(level));level=history.pop();ensureLevel();selected={type:'none'};updateUndoRedo();resolveAttachments();compileLevel(false);renderAll()};
+$('redoBtn').onclick=()=>{if(!future.length)return;history.push(clone(level));level=future.pop();ensureLevel();selected={type:'none'};updateUndoRedo();resolveAttachments();compileLevel(false);renderAll()};
+$('clearCanvasBtn').onclick=()=>{
+  if(!confirm('Clear the canvas and start a completely new blank level?'))return;
+  if(mode!=='edit')setMode('edit');pushHistory();level=blankLevel();ensureLevel();selected={type:'none'};drag=null;
+  hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];portalPairState=[];resolveAttachments();compileLevel(false);renderAll();updateUndoRedo();
+};
+
+$('exportBtn').onclick=()=>{
+  ensureLevel();const blob=new Blob([JSON.stringify(level,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`growing-paint-level-${level.level||1}-v23.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500)
+};
+$('importBtn').onclick=()=>{$('importFile').value='';$('importFile').click()};
+$('importFile').onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  try{
+    const raw=await f.text(),o=JSON.parse(raw);
+    history=[];future=[];selected={type:'none'};drag=null;
+    hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;sctx=null;simImage=null;heap=[];sources=[];started=null;portalPairState=[];
+    compiled=null;previewCanvas=null;previewImage=null;
+    migrateImported(clone(o));
+    resolveAttachments();compileLevel(false);renderAll();updateUndoRedo();
+  }catch(err){alert('Could not import: '+err.message)}
+  e.target.value=''
+};
+
+
+function hardResetPlayerState(){
+  hingePhysicsActive=false;
+  hingeStates=new Map();hingeCoverCount=null;hingeDebugData=new Map();
+  hingeLastUpdateTime=0;hingePhysicsTime=0;hingeAccumulator=0;
+  owner=null;arrival=null;trialSid=null;trialParent=null;
+  speedField=null;portalLeakField=null;
+  simCanvas=null;sctx=null;simImage=null;
+  heap=[];sources=[];started=null;portalPairState=[];
+  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;
+  currentSimNow=0;doorRelaxFloor=-1;
   collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];
-  compiled=null;previewCanvas=null;
-  orientationPauseStart=0;
+  dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  finished=false;compiled=null;previewCanvas=null;
+  selected={type:'none'};drag=null;
   vector.innerHTML='';editorSvg.innerHTML='';
-  ctx.fillStyle=(level?.palette?.outside||DEFAULT.outside);ctx.fillRect(0,0,paint.width,paint.height);
+  if(hingeDebugCtx)hingeDebugCtx.clearRect(0,0,hingeDebugCanvas.width,hingeDebugCanvas.height);
+  ctx.clearRect(0,0,paint.width,paint.height);
 }
 function loadPlayerLevel(index){
-  const nextIndex=(index+PLAYER_LEVELS.length)%PLAYER_LEVELS.length;
-  mode='loading';
-  destroyPlayerLevelState();
-  playerIndex=nextIndex;
-  level=clone(PLAYER_LEVELS[playerIndex]);
-  ensureLevel();
+  index=clamp(index,0,PLAYER_LEVELS.length-1);
+  hardResetPlayerState();
+  playerIndex=index;
+  mode='play';
+
+  // Use the v5.6 builder's own migration/default path for every embedded level.
+  migrateImported(clone(PLAYER_LEVELS[playerIndex]));
   level.level=playerIndex+1;
-  selected={type:'none'};
-  $('levelCounter').textContent=(playerIndex+1)+' / '+PLAYER_LEVELS.length;
-  resolveAttachments();
+  ensureLevel();resolveAttachments();
   compileLevel(true);
   if(!compiled?.valid){
-    mode='play';renderAll();checkOrientation();return;
+    console.error('Embedded level failed validation',playerIndex+1,compiled?.errors);
+    return
   }
-  mode='play';
-  $('editBtn').classList.remove('active');$('playBtn').classList.add('active');$('editorSvg').classList.add('hidden');
-  $('resetFillBtn').disabled=false;$('backEditBtn').disabled=true;
-  layoutStage();
-  resetFill();
-  renderAll();
-  checkOrientation();
-}
-$('prevLevelBtn').onclick=()=>loadPlayerLevel(playerIndex-1);
-$('nextLevelBtn').onclick=()=>loadPlayerLevel(playerIndex+1);
-loadPlayerLevel(0);
-requestAnimationFrame(loop);
-})();
 
+  resetFill();
+  $('editorSvg').classList.add('hidden');
+  $('accuracy').textContent='100.00%';
+  $('accuracyLabel').textContent='ACCURACY';
+  renderVector();renderHeader();drawPaint();
+  layoutStage();checkOrientation();
+}
+
+function checkOrientation(){$('orientation').classList.toggle('show',mode==='play'&&window.innerWidth<760&&window.innerWidth>window.innerHeight)}
+window.addEventListener('resize',()=>{layoutStage();checkOrientation()});
+
+loadPlayerLevel(0);requestAnimationFrame(loop);
+})();
 </script>
 </body>
 </html>
