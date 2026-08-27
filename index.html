@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 7 Level Phone App v6.5</title>
+<title>Growing Paint — 8 Level Phone App v6.7</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">7 Level Phone App v6.5</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">8 Level Phone App v6.7</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -316,6 +316,8 @@ const REPLACEMENT_LEVEL_7={"version":23,"level":1,"target":99.2,"palette":{"outs
 const REPLACEMENT_LEVEL_6={"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":345.4966012084592,"smooth":false,"attach":{"type":"border","edge":"right","t":0.3443564004430143}},{"x":548.279931551307,"y":508.1665407854985,"smooth":true,"attach":null},{"x":436.4017230188234,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5500023667840981}}],"gates":[]},{"color":"#ffffff","points":[{"x":236.91508821620346,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2759822640332465}},{"x":276.1904761904762,"y":357.4631797583082,"smooth":true,"attach":null},{"x":419.7852127220157,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.5271774900027688}}],"gates":[{"t":0.22515398613445678,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.871574281759526,"w":53,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.5,"w":55,"mode":"hinge","hingeEnd":"end","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":197.138136543341,"y":324.47247922960725,"smooth":false,"attach":null},{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":209.56511476957576,"y":224.32024169184288},"b":{"x":600.7966011683484,"y":791.8535215256798},"radius":15,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":250.55970660926414,"y":466.4278338515507},"paint":"#79b7d3"},{"seed":{"x":684.2914888056451,"y":162.74419955280658},"paint":"#4e8fa3"},{"seed":{"x":656.3595396275849,"y":751.3263591279124},"paint":"#86a979"}]};
 const REPLACEMENT_LEVEL_5={"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":345.4966012084592,"smooth":false,"attach":{"type":"border","edge":"right","t":0.3443564004430143}},{"x":633.4041423260754,"y":810.4347620845922,"smooth":false,"attach":null},{"x":436.4017230188234,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5500023667840981}}],"gates":[]},{"color":"#ffffff","points":[{"x":236.91508821620346,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2759822640332465}},{"x":556.3934619696702,"y":591.1123961480363,"smooth":false,"attach":null},{"x":764,"y":217.83539463746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.2058952219495252}}],"gates":[{"t":0.22515398613445678,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":573.6166268991606,"y":560.1451085934266,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.5684376709125305}},{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}}],"gates":[{"t":0.794378833459734,"w":52,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":136.80297397769516,"y":240.49400490936557},"b":{"x":420.17466218209717,"y":833.7365464501511},"radius":15,"color":"#ffffff"},{"a":{"x":431.27397179441795,"y":227.74263595166164},"b":{"x":707.1989142621112,"y":805.2539652567976},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":684.2914888056451,"y":162.74419955280658},"paint":"#6f8798"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#c28e91"},{"seed":{"x":501.41217016222754,"y":682.8293823841219},"paint":"#8d9b76"},{"seed":{"x":656.3595396275849,"y":751.3263591279124},"paint":"#c5a24f"}]};
 PLAYER_LEVELS.splice(0,2,REPLACEMENT_LEVEL_7,REPLACEMENT_LEVEL_6,REPLACEMENT_LEVEL_5);
+const APPENDED_LEVEL_8={"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":345.4966012084592,"smooth":false,"attach":{"type":"border","edge":"right","t":0.3443564004430143}},{"x":633.4041423260754,"y":810.4347620845922,"smooth":false,"attach":null},{"x":436.4017230188234,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5500023667840981}}],"gates":[{"t":0.2932941893864233,"w":37,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":236.91508821620346,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2759822640332465}},{"x":556.3934619696702,"y":591.1123961480363,"smooth":false,"attach":null},{"x":764,"y":217.83539463746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.2058952219495252}}],"gates":[{"t":0.22515398613445678,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":573.6166268991606,"y":560.1451085934266,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.5684376709125305}},{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}}],"gates":[{"t":0.794378833459734,"w":52,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.12683778429321965,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":253.5906060069629,"y":456.8247262084592,"smooth":false,"attach":null},{"x":432.99984269776485,"y":420.95943211890494,"smooth":false,"attach":{"type":"divider","divider":2,"t":0.2615558693049325}}],"gates":[]}],"shapes":[{"type":"circle","role":"playable","x":198.73620699828876,"y":698.8208553625378,"w":183.88121791467518,"h":183.88121791467518,"rotation":0,"color":"#ffffff","gates":[{"t":0.70896239634246,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.0754795998368788,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":136.80297397769516,"y":240.49400490936557},"b":{"x":393.27904643889775,"y":827.7060517371601},"radius":17,"color":"#ffffff"},{"a":{"x":380.0141617985484,"y":181.69373111782477},"b":{"x":563.2265297692807,"y":422.3765577794562},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":684.2914888056451,"y":162.74419955280658},"paint":"#6f8798"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#c28e91"},{"seed":{"x":501.41217016222754,"y":682.8293823841219},"paint":"#8d9b76"},{"seed":{"x":656.3595396275849,"y":751.3263591279124},"paint":"#c5a24f"},{"seed":{"x":197.09157175398636,"y":689.3499367248797},"paint":"#bf718f"}]};
+PLAYER_LEVELS.push(APPENDED_LEVEL_8);
 let playerIndex=0;
 let level=blankLevel();
 
@@ -667,7 +669,12 @@ function compileLevel(highRes=false){
   for(let pi=0;pi<level.portals.length;pi++){
     const p=level.portals[pi],a=labelNearPoint(labels,GW,GH,sx,sy,p.a,Math.max(28,(p.radius||13)*2)),bb=labelNearPoint(labels,GW,GH,sx,sy,p.b,Math.max(28,(p.radius||13)*2));
     portalInfos.push({pair:pi,a,b:bb,pa:p.a,pb:p.b,radius:p.radius||13});
-    if(a&&bb&&a!==bb){gateCount[a]++;gateCount[bb]++;addAdj(a,bb);addAdj(bb,a)}
+    if(a&&bb){
+      // Same-zone pairs are valid and still alter propagation by blooming at
+      // the second endpoint; only cross-zone pairs add graph adjacency.
+      gateCount[a]++;
+      if(bb!==a){gateCount[bb]++;addAdj(a,bb);addAdj(bb,a)}
+    }
   }
 
   const activeIds=[],excludedIds=[];
@@ -737,7 +744,7 @@ function compileLevel(highRes=false){
 
   const errors=[];
   for(const g of gateInfos)if(!(g.a&&g.b&&g.a!==g.b))errors.push(`${g.kind==='shape'?'A shape gate':'A line gate'} is not bridging two distinct regions.`);
-  for(const p of portalInfos)if(!(p.a&&p.b&&p.a!==p.b))errors.push(`Portal pair ${p.pair+1} must sit in two distinct regions.`);
+  for(const p of portalInfos)if(!(p.a&&p.b))errors.push(`Both ends of portal pair ${p.pair+1} must sit inside a region.`);
   if(activeIds.length===0)errors.push('No active regions yet. Add at least one valid gate or portal connection.');
   if(activeIds.length>1){
     const seenA=new Set([activeIds[0]]),qq=[activeIds[0]];
