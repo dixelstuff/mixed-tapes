@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 4 Level App v5.7 Fast Dynamic Doors</title>
+<title>Growing Paint — 4 Level App v5.8 Mobile Fixed</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -56,16 +56,45 @@ button.primary,button.active{background:#111;color:#fff;border-color:#111}button
 @media(max-width:980px){#workspace{grid-template-columns:1fr}#side{display:none}}
 @media(max-width:560px){#playHeader{flex-basis:98px;padding:14px 16px;gap:8px;grid-template-columns:1.25fr .8fr .72fr}.value{font-size:23px}#levelValue{font-size:27px}.label,#sublevel{font-size:8px}#playFooter{flex-basis:66px}}
 
-/* player shell: the v5.6 builder engine remains underneath, but editing UI is hidden */
-#topbar,#side{display:none!important}
-#app{grid-template-rows:1fr}
-#workspace{grid-template-columns:1fr}
-#left{height:100vh}
-#editorSvg{display:none!important}
-#playFooter{padding:0 12px}
+/* Standalone mobile player */
+html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+#topbar,#side,#editorSvg{display:none!important}
+#app{
+  position:fixed;inset:0;
+  width:100%;height:auto;min-height:0;
+  display:grid;grid-template-rows:minmax(0,1fr);
+}
+#workspace{
+  width:100%;height:100%;min-height:0;
+  grid-template-columns:minmax(0,1fr);
+}
+#left{
+  width:100%;height:100%;min-height:0;
+  display:flex;flex-direction:column;
+}
+#playHeader{background:var(--navy);color:#fff}
+#playHeader .label{color:#eee6d8}
+#sublevel{color:#eee6d8}
+#stageWrap{flex:1 1 auto;min-height:0}
+#playFooter{
+  flex:0 0 82px;
+  gap:8px;
+  padding:0 12px max(env(safe-area-inset-bottom),0px);
+  background:var(--navy);border-top:0;
+  position:relative;z-index:5;
+}
+#playFooter button{
+  min-width:0;flex:1 1 0;max-width:180px;
+  background:#fffaf4;color:#171717;border-color:#fffaf4;
+}
+#retryBtn.primary{background:#fff;color:#10283a;border-color:#fff}
 @media(max-width:560px){
-  #playFooter{gap:6px;padding:0 8px}
-  #playFooter button{font-size:10px;padding:7px 6px}
+  #playHeader{flex:0 0 98px}
+  #playFooter{
+    flex:0 0 calc(66px + env(safe-area-inset-bottom));
+    gap:6px;padding:0 8px env(safe-area-inset-bottom);
+  }
+  #playFooter button{font-size:9px;padding:7px 5px}
 }
 
 </style>
@@ -73,7 +102,7 @@ button.primary,button.active{background:#111;color:#fff;border-color:#111}button
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.7 · FAST DYNAMIC DOORS</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.8 · MOBILE FIXED</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -112,7 +141,8 @@ button.primary,button.active{background:#111;color:#fff;border-color:#111}button
       </div>
       <div id="playFooter">
           <button id="prevBtn">PREVIOUS</button>
-          <button id="retryBtn" class="primary">RETRY LEVEL</button>
+          <span id="levelCounter" style="color:#eee6d8;font-size:9px;font-weight:900;letter-spacing:.12em;white-space:nowrap">1 / 4</span>
+          <button id="retryBtn" class="primary">RETRY</button>
           <button id="nextBtn">NEXT</button>
           <button id="backEditBtn" class="hidden">BACK TO EDIT</button>
         </div>
@@ -245,7 +275,7 @@ button.primary,button.active{background:#111;color:#fff;border-color:#111}button
 
 <script>
 (()=>{
-const W=800,H=1000,SIM_W=1200,SIM_H=1500;
+const W=800,H=1000,SIM_W=960,SIM_H=1200;
 const $=id=>document.getElementById(id);
 const paint=$('paint'),ctx=paint.getContext('2d',{alpha:false}),hingeDebugCanvas=$('hingeDebugCanvas'),hingeDebugCtx=hingeDebugCanvas.getContext('2d'),editorSvg=$('editorSvg'),vector=$('vector'),stage=$('stageWrap');
 const PAINTS=['#e5b43d','#4f918a','#496fa5','#e4624d','#bf718f','#7b69a8','#d1844f','#4c8d63','#d66b8a'];
@@ -1314,6 +1344,7 @@ function renderHeader(){
   const prev=$('prevBtn'),next=$('nextBtn');
   if(prev)prev.disabled=playerIndex<=0;
   if(next)next.disabled=playerIndex>=PLAYER_LEVELS.length-1;
+  const counter=$('levelCounter');if(counter)counter.textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
 }
 function renderInspector(){
   for(const id of['dividerControls','pointControls','gateControls','shapeControls','portalControls','regionControls'])$(id).classList.add('hidden');
@@ -1410,7 +1441,7 @@ function resetFill(){
   trialParent=new Int32Array(N);trialParent.fill(-1);
   speedField=new Float32Array(N);speedField.fill(1);
   portalLeakField=new Float32Array(N);portalLeakField.fill(-1);
-  initHingeStates();hingePhysicsActive=false;buildWallDistance();hingePhysicsActive=true;
+  initHingeStates();hingePhysicsActive=false;buildWallDistance();hingePhysicsActive=hingeStates.size>0;
   simCanvas=document.createElement('canvas');simCanvas.width=GW;simCanvas.height=GH;sctx=simCanvas.getContext('2d');simImage=sctx.createImageData(GW,GH);
   sources=[];heap=[];started=new Uint8Array(compiled.activeCount+1);
   portalPairState=(compiled.portalSeeds||[]).map(()=>({locked:false,inlet:null,sid:-1,fireTime:Infinity,fired:false,cancelled:false,currentSpeed:1}));
@@ -2111,7 +2142,7 @@ function loop(ms){
     updateHingeDoorLayer();
     flushSimImage();
     drawPaint();
-    if(ms-lastStats>90){lastStats=ms;accuracy()}
+    if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
       finished=true;const a=accuracy();$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
     }
@@ -2121,9 +2152,36 @@ function loop(ms){
 
 /* ---------- layout/editor interactions ---------- */
 function layoutStage(){
-  const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);paint.width=Math.max(1,Math.round(r.width*dpr));paint.height=Math.max(1,Math.round(r.height*dpr));hingeDebugCanvas.width=paint.width;hingeDebugCanvas.height=paint.height;
-  const px=14*dpr,py=6*dpr,s=Math.min((paint.width-px*2)/W,(paint.height-py*2)/H),dw=W*s,dh=H*s,dx=(paint.width-dw)/2,dy=py;
-  Object.assign(paint.dataset,{dx,dy,dw,dh});for(const el of[vector,editorSvg]){el.style.left=(dx/dpr)+'px';el.style.top=(dy/dpr)+'px';el.style.width=(dw/dpr)+'px';el.style.height=(dh/dpr)+'px'}drawPaint()
+  const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);
+  paint.width=Math.max(1,Math.round(r.width*dpr));
+  paint.height=Math.max(1,Math.round(r.height*dpr));
+  hingeDebugCanvas.width=paint.width;hingeDebugCanvas.height=paint.height;
+
+  let s,dw,dh,dx,dy;
+  const mobilePortrait=window.innerHeight>=window.innerWidth;
+  if(mobilePortrait){
+    const b=level.board,screenPad=2*dpr,logicalSide=4;
+    s=Math.min(
+      (paint.width-screenPad*2)/(b.w+logicalSide*2),
+      (paint.height-screenPad*2)/H
+    );
+    dw=W*s;dh=H*s;
+    dx=(paint.width-b.w*s)/2-b.x*s;
+    dy=screenPad;
+  }else{
+    const px=14*dpr,py=6*dpr;
+    s=Math.min((paint.width-px*2)/W,(paint.height-py*2)/H);
+    dw=W*s;dh=H*s;dx=(paint.width-dw)/2;dy=py;
+  }
+
+  Object.assign(paint.dataset,{dx,dy,dw,dh});
+  for(const el of[vector,editorSvg]){
+    el.style.left=(dx/dpr)+'px';
+    el.style.top=(dy/dpr)+'px';
+    el.style.width=(dw/dpr)+'px';
+    el.style.height=(dh/dpr)+'px';
+  }
+  drawPaint()
 }
 function clientWorld(e){const r=editorSvg.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
 function regionAtWorld(p){
