@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 7 Level Phone App v6.4</title>
+<title>Growing Paint — 7 Level Phone App v6.5</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">7 Level Phone App v6.4</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">7 Level Phone App v6.5</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -748,7 +748,9 @@ function compileLevel(highRes=false){
 
   const total=sizes.reduce((a,b)=>a+(b||0),0),regionAreas=[];
   for(let id=1;id<=comp;id++)regionAreas.push({id,pct:total?100*sizes[id]/total:0,active:activeMap.has(id),activeIndex:activeMap.get(id)||0,paint:styleByLabel[id]?.paint||PAINTS[(id-1)%PAINTS.length],seed:styleByLabel[id]?.seed});
-  compiled={valid:errors.length===0,errors,GW,GH,labels,regionMap,visibility,doorWallMask,tinyRegions,totalRegions:comp,activeCount:activeIds.length,activeIds,excludedIds,activeMap,activeColors,gateInfos,portalInfos,portalCellMap,portalSeeds,regionAreas,styleByLabel,styleIndexByLabel};
+  // Keep zone ownership separate from physical line blocking. This lets an
+  // open-ended or overshooting divider behave as a wall without creating a zone.
+  compiled={valid:errors.length===0,errors,GW,GH,labels,regionMap,visibility,doorWallMask,staticBarrierMask:doorWallMask,tinyRegions,totalRegions:comp,activeCount:activeIds.length,activeIds,excludedIds,activeMap,activeColors,gateInfos,portalInfos,portalCellMap,portalSeeds,regionAreas,styleByLabel,styleIndexByLabel};
   buildPreview();renderHeader();renderInspector();return compiled;
 }
 
@@ -1520,6 +1522,9 @@ function stepAllowed(from,to){
   const a=regionMap[from],b=regionMap[to];if(a<=0||b<=0)return false;
   const x0=from%GW,y0=(from/GW)|0,x1=to%GW,y1=(to/GW)|0;
   if(Math.abs(x1-x0)+Math.abs(y1-y0)!==1)return false;
+  // Visible divider pixels block paint even when both sides share the same zone;
+  // deliberately cut gate gaps are not present in the mask and remain open.
+  if(compiled.staticBarrierMask?.[from]||compiled.staticBarrierMask?.[to])return false;
   const topologyOK=a===b||gateAllows(a,b,(x0+x1)/2,(y0+y1)/2);if(!topologyOK)return false;
   if(doorBlocksStep(from,to))return false;
   return true;
