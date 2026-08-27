@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 4 Level App v5.8 Mobile Fixed</title>
+<title>Growing Paint — 4 Level App v5.9 Faster Paint</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.8 · MOBILE FIXED</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">4 Level App v5.9 · FASTER PAINT</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -1458,7 +1458,7 @@ function resetFill(){
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
 function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
 
-const SPEED=16,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18;
+const SPEED=17.5,CONFINE_MAX=1.30,CONFINE_WIDE=62,CONFINE_NARROW=14,ACCEL_TAU=.30,DECEL_TAU=.18;
 function smoothstep01(v){v=clamp(v,0,1);return v*v*(3-2*v)}
 function portalLeakFactor(d){
   if(d<=20)return 1;
