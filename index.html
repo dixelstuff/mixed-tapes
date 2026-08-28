@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 12 Level Phone App v7.1</title>
+<title>Growing Paint — 13 Level Phone App v7.2</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">12 Level Phone App v7.1</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">13 Level Phone App v7.2</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -331,6 +331,8 @@ const NAMED_LEVEL_YING_YANG={"version":23,"level":1,"name":"Ying yang","target":
 PLAYER_LEVELS.push(NAMED_LEVEL_UNHINGED,NAMED_LEVEL_STAR_AND_STRIPE,NAMED_LEVEL_YING_YANG);
 const NAMED_LEVEL_DOUBLE_HEX={"version":23,"level":1,"name":"double hex","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":446.2453414892854,"y":306.02472132963845,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.16527099075358812}},{"x":814.6102555024488,"y":526.8244901812689,"smooth":false,"attach":null}],"gates":[{"t":0.5,"w":47,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":507.7003870845922,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5202824154930501}},{"x":319.1125678495095,"y":675.5924282477341,"smooth":false,"attach":{"type":"shape","shape":1,"t":0.6680603434344465}}],"gates":[{"t":0.7584919764761414,"w":40,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"hexagon","role":"playable","x":319.14689915619283,"y":380.6444014350453,"w":296,"h":296,"rotation":0,"color":"#ffffff","gates":[{"t":0.9207960460776696,"w":35,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1},{"type":"hexagon","role":"playable","x":447.2843276096064,"y":602.8300132175226,"w":296,"h":296,"rotation":0,"color":"#ffffff","gates":[{"t":0.5880380095160327,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1}],"portals":[{"a":{"x":612.2971617395409,"y":150.86858006042297},"b":{"x":475.9780492122499,"y":863.3461574773413},"radius":11,"color":"#ffffff"},{"a":{"x":316.286068330678,"y":384.68301548338366},"b":{"x":448.3566412934443,"y":599.6211763595167},"radius":21,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":215.83920178336425,"y":265.0779953267263},"paint":"#f05b4f"},{"seed":{"x":293.281302471891,"y":338.04612212799424},"paint":"#2456a6"},{"seed":{"x":420.817657638595,"y":737.0985153054027},"paint":"#65a84d"},{"seed":{"x":482.34854477906885,"y":595.882070982531},"paint":"#f1c84b"}]};
 PLAYER_LEVELS.push(NAMED_LEVEL_DOUBLE_HEX);
+const NAMED_LEVEL_TARGET={"version":23,"level":1,"name":"target","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[],"shapes":[{"type":"circle","role":"playable","x":400.7778662890187,"y":445.3512556646525,"w":493.80037764796134,"h":493.80037764796134,"rotation":0,"color":"#ffffff","gates":[{"t":0.4878006743695428,"w":60,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9997987606891234,"w":52,"mode":"hinge","hingeEnd":"end","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1},{"type":"circle","role":"playable","x":402.5556440667965,"y":442.6624811178248,"w":299.13135068153656,"h":299.13135068153656,"rotation":0,"color":"#ffffff","gates":[{"t":0.4760513937565285,"w":53,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.0061874291586606536,"w":46,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":222.7296866702071,"y":101.71001699395771},"b":{"x":541.9248244527055,"y":847.0189765861027},"radius":20,"color":"#c2c2c2"}],"regionStyles":[{"seed":{"x":636,"y":354.6666666666667},"paint":"#f05b4f"},{"seed":{"x":261.7816593886463,"y":306.2950906444356},"paint":"#2456a6"},{"seed":{"x":393.2063982597737,"y":503.0213841805694},"paint":"#65a84d"}]};
+PLAYER_LEVELS.push(NAMED_LEVEL_TARGET);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
