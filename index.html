@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 11 Level Phone App v7.0</title>
+<title>Growing Paint — 12 Level Phone App v7.1</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">11 Level Phone App v7.0</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">12 Level Phone App v7.1</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -329,6 +329,8 @@ const NAMED_LEVEL_UNHINGED={"version":23,"level":1,"name":"unhinged","target":99
 const NAMED_LEVEL_STAR_AND_STRIPE={"version":23,"level":1,"name":"star and stripe","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":790.4727624622357,"smooth":false,"attach":{"type":"border","edge":"left","t":0.8269769657941819}},{"x":764,"y":792.5084969788519,"smooth":false,"attach":{"type":"border","edge":"right","t":0.8291849208013577}}],"gates":[{"t":0.2693546834020722,"w":63,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"star","role":"playable","x":404.69596388741365,"y":357.85597620845925,"w":500,"h":500,"rotation":0,"color":"#ffffff","gates":[{"t":0.45726490420476573,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.831569839991093,"w":44,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1}],"portals":[{"a":{"x":631.037941818611,"y":128.1037575528701},"b":{"x":625.6741606183986,"y":869.925415407855},"radius":15,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":400.3413062165675,"y":494.7644719849098},"paint":"#f05b4f"},{"seed":{"x":404.026332395327,"y":357.2256502089196},"paint":"#2456a6"},{"seed":{"x":398.32502098133864,"y":872.5264311411175},"paint":"#65a84d"}]};
 const NAMED_LEVEL_YING_YANG={"version":23,"level":1,"name":"Ying yang","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}},{"x":520.3339824157669,"y":233.1358572507553,"smooth":true,"attach":null},{"x":272.57921756063024,"y":697.8084875377643,"smooth":true,"attach":null},{"x":764,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":1}}],"gates":[{"t":0.17265899311097863,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.48114659103578916,"w":52,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8286391441812259,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"circle","role":"playable","x":184.18495898979165,"y":787.3723564954684,"w":206.02082964536515,"h":206.02082964536515,"rotation":0,"color":"#ffffff","gates":[{"t":0.8106861274666396,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1},{"type":"circle","role":"playable","x":599.7714934796719,"y":197.21138595166164,"w":269.0945300053106,"h":269.0945300053106,"rotation":0,"color":"#ffffff","gates":[{"t":0.8804665919410606,"w":71,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[],"regionStyles":[{"seed":{"x":550.1827128961539,"y":447.41818104420753},"paint":"#f05b4f"},{"seed":{"x":241.5183370313516,"y":553.2169273155068},"paint":"#2456a6"},{"seed":{"x":585.6281780862307,"y":218.2773355106484},"paint":"#65a84d"},{"seed":{"x":171.83313918873444,"y":778.3970386477181},"paint":"#f1c84b"}]};
 PLAYER_LEVELS.push(NAMED_LEVEL_UNHINGED,NAMED_LEVEL_STAR_AND_STRIPE,NAMED_LEVEL_YING_YANG);
+const NAMED_LEVEL_DOUBLE_HEX={"version":23,"level":1,"name":"double hex","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":446.2453414892854,"y":306.02472132963845,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.16527099075358812}},{"x":814.6102555024488,"y":526.8244901812689,"smooth":false,"attach":null}],"gates":[{"t":0.5,"w":47,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":507.7003870845922,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5202824154930501}},{"x":319.1125678495095,"y":675.5924282477341,"smooth":false,"attach":{"type":"shape","shape":1,"t":0.6680603434344465}}],"gates":[{"t":0.7584919764761414,"w":40,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"hexagon","role":"playable","x":319.14689915619283,"y":380.6444014350453,"w":296,"h":296,"rotation":0,"color":"#ffffff","gates":[{"t":0.9207960460776696,"w":35,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1},{"type":"hexagon","role":"playable","x":447.2843276096064,"y":602.8300132175226,"w":296,"h":296,"rotation":0,"color":"#ffffff","gates":[{"t":0.5880380095160327,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1}],"portals":[{"a":{"x":612.2971617395409,"y":150.86858006042297},"b":{"x":475.9780492122499,"y":863.3461574773413},"radius":11,"color":"#ffffff"},{"a":{"x":316.286068330678,"y":384.68301548338366},"b":{"x":448.3566412934443,"y":599.6211763595167},"radius":21,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":215.83920178336425,"y":265.0779953267263},"paint":"#f05b4f"},{"seed":{"x":293.281302471891,"y":338.04612212799424},"paint":"#2456a6"},{"seed":{"x":420.817657638595,"y":737.0985153054027},"paint":"#65a84d"},{"seed":{"x":482.34854477906885,"y":595.882070982531},"paint":"#f1c84b"}]};
+PLAYER_LEVELS.push(NAMED_LEVEL_DOUBLE_HEX);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
@@ -552,6 +554,9 @@ function visibleRunsFromPoly(poly,gates,closed=false){
   const m=polyMetrics(poly),merged=gateIntervals(gates,m.L,closed),runs=[];let pos=0;
   for(const[a,b]of merged){if(a>pos+.01)runs.push(subPolyline(poly,m,pos,a));pos=Math.max(pos,b)}
   if(pos<m.L-.01)runs.push(subPolyline(poly,m,pos,m.L));
+  if(closed&&runs.length>1&&merged.length&&merged[0][0]>.01&&merged[merged.length-1][1]<m.L-.01){
+    const first=runs.shift(),last=runs.pop();runs.unshift(concatPolyline(last,first))
+  }
   return runs.filter(r=>r.length>1)
 }
 function visibleDividerRuns(d){return visibleRunsFromPoly(flattenDivider(d,1.25),d.gates,false)}
@@ -601,9 +606,9 @@ function shapeBoundary(s,quality=160){
       for(let i=0;i<=n;i++){const a=i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),cy+rx*Math.sin(a),s))}
     }
   }else if(type==='crescent'){
-    const n=Math.max(48,Math.round(quality*.55));
-    for(let i=0;i<=n;i++){const a=-Math.PI/2-i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
-    for(let i=0;i<=n;i++){const a=Math.PI/2-i/n*Math.PI;pts.push(rotateLocal(-rx*.08+rx*.72*Math.cos(a),ry*.82*Math.sin(a),s))}
+    const n=Math.max(56,Math.round(quality*.62)),tx=rx*.28,ty=ry*.72,alpha=Math.atan2(ty/ry,tx/rx);
+    for(let i=0;i<=n;i++){const a=-alpha-i/n*(Math.PI*2-alpha*2);pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
+    for(let i=1;i<=n;i++){const t=i/n,u=1-t,x=u*u*tx+2*u*t*(-rx*.92)+t*t*tx,y=u*u*ty+t*t*(-ty);pts.push(rotateLocal(x,y,s))}
   }else if(type==='star'){
     const n=clamp(Math.round(s.starPoints||5),5,12),inner=.43;
     for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,r=i%2?inner:1;pts.push(rotateLocal(rx*r*Math.cos(a),ry*r*Math.sin(a),s))}
