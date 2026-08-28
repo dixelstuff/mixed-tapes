@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 8 Level Phone App v6.9 Rotation Pause</title>
+<title>Growing Paint — 11 Level Phone App v7.0</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">8 Level Phone App v6.9</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">11 Level Phone App v7.0</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -129,8 +129,8 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
     <div id="left">
       <div id="playHeader">
         <div><div class="value" id="levelValue">LEVEL 1</div><div id="sublevel">ZERO ACTIVE · 1 REGION</div></div>
-        <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">--.--%</div></div>
-        <div><div class="label">BEST</div><div class="value" id="bestAccuracy">--.--%</div></div>
+        <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">-</div></div>
+        <div><div class="label">BEST</div><div class="value" id="bestAccuracy">-</div></div>
         <div><div class="label">TARGET</div><div class="value" id="targetReadout">99.2%</div></div>
       </div>
       <div id="stageWrap">
@@ -145,6 +145,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
           <span id="levelCounter" style="color:#eee6d8;font-size:9px;font-weight:900;letter-spacing:.12em;white-space:nowrap">1 / 4</span>
           <button id="retryBtn" class="primary">RETRY</button>
           <button id="nextBtn">NEXT</button>
+          <button id="copyBestsBtn">COPY BESTS</button>
           <button id="backEditBtn" class="hidden">BACK TO EDIT</button>
         </div>
     </div>
@@ -200,6 +201,11 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
               <option value="quarter">Quarter circle</option>
               <option value="rectangle">Rectangle</option>
               <option value="triangle">Triangle</option>
+              <option value="rightTriangle">Right-angle triangle</option>
+              <option value="diamond">Diamond</option>
+              <option value="hexagon">Hexagon</option>
+              <option value="capsule">Capsule</option>
+              <option value="crescent">Crescent moon</option>
               <option value="star">Star</option>
             </select>
           </div>
@@ -319,6 +325,10 @@ const REPLACEMENT_LEVEL_5={"version":23,"level":1,"target":99.2,"palette":{"outs
 PLAYER_LEVELS.splice(0,2,REPLACEMENT_LEVEL_7,REPLACEMENT_LEVEL_6,REPLACEMENT_LEVEL_5);
 const APPENDED_LEVEL_8={"version":23,"level":1,"target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":345.4966012084592,"smooth":false,"attach":{"type":"border","edge":"right","t":0.3443564004430143}},{"x":633.4041423260754,"y":810.4347620845922,"smooth":false,"attach":null},{"x":436.4017230188234,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5500023667840981}}],"gates":[{"t":0.2932941893864233,"w":37,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":236.91508821620346,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2759822640332465}},{"x":556.3934619696702,"y":591.1123961480363,"smooth":false,"attach":null},{"x":764,"y":217.83539463746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.2058952219495252}}],"gates":[{"t":0.22515398613445678,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":573.6166268991606,"y":560.1451085934266,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.5684376709125305}},{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}}],"gates":[{"t":0.794378833459734,"w":52,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.12683778429321965,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":253.5906060069629,"y":456.8247262084592,"smooth":false,"attach":null},{"x":432.99984269776485,"y":420.95943211890494,"smooth":false,"attach":{"type":"divider","divider":2,"t":0.2615558693049325}}],"gates":[]}],"shapes":[{"type":"circle","role":"playable","x":198.73620699828876,"y":698.8208553625378,"w":183.88121791467518,"h":183.88121791467518,"rotation":0,"color":"#ffffff","gates":[{"t":0.70896239634246,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.0754795998368788,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":136.80297397769516,"y":240.49400490936557},"b":{"x":393.27904643889775,"y":827.7060517371601},"radius":17,"color":"#ffffff"},{"a":{"x":380.0141617985484,"y":181.69373111782477},"b":{"x":563.2265297692807,"y":422.3765577794562},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":684.2914888056451,"y":162.74419955280658},"paint":"#6f8798"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#c28e91"},{"seed":{"x":501.41217016222754,"y":682.8293823841219},"paint":"#8d9b76"},{"seed":{"x":656.3595396275849,"y":751.3263591279124},"paint":"#c5a24f"},{"seed":{"x":197.09157175398636,"y":689.3499367248797},"paint":"#bf718f"}]};
 PLAYER_LEVELS.push(APPENDED_LEVEL_8);
+const NAMED_LEVEL_UNHINGED={"version":23,"level":1,"name":"unhinged","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":319.5019767510474,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.3894257922404497}},{"x":421.05977459137307,"y":754.7618485649547,"smooth":false,"attach":null}],"gates":[{"t":0.13612433913984334,"w":52,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":363.1387513411883,"y":340.27088063099484,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.42967428910529376}},{"x":764,"y":499.9822979607251,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5119113860745391}}],"gates":[{"t":0.5,"w":46,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":270.26612379772234,"y":410.04413708459214},"b":{"x":678.9225231604414,"y":103.02586858006042},"radius":15,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":399.3333333333333,"y":488},"paint":"#e5b43d"},{"seed":{"x":569.5043225529013,"y":219.68511351335323},"paint":"#4f918a"}]};
+const NAMED_LEVEL_STAR_AND_STRIPE={"version":23,"level":1,"name":"star and stripe","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":790.4727624622357,"smooth":false,"attach":{"type":"border","edge":"left","t":0.8269769657941819}},{"x":764,"y":792.5084969788519,"smooth":false,"attach":{"type":"border","edge":"right","t":0.8291849208013577}}],"gates":[{"t":0.2693546834020722,"w":63,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"star","role":"playable","x":404.69596388741365,"y":357.85597620845925,"w":500,"h":500,"rotation":0,"color":"#ffffff","gates":[{"t":0.45726490420476573,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.831569839991093,"w":44,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1}],"portals":[{"a":{"x":631.037941818611,"y":128.1037575528701},"b":{"x":625.6741606183986,"y":869.925415407855},"radius":15,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":400.3413062165675,"y":494.7644719849098},"paint":"#f05b4f"},{"seed":{"x":404.026332395327,"y":357.2256502089196},"paint":"#2456a6"},{"seed":{"x":398.32502098133864,"y":872.5264311411175},"paint":"#65a84d"}]};
+const NAMED_LEVEL_YING_YANG={"version":23,"level":1,"name":"Ying yang","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":28,"smooth":false,"attach":{"type":"border","edge":"left","t":0}},{"x":520.3339824157669,"y":233.1358572507553,"smooth":true,"attach":null},{"x":272.57921756063024,"y":697.8084875377643,"smooth":true,"attach":null},{"x":764,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":1}}],"gates":[{"t":0.17265899311097863,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.48114659103578916,"w":52,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8286391441812259,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"circle","role":"playable","x":184.18495898979165,"y":787.3723564954684,"w":206.02082964536515,"h":206.02082964536515,"rotation":0,"color":"#ffffff","gates":[{"t":0.8106861274666396,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1},{"type":"circle","role":"playable","x":599.7714934796719,"y":197.21138595166164,"w":269.0945300053106,"h":269.0945300053106,"rotation":0,"color":"#ffffff","gates":[{"t":0.8804665919410606,"w":71,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[],"regionStyles":[{"seed":{"x":550.1827128961539,"y":447.41818104420753},"paint":"#f05b4f"},{"seed":{"x":241.5183370313516,"y":553.2169273155068},"paint":"#2456a6"},{"seed":{"x":585.6281780862307,"y":218.2773355106484},"paint":"#65a84d"},{"seed":{"x":171.83313918873444,"y":778.3970386477181},"paint":"#f1c84b"}]};
+PLAYER_LEVELS.push(NAMED_LEVEL_UNHINGED,NAMED_LEVEL_STAR_AND_STRIPE,NAMED_LEVEL_YING_YANG);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
@@ -342,12 +352,36 @@ function fingerprintLevel(levelData){
   return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')
 }
 function bestScoreKey(){return BEST_SCORE_PREFIX+currentLevelFingerprint}
+function storedBestForLevel(levelData){
+  try{
+    const raw=localStorage.getItem(BEST_SCORE_PREFIX+fingerprintLevel(levelData));
+    if(raw===null)return null;
+    const n=Number(raw);return Number.isFinite(n)?n:null
+  }catch{return null}
+}
 function readStoredBest(){
   if(!currentLevelFingerprint)return null;
   try{const raw=localStorage.getItem(bestScoreKey());if(raw===null)return null;const n=Number(raw);return Number.isFinite(n)?n:null}catch{return null}
 }
 function renderBestAccuracy(){
-  const el=$('bestAccuracy');if(el)el.textContent=Number.isFinite(currentBestAccuracy)?currentBestAccuracy.toFixed(2)+'%':'--.--%'
+  const el=$('bestAccuracy');if(el)el.textContent=Number.isFinite(currentBestAccuracy)?currentBestAccuracy.toFixed(2)+'%':'-'
+}
+function bestScoresText(){
+  return PLAYER_LEVELS.map((levelData,i)=>{
+    const name=String(levelData.name||'').trim()||`Level ${i+1}`,best=storedBestForLevel(levelData);
+    return `${i+1}. ${name}: ${Number.isFinite(best)?best.toFixed(2)+'%':'-'}`
+  }).join('\n')
+}
+async function copyBestScores(){
+  const output=bestScoresText(),button=$('copyBestsBtn');let copied=false;
+  try{
+    if(!navigator.clipboard?.writeText)throw new Error('Clipboard API unavailable');
+    await navigator.clipboard.writeText(output);copied=true
+  }catch{
+    const field=document.createElement('textarea');field.value=output;field.setAttribute('readonly','');field.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(field);field.select();copied=document.execCommand('copy');field.remove();
+    if(!copied)window.prompt('Copy your best scores:',output)
+  }
+  if(button){button.textContent=copied?'COPIED':'COPY SHOWN';setTimeout(()=>button.textContent='COPY BESTS',1400)}
 }
 function recordBestAccuracy(score){
   if(!Number.isFinite(score)||!currentLevelFingerprint)return;
@@ -521,7 +555,17 @@ function visibleRunsFromPoly(poly,gates,closed=false){
   return runs.filter(r=>r.length>1)
 }
 function visibleDividerRuns(d){return visibleRunsFromPoly(flattenDivider(d,1.25),d.gates,false)}
-function runsPath(runs){let d='';for(const run of runs){d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;for(let i=1;i<run.length;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`}return d}
+function runsPath(runs){
+  let d='';
+  for(const run of runs){
+    if(!run.length)continue;
+    const closed=run.length>2&&dist(run[0],run[run.length-1])<.01,end=closed?run.length-1:run.length;
+    d+=`M${run[0].x.toFixed(2)} ${run[0].y.toFixed(2)}`;
+    for(let i=1;i<end;i++)d+=` L${run[i].x.toFixed(2)} ${run[i].y.toFixed(2)}`;
+    if(closed)d+=' Z'
+  }
+  return d
+}
 
 function shapeBoundary(s,quality=160){
   const pts=[],w=Math.max(20,s.w||120),h=Math.max(20,s.h||120),rx=w/2,ry=h/2,type=s.type||'circle';
@@ -539,6 +583,27 @@ function shapeBoundary(s,quality=160){
     pts.push(rotateLocal(-rx,-ry,s),rotateLocal(rx,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
   }else if(type==='triangle'){
     pts.push(rotateLocal(0,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
+  }else if(type==='rightTriangle'){
+    pts.push(rotateLocal(-rx,-ry,s),rotateLocal(rx,ry,s),rotateLocal(-rx,ry,s));
+  }else if(type==='diamond'){
+    pts.push(rotateLocal(0,-ry,s),rotateLocal(rx,0,s),rotateLocal(0,ry,s),rotateLocal(-rx,0,s));
+  }else if(type==='hexagon'){
+    for(let i=0;i<6;i++){const a=-Math.PI/2+i*Math.PI/3;pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
+  }else if(type==='capsule'){
+    const n=Math.max(32,Math.round(quality*.35));
+    if(w>=h){
+      const cx=Math.max(0,rx-ry);
+      for(let i=0;i<=n;i++){const a=-Math.PI/2+i/n*Math.PI;pts.push(rotateLocal(cx+ry*Math.cos(a),ry*Math.sin(a),s))}
+      for(let i=0;i<=n;i++){const a=Math.PI/2+i/n*Math.PI;pts.push(rotateLocal(-cx+ry*Math.cos(a),ry*Math.sin(a),s))}
+    }else{
+      const cy=Math.max(0,ry-rx);
+      for(let i=0;i<=n;i++){const a=Math.PI+i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),-cy+rx*Math.sin(a),s))}
+      for(let i=0;i<=n;i++){const a=i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),cy+rx*Math.sin(a),s))}
+    }
+  }else if(type==='crescent'){
+    const n=Math.max(48,Math.round(quality*.55));
+    for(let i=0;i<=n;i++){const a=-Math.PI/2-i/n*Math.PI;pts.push(rotateLocal(rx*Math.cos(a),ry*Math.sin(a),s))}
+    for(let i=0;i<=n;i++){const a=Math.PI/2-i/n*Math.PI;pts.push(rotateLocal(-rx*.08+rx*.72*Math.cos(a),ry*.82*Math.sin(a),s))}
   }else if(type==='star'){
     const n=clamp(Math.round(s.starPoints||5),5,12),inner=.43;
     for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,r=i%2?inner:1;pts.push(rotateLocal(rx*r*Math.cos(a),ry*r*Math.sin(a),s))}
@@ -1406,7 +1471,7 @@ function selectedRegionStyle(){
 function renderHeader(){
   const named=String(level.name||'').trim();
   $('levelValue').textContent=named||`LEVEL ${playerIndex+1}`;
-  $('sublevel').textContent=named?`LEVEL ${playerIndex+1} · ${playerIndex+1} / ${PLAYER_LEVELS.length}`:`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
+  $('sublevel').textContent=named?`LEVEL ${playerIndex+1}`:'';
   $('targetReadout').textContent=Number(level.target).toFixed(1)+'%';
   $('targetInput').value=Number(level.target).toFixed(1);
   const prev=$('prevBtn'),next=$('nextBtn');
@@ -1496,7 +1561,7 @@ function drawPaint(){
 function renderAll(){renderVector();renderEditor();renderHeader();renderInspector();drawPaint()}
 function setMode(m){
   if(m==='play'){compileLevel(true);if(!compiled.valid)return;mode='play';resetFill()}
-  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='--.--%';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy()}
+  else{mode='edit';hingePhysicsActive=false;hingeStates=new Map();hingeCoverCount=null;hingeBlockedEdgeCounts=new Map();hingeDebugData=new Map();owner=null;arrival=null;trialSid=null;trialParent=null;simCanvas=null;simImage=null;heap=[];sources=[];finished=false;$('accuracy').textContent='-';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy()}
   $('editBtn').classList.toggle('active',mode==='edit');$('playBtn').classList.toggle('active',mode==='play');$('editorSvg').classList.toggle('hidden',mode!=='edit');$('resetFillBtn').disabled=mode!=='play';$('backEditBtn').disabled=mode!=='play';checkOrientation();renderAll()
 }
 function resetFill(){
@@ -1521,7 +1586,7 @@ function resetFill(){
     simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
   }
   sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
-  $('accuracy').textContent='--.--%';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy();updateHingeDoorLayer();drawPaint();
+  $('accuracy').textContent='-';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy();updateHingeDoorLayer();drawPaint();
 }
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
 function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
@@ -2182,7 +2247,7 @@ function accuracy(){
     }
   }
   filled=Math.max(0,filled);correct=clamp(correct,0,filled);
-  if(filled<=0){$('accuracy').textContent='--.--%';return NaN}
+  if(filled<=0){$('accuracy').textContent='-';return NaN}
   const a=filled?100*correct/filled:100;$('accuracy').textContent=a.toFixed(2)+'%';return a
 }
 function advanceSmoothly(targetNow){
@@ -2377,6 +2442,7 @@ stage.addEventListener('pointerdown',e=>{if(e.target===paint)return;playTap(e)})
 $('editBtn').onclick=()=>setMode('edit');$('playBtn').onclick=()=>setMode('play');$('resetFillBtn').onclick=resetFill;$('retryBtn').onclick=resetFill;$('backEditBtn').onclick=()=>setMode('edit');
 $('prevBtn').onclick=()=>{if(playerIndex>0)loadPlayerLevel(playerIndex-1)};
 $('nextBtn').onclick=()=>{if(playerIndex<PLAYER_LEVELS.length-1)loadPlayerLevel(playerIndex+1)};
+$('copyBestsBtn').onclick=copyBestScores;
 $('targetInput').onchange=e=>{pushHistory();level.target=clamp(+e.target.value||99.2,80,100);renderHeader()};
 
 $('addLineBtn').onclick=()=>{
@@ -2529,7 +2595,7 @@ function loadPlayerLevel(index){
 
   resetFill();
   $('editorSvg').classList.add('hidden');
-  $('accuracy').textContent='--.--%';
+  $('accuracy').textContent='-';
   $('accuracyLabel').textContent='ACCURACY';
   renderBestAccuracy();
   renderVector();renderHeader();drawPaint();
