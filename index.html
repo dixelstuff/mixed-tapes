@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 17 Level Phone App v7.5</title>
+<title>Growing Paint — 18 Level Phone App v7.7 · 50/50 Mode</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -88,6 +88,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
   background:#fffaf4;color:#171717;border-color:#fffaf4;
 }
 #retryBtn.primary{background:#fff;color:#10283a;border-color:#fff}
+#gameModeBtn.balanceActive{background:linear-gradient(90deg,#496fa5 0 50%,#e5b43d 50% 100%);color:#10283a;border-color:#fff}
 @media(max-width:560px){
   #playHeader{flex:0 0 98px}
   #playFooter{
@@ -102,7 +103,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">17 Level Phone App v7.5</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">18 Level Phone App v7.7 · 50/50 MODE</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -131,7 +132,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
         <div><div class="value" id="levelValue">LEVEL 1</div><div id="sublevel">ZERO ACTIVE · 1 REGION</div></div>
         <div><div class="label" id="accuracyLabel">ACCURACY</div><div class="value" id="accuracy">-</div></div>
         <div><div class="label">BEST</div><div class="value" id="bestAccuracy">-</div></div>
-        <div><div class="label">TARGET</div><div class="value" id="targetReadout">99.2%</div></div>
+        <div><div class="label" id="targetLabel">TARGET</div><div class="value" id="targetReadout">99.2%</div></div>
       </div>
       <div id="stageWrap">
         <canvas id="paint"></canvas>
@@ -146,6 +147,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
           <button id="retryBtn" class="primary">RETRY</button>
           <button id="nextBtn">NEXT</button>
           <button id="copyBestsBtn">COPY BESTS</button>
+          <button id="gameModeBtn">50:50 MODE</button>
           <button id="backEditBtn" class="hidden">BACK TO EDIT</button>
         </div>
     </div>
@@ -303,7 +305,7 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),hex=h=>[parseInt(h.slice(1,3),16),
 const zoneWord=n=>(['ZERO','ONE','TWO','THREE','FOUR','FIVE','SIX','SEVEN','EIGHT','NINE','TEN','ELEVEN','TWELVE'][n]||String(n));
 
 let mode='edit',selected={type:'none'},compiled=null,previewCanvas=null,history=[],future=[],drag=null,lastPointTap={key:'',time:0},suppressLineTapUntil=0;
-let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[],hingeStates=new Map(),hingeCoverCount=null,hingeBlockedEdgeCounts=new Map(),hingePhysicsActive=false,hingeLastUpdateTime=0,hingePhysicsTime=0,hingeAccumulator=0,currentSimNow=0,doorRelaxFloor=-1,hingeDebugEnabled=false,hingeDebugData=new Map(),accuracyFilledTotal=0,accuracyCorrectTotal=0;
+let owner=null,arrival=null,trialSid=null,trialParent=null,speedField=null,portalLeakField=null,simCanvas=null,sctx=null,simImage=null,heap=[],sources=[],started=null,finished=false,clock0=0,lastPaint=0,lastStats=0,portalPairState=[],endBoostStart=-1,endBoostLast=-1,endBoostExtra=0,simAdvanceCursor=0,dirtyMinX=1e9,dirtyMinY=1e9,dirtyMaxX=-1,dirtyMaxY=-1,collisionBlocks=new Set(),collisionVersion=0,interfaceChainVersion=-1,interfaceChains=[],hingeStates=new Map(),hingeCoverCount=null,hingeBlockedEdgeCounts=new Map(),hingePhysicsActive=false,hingeLastUpdateTime=0,hingePhysicsTime=0,hingeAccumulator=0,currentSimNow=0,doorRelaxFloor=-1,hingeDebugEnabled=false,hingeDebugData=new Map(),accuracyFilledTotal=0,accuracyCorrectTotal=0,balanceCoverage=[0,0];
 
 function blankLevel(){
   return{
@@ -339,11 +341,21 @@ PLAYER_LEVELS.push(NAMED_LEVEL_TAKEOFF,NAMED_LEVEL_PILL_FLIP);
 const NAMED_LEVEL_SLIDE={"version":23,"level":1,"name":"slide","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":423.08463935045313,"smooth":false,"attach":{"type":"border","edge":"left","t":0.4285082856295587}},{"x":260.00472059951613,"y":227.23517749244712,"smooth":true,"attach":null},{"x":468.81453944650974,"y":827.0864803625377,"smooth":true,"attach":null},{"x":665.7284475128341,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.8650116037264205}}],"gates":[{"t":0.4282849565344321,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":444.7217796660176,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.5614310160247494}},{"x":260.8308255148404,"y":202.06877832326285,"smooth":true,"attach":null},{"x":764,"y":561.2726586102718,"smooth":false,"attach":{"type":"border","edge":"right","t":0.5783868314645031}}],"gates":[{"t":0.1569924826750744,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":119.22464152947425,"y":127.33076850453173},"b":{"x":647.8255738478787,"y":701.956665407855},"radius":18,"color":"#ffffff"},{"a":{"x":259.16681418540156,"y":540.1482250755288},"b":{"x":708.1961409098956,"y":429.1859422205438},"radius":10,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":423.4075257813851,"y":465.9691698090285},"paint":"#e5b43d"},{"seed":{"x":488.4686770998183,"y":360.180405603423},"paint":"#e5b43d"},{"seed":{"x":253.21828578668206,"y":696.4376387234156},"paint":"#4f918a"}]};
 const NAMED_LEVEL_CRAZY_STAIR={"version":23,"level":1,"name":"Crazy stair","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":420.25231306646526,"smooth":false,"attach":{"type":"border","edge":"left","t":0.42543634822827037}},{"x":316.3922818197911,"y":455.4321657854985,"smooth":false,"attach":null},{"x":257.5146043547531,"y":606.4718655589124,"smooth":false,"attach":null},{"x":411.9726205228064,"y":607.7228096676737,"smooth":false,"attach":null},{"x":398.1530654393108,"y":796.4973564954682,"smooth":false,"attach":null},{"x":590.493892724376,"y":795.6535592900302,"smooth":false,"attach":null},{"x":671.2043429515548,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.8725334381202676}}],"gates":[{"t":0.06589157297050985,"w":43,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9188611199211145,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":181.3438503228868,"y":438.4881047751066,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.12682971071383156}},{"x":198.21207293326253,"y":345.43169373111783,"smooth":false,"attach":null}],"gates":[]},{"color":"#ffffff","points":[{"x":499.6715766132562,"y":796.051995844597,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.7705564237777719}},{"x":576.5032159084203,"y":690.6863670694864,"smooth":false,"attach":null}],"gates":[]}],"shapes":[{"type":"circle","role":"playable","x":539.0206231191362,"y":271.9479796072507,"w":328.74376888217535,"h":328.74376888217535,"rotation":0,"color":"#ffffff","gates":[{"t":0.6087726457715031,"w":59,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.12680649064683122,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":129.10839676638932,"y":100.57708648036254},"b":{"x":339.79465392104794,"y":882.2991408610272},"radius":20,"color":"#b8b8b8"}],"regionStyles":[{"seed":{"x":444.6302330775779,"y":399.2498761467244},"paint":"#e5b43d"},{"seed":{"x":444.6302330775779,"y":399.2498761467244},"paint":"#f05b4f"},{"seed":{"x":354.54107457357236,"y":735.8833988757268},"paint":"#65a84d"}]};
 PLAYER_LEVELS.push(NAMED_LEVEL_SLIDE,NAMED_LEVEL_CRAZY_STAIR);
+const NAMED_LEVEL_FIDDYCENT={"version":23,"level":1,"name":"fiddycent","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":321.6047488670695,"smooth":false,"attach":{"type":"border","edge":"left","t":0.31844332848922935}},{"x":93.8809228772054,"y":542.4612915407855,"smooth":true,"attach":null},{"x":580.1970850297987,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7475234684475257}}],"gates":[{"t":0.7793360046873253,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"diamond","role":"playable","x":422.07367085619853,"y":576.8597054380667,"w":399.25857083849655,"h":229.81265120670332,"rotation":-35,"color":"#ffffff","gates":[{"t":0.6418842489012778,"w":42,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.1759780179337374,"w":53,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1.7373219826761683}],"portals":[{"a":{"x":243.2229893196436,"y":191.86650302114805},"b":{"x":549.7138136543341,"y":706.0812405589124},"radius":22,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":212.83863872236938,"y":123.12080796815218},"paint":"#e5b43d"},{"seed":{"x":259.4169664836205,"y":727.7951145616361},"paint":"#e4624d"},{"seed":{"x":386.6407378404246,"y":536.1578352040373},"paint":"#496fa5"}]};
+PLAYER_LEVELS.push(NAMED_LEVEL_FIDDYCENT);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
+let gameMode='target';
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
 const BEST_SCORE_PREFIX='growing-paint-best-v1:';
+const BALANCE_BEST_SCORE_PREFIX='growing-paint-best-5050-v1:';
 const LAST_LEVEL_KEY='growing-paint-last-level-v1';
+const GAME_MODE_KEY='growing-paint-game-mode-v1';
+const BALANCE_COLORS=['#496fa5','#e5b43d'];
+
+function activeBestScorePrefix(){return gameMode==='balance'?BALANCE_BEST_SCORE_PREFIX:BEST_SCORE_PREFIX}
+function readStoredGameMode(){try{return localStorage.getItem(GAME_MODE_KEY)==='balance'?'balance':'target'}catch{return'target'}}
+function rememberGameMode(){try{localStorage.setItem(GAME_MODE_KEY,gameMode)}catch{}}
 
 function readLastPlayerLevel(){
   try{
@@ -372,10 +384,10 @@ function fingerprintLevel(levelData){
   }
   return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')
 }
-function bestScoreKey(){return BEST_SCORE_PREFIX+currentLevelFingerprint}
+function bestScoreKey(){return activeBestScorePrefix()+currentLevelFingerprint}
 function storedBestForLevel(levelData){
   try{
-    const raw=localStorage.getItem(BEST_SCORE_PREFIX+fingerprintLevel(levelData));
+    const raw=localStorage.getItem(activeBestScorePrefix()+fingerprintLevel(levelData));
     if(raw===null)return null;
     const n=Number(raw);return Number.isFinite(n)?n:null
   }catch{return null}
@@ -388,10 +400,11 @@ function renderBestAccuracy(){
   const el=$('bestAccuracy');if(el)el.textContent=Number.isFinite(currentBestAccuracy)?currentBestAccuracy.toFixed(2)+'%':'-'
 }
 function bestScoresText(){
-  return PLAYER_LEVELS.map((levelData,i)=>{
+  const scores=PLAYER_LEVELS.map((levelData,i)=>{
     const name=String(levelData.name||'').trim()||`Level ${i+1}`,best=storedBestForLevel(levelData);
     return `${i+1}. ${name}: ${Number.isFinite(best)?best.toFixed(2)+'%':'-'}`
-  }).join('\n')
+  });
+  return `${gameMode==='balance'?'50/50 MODE':'TARGET MODE'}\n`+scores.join('\n')
 }
 async function copyBestScores(){
   const output=bestScoresText(),button=$('copyBestsBtn');let copied=false;
@@ -1492,16 +1505,30 @@ function selectedRegionStyle(){
   if(selected.type!=='region'||!compiled)return null;
   const idx=compiled.styleIndexByLabel[selected.label];return idx==null?null:level.regionStyles[idx]
 }
+function updateGameModeHeader(){
+  const balance=gameMode==='balance',button=$('gameModeBtn');
+  if(button){button.textContent=balance?'TARGET MODE':'50:50 MODE';button.classList.toggle('balanceActive',balance)}
+  if(!balance){
+    $('targetLabel').textContent='TARGET';$('targetReadout').textContent=Number(level.target).toFixed(1)+'%';
+    if(!finished)$('accuracyLabel').textContent='ACCURACY'
+  }else if(sources.length<2){
+    $('targetLabel').textContent='NEXT TAP';$('targetReadout').textContent=sources.length?'YELLOW':'BLUE';
+    if(!finished)$('accuracyLabel').textContent='50/50 SCORE'
+  }else{
+    $('targetLabel').textContent='BLUE/YELLOW';
+    if(!finished)$('accuracyLabel').textContent='50/50 SCORE'
+  }
+}
 function renderHeader(){
   const named=String(level.name||'').trim();
   $('levelValue').textContent=named||`LEVEL ${playerIndex+1}`;
   $('sublevel').textContent=named?`LEVEL ${playerIndex+1}`:'';
-  $('targetReadout').textContent=Number(level.target).toFixed(1)+'%';
   $('targetInput').value=Number(level.target).toFixed(1);
   const prev=$('prevBtn'),next=$('nextBtn');
   if(prev)prev.disabled=playerIndex<=0;
   if(next)next.disabled=playerIndex>=PLAYER_LEVELS.length-1;
   const counter=$('levelCounter');if(counter)counter.textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
+  updateGameModeHeader();
 }
 function renderInspector(){
   for(const id of['dividerControls','pointControls','gateControls','shapeControls','portalControls','regionControls'])$(id).classList.add('hidden');
@@ -1590,7 +1617,7 @@ function setMode(m){
 }
 function resetFill(){
   if(!compiled?.valid)return;
-  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;accuracyFilledTotal=0;accuracyCorrectTotal=0;
+  endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;accuracyFilledTotal=0;accuracyCorrectTotal=0;balanceCoverage=[0,0];
   const{GW,GH,regionMap}=compiled,N=GW*GH;
   owner=new Int16Array(N);owner.fill(-99);
   arrival=new Float32Array(N);arrival.fill(Infinity);
@@ -1610,7 +1637,7 @@ function resetFill(){
     simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
   }
   sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
-  $('accuracy').textContent='-';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy();updateHingeDoorLayer();drawPaint();
+  $('accuracy').textContent='-';renderBestAccuracy();updateGameModeHeader();updateHingeDoorLayer();drawPaint();
 }
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
 function heapPop(){const f=heap[0],l=heap.pop();if(heap.length){let i=0;for(;;){const a=i*2+1,b=a+1;if(a>=heap.length)break;let q=b<heap.length&&heap[b].t<heap[a].t?b:a;if(heap[q].t>=l.t)break;heap[i]=heap[q];i=q}heap[i]=l}return f}
@@ -1818,11 +1845,14 @@ function startFill(gx,gy){
   if(!owner)return;
   const{GW,GH,regionMap,visibility,wallDistance}=compiled;
   const x=clamp(Math.floor(gx),0,GW-1),y=clamp(Math.floor(gy),0,GH-1),i=y*GW+x,id=regionMap[i];
-  if(id<=0||visibility[i]===0||started[id]||owner[i]!==-1)return;
+  const balance=gameMode==='balance';
+  if(id<=0||visibility[i]===0||owner[i]!==-1)return;
+  if(balance?sources.length>=2:started[id])return;
 
-  started[id]=1;
-  const sid=sources.length,now=performance.now()/1000-clock0,color=compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length];
+  if(!balance)started[id]=1;
+  const sid=sources.length,now=performance.now()/1000-clock0,color=balance?BALANCE_COLORS[sid]:(compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length]);
   sources.push({id,rgb:hex(color)});
+  if(balance)updateGameModeHeader();
 
   const worldPerCell=W/GW;
   const openDist=(wallDistance?.[i]??0)*worldPerCell;
@@ -2247,6 +2277,7 @@ function advance(now){
     const src=sources[e.sid],c=src.rgb,j=e.i*4;
     const aw=compiled.visibility[e.i],az=compiled.regionMap[e.i];
     if(aw&&az>0){accuracyFilledTotal+=aw;if(src.id===az)accuracyCorrectTotal+=aw}
+    if(gameMode==='balance'&&aw&&az>0&&e.sid<2)balanceCoverage[e.sid]+=aw;
     simImage.data[j]=c[0];simImage.data[j+1]=c[1];simImage.data[j+2]=c[2];simImage.data[j+3]=255;
     markDirty(e.i);noteCollisionBlocks(e.i,e.sid);triggerPortal(e.i,e.sid,e.t);relaxAround(e.i,e.sid);
   }
@@ -2257,7 +2288,28 @@ function hasPendingPortals(){
   return portalPairState.some(st=>st&&st.locked&&!st.fired&&!st.cancelled);
 }
 
+function balanceAccuracy(){
+  let blue=balanceCoverage[0]||0,yellow=balanceCoverage[1]||0;
+  if(hingeCoverCount&&hingeStates?.size){
+    const seen=new Set();
+    for(const st of hingeStates.values())for(const i of st.coverCells||[]){
+      if(seen.has(i)||!hingeCoverCount[i])continue;seen.add(i);
+      const sid=owner[i],w=compiled.visibility[i],z=compiled.regionMap[i];
+      if(sid===0&&w&&z>0)blue-=w;else if(sid===1&&w&&z>0)yellow-=w
+    }
+  }
+  blue=Math.max(0,blue);yellow=Math.max(0,yellow);
+  const total=blue+yellow;
+  if(sources.length<2||total<=0){$('accuracy').textContent='-';updateGameModeHeader();return NaN}
+  const bluePct=100*blue/total,yellowPct=100-bluePct;
+  // Perfectly even coverage is 100. Every percentage point separating the
+  // two shares removes one point: 60/40 => 80, 75/25 => 50.
+  const score=clamp(100-Math.abs(bluePct-yellowPct),0,100),blueRounded=Math.round(bluePct);
+  $('accuracy').textContent=score.toFixed(2)+'%';$('targetLabel').textContent='BLUE/YELLOW';$('targetReadout').textContent=`${blueRounded}/${100-blueRounded}`;
+  return score
+}
 function accuracy(){
+  if(gameMode==='balance')return balanceAccuracy();
   let filled=accuracyFilledTotal,correct=accuracyCorrectTotal;
   // Totals update as cells settle; only the small moving-door footprints need
   // subtracting here, avoiding a full simulation-grid scan on the phone.
@@ -2287,8 +2339,8 @@ function advanceSmoothly(targetNow){
 function loop(ms){
   if(mode==='play'&&owner&&!orientationPaused){
     const baseNow=ms/1000-clock0;
-    let all=true;
-    for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}
+    let all=gameMode==='balance'?sources.length>=2:true;
+    if(gameMode!=='balance')for(let i=1;i<=compiled.activeCount;i++)if(!started[i]){all=false;break}
 
     let simNow=baseNow;
     if(all){
@@ -2310,7 +2362,7 @@ function loop(ms){
     if(paintChanged||hingeDebugEnabled)drawPaint();
     if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
-      finished=true;const a=accuracy();recordBestAccuracy(a);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
+      finished=true;const a=accuracy();recordBestAccuracy(a);$('accuracyLabel').textContent=gameMode==='balance'?'FINAL SCORE':(a>=level.target?'PASSED':'RESULT')
     }
   }
   requestAnimationFrame(loop)
@@ -2467,6 +2519,9 @@ $('editBtn').onclick=()=>setMode('edit');$('playBtn').onclick=()=>setMode('play'
 $('prevBtn').onclick=()=>{if(playerIndex>0)loadPlayerLevel(playerIndex-1)};
 $('nextBtn').onclick=()=>{if(playerIndex<PLAYER_LEVELS.length-1)loadPlayerLevel(playerIndex+1)};
 $('copyBestsBtn').onclick=copyBestScores;
+$('gameModeBtn').onclick=()=>{
+  gameMode=gameMode==='balance'?'target':'balance';rememberGameMode();currentBestAccuracy=readStoredBest();resetFill();renderHeader()
+};
 $('targetInput').onchange=e=>{pushHistory();level.target=clamp(+e.target.value||99.2,80,100);renderHeader()};
 
 $('addLineBtn').onclick=()=>{
@@ -2592,7 +2647,7 @@ function hardResetPlayerState(){
   currentSimNow=0;doorRelaxFloor=-1;
   collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];
   dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
-  accuracyFilledTotal=0;accuracyCorrectTotal=0;
+  accuracyFilledTotal=0;accuracyCorrectTotal=0;balanceCoverage=[0,0];
   finished=false;compiled=null;previewCanvas=null;
   selected={type:'none'};drag=null;
   vector.innerHTML='';editorSvg.innerHTML='';
@@ -2663,7 +2718,7 @@ window.addEventListener('resize',handleViewportChange);
 window.addEventListener('orientationchange',handleViewportChange);
 if(window.visualViewport)window.visualViewport.addEventListener('resize',handleViewportChange);
 
-loadPlayerLevel(readLastPlayerLevel());requestAnimationFrame(loop);
+gameMode=readStoredGameMode();loadPlayerLevel(readLastPlayerLevel());requestAnimationFrame(loop);
 })();
 </script>
 </body>
