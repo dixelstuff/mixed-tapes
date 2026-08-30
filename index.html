@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — 22 Level Phone App v7.9</title>
+<title>Growing Paint — Learning Recorder v8.0</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">22 Level Phone App v7.9</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Learning Recorder v8.0</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -145,7 +145,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
           <span id="levelCounter" style="color:#eee6d8;font-size:9px;font-weight:900;letter-spacing:.12em;white-space:nowrap">1 / 4</span>
           <button id="retryBtn" class="primary">RETRY</button>
           <button id="nextBtn">NEXT</button>
-          <button id="copyBestsBtn">COPY BESTS</button>
+          <button id="copyLearningBtn">COPY DATA</button>
           <button id="backEditBtn" class="hidden">BACK TO EDIT</button>
         </div>
     </div>
@@ -346,11 +346,18 @@ const NAMED_LEVEL_DOUBLE_DIAMOND={"version":23,"level":1,"name":"double diamond"
 const NAMED_LEVEL_TENNIS_BALL={"version":23,"level":1,"name":"tennis ball","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":214.53944650970675,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.2452464924583884}},{"x":495.0905765032159,"y":125.99721487915409,"smooth":true,"attach":null},{"x":159.36743966483743,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.1694607687703811}}],"gates":[{"t":0.14051117396950505,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8171574343931874,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.4386101656009832,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"circle","role":"playable","x":406.4189827108043,"y":396.5644354229608,"w":500,"h":500,"rotation":0,"color":"#ffffff","gates":[{"t":0.38773944631678353,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9162661185893359,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":513.0583584115183,"y":482.7877171450151},"b":{"x":673.1338880037764,"y":862.667579305136},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":105.66164976542848,"y":462.80823720318216},"paint":"#f05b4f"},{"seed":{"x":550.1353709027275,"y":567.0878105746875},"paint":"#2456a6"},{"seed":{"x":550.1133421056907,"y":566.3621521516643},"paint":"#65a84d"},{"seed":{"x":193.33333333333334,"y":276},"paint":"#f1c84b"}]};
 const NAMED_LEVEL_TWO_TRI={"version":23,"level":1,"name":"Two Tri","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[],"shapes":[{"type":"triangle","role":"playable","x":351.9432642945653,"y":301.47498111782465,"w":500,"h":500,"rotation":-52,"color":"#ffffff","gates":[{"t":0.43838806306829314,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.5817750498335448,"w":41,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8769289298061475,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1},{"type":"triangle","role":"playable","x":427.5630200035403,"y":534.9019070996977,"w":500,"h":500,"rotation":16,"color":"#ffffff","gates":[{"t":0.29402179414199037,"w":60,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.5773986881747691,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1}],"portals":[],"regionStyles":[{"seed":{"x":396.1425252452797,"y":490.747343301267},"paint":"#f05b4f"},{"seed":{"x":542.4266774891775,"y":407.4055735930736},"paint":"#2456a6"},{"seed":{"x":395.79603562424336,"y":489.9806535905929},"paint":"#65a84d"},{"seed":{"x":402.7054981397271,"y":665.7198566900923},"paint":"#f1c84b"}]};
 PLAYER_LEVELS.push(NAMED_LEVEL_DOUBLE_DIAMOND,NAMED_LEVEL_TENNIS_BALL,NAMED_LEVEL_TWO_TRI);
+const LEARNING_LEVEL_IM_CROSS={"version":23,"level":1,"name":"I'm cross","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":41.045612792824684,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.006930786803330611}},{"x":764,"y":938.4677114803626,"smooth":false,"attach":{"type":"border","edge":"right","t":0.9874920948810875}}],"gates":[{"t":0.3678723306022681,"w":43,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8215815757373628,"w":56,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0}},{"x":764,"y":32.081995845921455,"smooth":false,"attach":{"type":"border","edge":"right","t":0.004427327381693552}}],"gates":[{"t":0.09579103026382516,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.40217404950009344,"w":39,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.6344337167860986,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":92.49424676933971,"y":248.87297016616313},"b":{"x":645.1584351212605,"y":70.8907666163142},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":399.3333333333333,"y":488},"paint":"#e5b43d"},{"seed":{"x":524.7166205627252,"y":327.78812024495704},"paint":"#e4624d"},{"seed":{"x":645.8536677723754,"y":484.7552596900986},"paint":"#496fa5"},{"seed":{"x":423.10283003491435,"y":820.8255397997787},"paint":"#4f918a"}]};
+const LEARNING_LEVEL_NEW_NEW_ONE={"version":23,"level":1,"name":"New new one","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[],"shapes":[{"type":"rectangle","role":"playable","x":401.85180267894026,"y":449.2929097432025,"w":299.02844161208486,"h":185.94731873111778,"rotation":0,"color":"#ffffff","gates":[{"t":0.9117903810878367,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1.6081352699927007},{"type":"quarter","role":"playable","x":406.0262878385555,"y":695.8837330060423,"w":277,"h":277,"rotation":-46,"color":"#ffffff","gates":[{"t":0.44947476007372217,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9148271153408276,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1},{"type":"rectangle","role":"playable","x":402.52614031982057,"y":192.85130287009062,"w":299.02844161208486,"h":185.94731873111778,"rotation":0,"color":"#ffffff","gates":[{"t":0.4199941715957568,"w":44,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1.6081352699927007}],"portals":[{"a":{"x":403.2277099191598,"y":324.4547771903323},"b":{"x":527.8161326488464,"y":691.8192975830816},"radius":18,"color":"#cfcfcf"}],"regionStyles":[{"seed":{"x":406,"y":330},"paint":"#d7a33d"},{"seed":{"x":402,"y":166.66666666666666},"paint":"#c75d45"},{"seed":{"x":351.2857001680008,"y":385.33610040517834},"paint":"#4d86a8"},{"seed":{"x":409.9397324025596,"y":712.3972076788831},"paint":"#78946b"}]};
+const LEARNING_LEVEL_KITE_FLY={"version":23,"level":1,"name":"kite fly","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":260.3792956948641,"smooth":false,"attach":{"type":"border","edge":"left","t":0.2520382816647116}},{"x":121.20139257685727,"y":505.08638595166167,"smooth":true,"attach":null},{"x":764,"y":404.88694297583083,"smooth":false,"attach":{"type":"border","edge":"right","t":0.40877108782628074}}],"gates":[{"t":0.7769052903563951,"w":49,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.17142760032845217,"w":43,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":340.83376752169124,"y":463.4994106637605,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.480319974581341}},{"x":437.3694459196318,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5513316564830107}}],"gates":[{"t":0.22815685071481406,"w":51,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.7286057562819791,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"diamond","role":"obstacle","x":342.6849884935388,"y":272.1545033987915,"w":321.8407387738242,"h":393.9226774924473,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":0.8170150061492586}],"portals":[{"a":{"x":546.0022422847701,"y":167.04234327794563},"b":{"x":647.3063079011035,"y":701.1777756797583},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":425.0535245361891,"y":212.99309249024927},"paint":"#f05b4f"},{"seed":{"x":189.46379390703783,"y":700.6709037752638},"paint":"#2456a6"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#65a84d"}]};
+// This research build deliberately contains only the three untouched test levels.
+PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_IM_CROSS,LEARNING_LEVEL_NEW_NEW_ONE,LEARNING_LEVEL_KITE_FLY);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
+let learningAttempt=null;
 const BEST_SCORE_PREFIX='growing-paint-best-v1:';
 const LAST_LEVEL_KEY='growing-paint-last-level-v1';
+const LEARNING_DATA_PREFIX='growing-paint-learning-v1:';
 
 function readLastPlayerLevel(){
   try{
@@ -378,6 +385,102 @@ function fingerprintLevel(levelData){
     h2=Math.imul(h2^c,3266489917);h2^=h2>>>13
   }
   return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')
+}
+function roundLearningNumber(value,places=4){
+  const scale=10**places;return Math.round(Number(value)*scale)/scale
+}
+function learningStorageKey(fingerprint=currentLevelFingerprint){
+  return LEARNING_DATA_PREFIX+fingerprint
+}
+function readLearningAttempts(fingerprint=currentLevelFingerprint){
+  if(!fingerprint)return[];
+  try{
+    const parsed=JSON.parse(localStorage.getItem(learningStorageKey(fingerprint))||'[]');
+    return Array.isArray(parsed)?parsed:[]
+  }catch{return[]}
+}
+function writeLearningAttempts(fingerprint,attempts){
+  try{localStorage.setItem(learningStorageKey(fingerprint),JSON.stringify(attempts.slice(-250)))}catch{}
+}
+function renderLearningCounter(){
+  const counter=$('levelCounter');if(!counter)return;
+  const completed=readLearningAttempts().length;
+  counter.textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length} · TRY ${completed+1}`
+}
+function beginLearningAttempt(){
+  if(!currentLevelFingerprint)return;
+  const previous=readLearningAttempts();
+  learningAttempt={
+    schemaVersion:1,
+    attemptNumber:previous.length+1,
+    levelIndex:playerIndex+1,
+    levelName:String(level.name||'').trim()||`Level ${playerIndex+1}`,
+    levelFingerprint:currentLevelFingerprint,
+    startedAt:new Date().toISOString(),
+    viewport:{width:window.innerWidth,height:window.innerHeight,devicePixelRatio:window.devicePixelRatio||1},
+    taps:[]
+  };
+  renderLearningCounter()
+}
+function noteLearningTap(gx,gy,regionId,sourceId,seconds,paintColor){
+  if(!learningAttempt||learningAttempt.levelFingerprint!==currentLevelFingerprint)beginLearningAttempt();
+  if(!learningAttempt)return;
+  const previous=learningAttempt.taps.at(-1);
+  learningAttempt.taps.push({
+    order:learningAttempt.taps.length+1,
+    regionId,
+    sourceId,
+    paint:paintColor,
+    x:roundLearningNumber(gx*W/compiled.GW),
+    y:roundLearningNumber(gy*H/compiled.GH),
+    gridX:roundLearningNumber(gx),
+    gridY:roundLearningNumber(gy),
+    timeSeconds:roundLearningNumber(seconds),
+    delayFromPreviousSeconds:roundLearningNumber(previous?seconds-previous.timeSeconds:seconds)
+  })
+}
+function finishLearningAttempt(status,score){
+  const attempt=learningAttempt;learningAttempt=null;
+  if(!attempt?.taps?.length)return;
+  const attempts=readLearningAttempts(attempt.levelFingerprint);
+  const numericScore=Number(score);
+  attempt.status=status;
+  attempt.completedAllStarts=!!started&&Array.from(started).slice(1).every(Boolean);
+  attempt.scorePercent=Number.isFinite(numericScore)?roundLearningNumber(numericScore):null;
+  attempt.durationSeconds=roundLearningNumber(Math.max(0,performance.now()/1000-clock0));
+  attempt.endedAt=new Date().toISOString();
+  attempts.push(attempt);
+  writeLearningAttempts(attempt.levelFingerprint,attempts);
+  renderLearningCounter()
+}
+function learningExportPackage(){
+  return{
+    schema:'growing-paint-learning-v1',
+    exportedAt:new Date().toISOString(),
+    app:'Growing Paint Learning Recorder v8.0',
+    note:'Completed runs and deliberately restarted runs are retained in chronological order.',
+    levels:PLAYER_LEVELS.map((levelData,index)=>{
+      const fingerprint=fingerprintLevel(levelData);
+      return{
+        levelIndex:index+1,
+        levelName:String(levelData.name||'').trim()||`Level ${index+1}`,
+        levelFingerprint:fingerprint,
+        levelDefinition:levelData,
+        attempts:readLearningAttempts(fingerprint)
+      }
+    })
+  }
+}
+async function copyLearningData(){
+  const output=JSON.stringify(learningExportPackage(),null,2),button=$('copyLearningBtn');let copied=false;
+  try{
+    if(!navigator.clipboard?.writeText)throw new Error('Clipboard API unavailable');
+    await navigator.clipboard.writeText(output);copied=true
+  }catch{
+    const field=document.createElement('textarea');field.value=output;field.setAttribute('readonly','');field.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(field);field.select();copied=document.execCommand('copy');field.remove();
+    if(!copied)window.prompt('Copy your learning data:',output)
+  }
+  if(button){button.textContent=copied?'COPIED':'COPY SHOWN';setTimeout(()=>button.textContent='COPY DATA',1400)}
 }
 function bestScoreKey(){return BEST_SCORE_PREFIX+currentLevelFingerprint}
 function storedBestForLevel(levelData){
@@ -885,7 +988,9 @@ function compileLevel(highRes=false){
     while(qq.length){const a=qq.shift();for(const bb of(adj[a]||[]))if(activeMap.has(bb)&&!seenA.has(bb)){seenA.add(bb);qq.push(bb)}}
     if(seenA.size!==activeIds.length)errors.push('The active gate/portal network is split into separate groups.');
   }
-  for(const tr of tinyRegions)errors.push(`Tiny region ${tr.id} detected — marked with a red target.`);
+  // A microscopic closed pocket with no gate or portal is simply excluded
+  // territory. Only reject it when it is part of the playable network.
+  for(const tr of tinyRegions)if(activeMap.has(tr.id))errors.push(`Tiny active region ${tr.id} detected — marked with a red target.`);
 
   const total=sizes.reduce((a,b)=>a+(b||0),0),regionAreas=[];
   for(let id=1;id<=comp;id++)regionAreas.push({id,pct:total?100*sizes[id]/total:0,active:activeMap.has(id),activeIndex:activeMap.get(id)||0,paint:styleByLabel[id]?.paint||PAINTS[(id-1)%PAINTS.length],seed:styleByLabel[id]?.seed});
@@ -1508,7 +1613,7 @@ function renderHeader(){
   const prev=$('prevBtn'),next=$('nextBtn');
   if(prev)prev.disabled=playerIndex<=0;
   if(next)next.disabled=playerIndex>=PLAYER_LEVELS.length-1;
-  const counter=$('levelCounter');if(counter)counter.textContent=`${playerIndex+1} / ${PLAYER_LEVELS.length}`;
+  renderLearningCounter();
 }
 function renderInspector(){
   for(const id of['dividerControls','pointControls','gateControls','shapeControls','portalControls','regionControls'])$(id).classList.add('hidden');
@@ -1597,6 +1702,7 @@ function setMode(m){
 }
 function resetFill(){
   if(!compiled?.valid)return;
+  if(learningAttempt?.taps?.length)finishLearningAttempt('restarted',accuracy());
   endBoostStart=-1;endBoostLast=-1;endBoostExtra=0;simAdvanceCursor=0;collisionBlocks=new Set();collisionVersion=0;interfaceChainVersion=-1;interfaceChains=[];currentSimNow=0;doorRelaxFloor=-1;accuracyFilledTotal=0;accuracyCorrectTotal=0;
   const{GW,GH,regionMap}=compiled,N=GW*GH;
   owner=new Int16Array(N);owner.fill(-99);
@@ -1617,6 +1723,7 @@ function resetFill(){
     simImage.data[j]=cc[0];simImage.data[j+1]=cc[1];simImage.data[j+2]=cc[2];simImage.data[j+3]=255;
   }
   sctx.putImageData(simImage,0,0);dirtyMinX=1e9;dirtyMinY=1e9;dirtyMaxX=-1;dirtyMaxY=-1;
+  beginLearningAttempt();
   $('accuracy').textContent='-';$('accuracyLabel').textContent='ACCURACY';renderBestAccuracy();updateHingeDoorLayer();drawPaint();
 }
 function heapPush(v){let i=heap.length;heap.push(v);while(i){const p=(i-1)>>1;if(heap[p].t<=v.t)break;heap[i]=heap[p];i=p}heap[i]=v}
@@ -1830,6 +1937,7 @@ function startFill(gx,gy){
   started[id]=1;
   const sid=sources.length,now=performance.now()/1000-clock0,color=compiled.activeColors[id-1]||PAINTS[(id-1)%PAINTS.length];
   sources.push({id,rgb:hex(color)});
+  noteLearningTap(gx,gy,id,sid,now,color);
 
   const worldPerCell=W/GW;
   const openDist=(wallDistance?.[i]??0)*worldPerCell;
@@ -2317,7 +2425,7 @@ function loop(ms){
     if(paintChanged||hingeDebugEnabled)drawPaint();
     if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
-      finished=true;const a=accuracy();recordBestAccuracy(a);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
+      finished=true;const a=accuracy();recordBestAccuracy(a);finishLearningAttempt('completed',a);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
     }
   }
   requestAnimationFrame(loop)
@@ -2473,7 +2581,7 @@ stage.addEventListener('pointerdown',e=>{if(e.target===paint)return;playTap(e)})
 $('editBtn').onclick=()=>setMode('edit');$('playBtn').onclick=()=>setMode('play');$('resetFillBtn').onclick=resetFill;$('retryBtn').onclick=resetFill;$('backEditBtn').onclick=()=>setMode('edit');
 $('prevBtn').onclick=()=>{if(playerIndex>0)loadPlayerLevel(playerIndex-1)};
 $('nextBtn').onclick=()=>{if(playerIndex<PLAYER_LEVELS.length-1)loadPlayerLevel(playerIndex+1)};
-$('copyBestsBtn').onclick=copyBestScores;
+$('copyLearningBtn').onclick=copyLearningData;
 $('targetInput').onchange=e=>{pushHistory();level.target=clamp(+e.target.value||99.2,80,100);renderHeader()};
 
 $('addLineBtn').onclick=()=>{
@@ -2608,6 +2716,7 @@ function hardResetPlayerState(){
 }
 function loadPlayerLevel(index){
   index=clamp(index,0,PLAYER_LEVELS.length-1);
+  if(learningAttempt?.taps?.length)finishLearningAttempt('level-changed',accuracy());
   hardResetPlayerState();
   playerIndex=index;
   mode='play';
@@ -2620,7 +2729,7 @@ function loadPlayerLevel(index){
   ensureLevel();resolveAttachments();
   compileLevel(true);
   if(!compiled?.valid){
-    console.error('Embedded level failed validation',playerIndex+1,compiled?.errors);
+    console.error('Embedded level failed validation '+(playerIndex+1)+': '+JSON.stringify(compiled?.errors||[]));
     return
   }
   rememberPlayerLevel();
