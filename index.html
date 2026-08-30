@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Error-Region Learning Test v8.3</title>
+<title>Growing Paint — Strategic Redesign Test v8.4</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Error-Region Learning Test v8.3</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Strategic Redesign Test v8.4</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -352,6 +352,26 @@ const LEARNING_LEVEL_KITE_FLY={"version":23,"level":1,"name":"kite fly","target"
 // This research build deliberately contains only the three untouched test levels.
 const LEARNING_LEVEL_STRING_BALL={"version":23,"level":1,"name":"string ball","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":621.7133213746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.6439406956340806}},{"x":36,"y":815.2910215256798,"smooth":false,"attach":{"type":"border","edge":"left","t":0.8538948172729716}}],"gates":[{"t":0.11683031689823901,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":705.8181389036408,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.9200798611313747}},{"x":606.0480418667964,"y":328.47902755537615,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.9771016667262235}}],"gates":[{"t":0.39616667451942655,"w":42,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":706.0104324018127,"smooth":false,"attach":{"type":"border","edge":"left","t":0.735369232539927}},{"x":148.418286800302,"y":499.62955778139377,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.4089792074555821}}],"gates":[{"t":0.5,"w":43,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"circle","role":"playable","x":358.6347141086918,"y":364.323121223565,"w":500,"h":500,"rotation":0,"color":"#ffffff","gates":[{"t":0.6501741952627706,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.3404091771508427,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":439.9421726559273,"y":244.87820996978851},"b":{"x":253.04183631321177,"y":862.3784459969788},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":281.85249297870405,"y":190.20993555239775},"paint":"#f05b4f"},{"seed":{"x":664.4391868643077,"y":389.66811181303933},"paint":"#2456a6"},{"seed":{"x":281.85249297870405,"y":190.20993555239775},"paint":"#65a84d"},{"seed":{"x":459.67881086465155,"y":810.6674073222745},"paint":"#f1c84b"}]};
 const LEARNING_LEVEL_BOLT={"version":23,"level":1,"name":"bolt","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":383.271375464684,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.4770211201437967}},{"x":202.25998701835132,"y":309.2074206948641,"smooth":false,"attach":null},{"x":423.18404437363546,"y":509.8187311178247,"smooth":false,"attach":null},{"x":231.993863220629,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2692223395887761}}],"gates":[{"t":0.18597884097275535,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":604.1482268248068,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7804233884956138}},{"x":389.57927656812416,"y":279.24966956193356,"smooth":false,"attach":null},{"x":581.1530064318168,"y":471.57052492447133,"smooth":false,"attach":null},{"x":250.43960582994035,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.29455989811804995}}],"gates":[{"t":0.6761400235818984,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.3949793867504144,"w":47,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":121.7855667669794,"y":526.8008874622357},"b":{"x":665.8759662477134,"y":560.5350736404833},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":197.09393646282388,"y":479.2173248468492},"paint":"#f05b4f"},{"seed":{"x":425.6278501991464,"y":443.7672615812312},"paint":"#f0de14"},{"seed":{"x":604.362398761044,"y":488.2723635483931},"paint":"#65a84d"}]};
+// Preserve the original line and shape geometry; redesign only portals,
+// openings, and the single strategically active door in each level.
+LEARNING_LEVEL_STRING_BALL.name="string ball (strategic)";
+Object.assign(LEARNING_LEVEL_STRING_BALL.portals[0],{radius:18});
+Object.assign(LEARNING_LEVEL_STRING_BALL.portals[0].a,{x:470,y:245});
+Object.assign(LEARNING_LEVEL_STRING_BALL.portals[0].b,{x:470,y:500});
+Object.assign(LEARNING_LEVEL_STRING_BALL.dividers[0].gates[0],{t:.36,w:46,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_STRING_BALL.dividers[1].gates[0],{t:.58,w:50,mode:'hinge',hingeEnd:'start',swingSide:-1});
+Object.assign(LEARNING_LEVEL_STRING_BALL.dividers[2].gates[0],{t:.62,w:34,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_STRING_BALL.shapes[0].gates[0],{t:.76,w:44,mode:'open'});
+Object.assign(LEARNING_LEVEL_STRING_BALL.shapes[0].gates[1],{t:.44,w:46,mode:'open'});
+
+LEARNING_LEVEL_BOLT.name="bolt (strategic)";
+Object.assign(LEARNING_LEVEL_BOLT.portals[0],{radius:18});
+Object.assign(LEARNING_LEVEL_BOLT.portals[0].a,{x:360,y:155});
+Object.assign(LEARNING_LEVEL_BOLT.portals[0].b,{x:385,y:700});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[0].gates[0],{t:.22,w:36,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[0],{t:.72,w:38,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[1],{t:.46,w:52,mode:'hinge',hingeEnd:'start',swingSide:-1});
+
 PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_STRING_BALL,LEARNING_LEVEL_BOLT);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
@@ -465,6 +485,7 @@ function analyseLearningErrors(score){
     }
   }
 
+  const totalFilledWeight=Math.max(1,totalWeight-totalUnfilledWeight);
   const visited=new Uint8Array(N),queue=new Int32Array(N),components=[];
   const addNeighbour=(ni,expected,actual,tail)=>{
     if(ni<0||ni>=N||visited[ni]||regionMap[ni]!==expected||actualIds[ni]!==actual||!effectiveWeight(ni))return tail;
@@ -472,7 +493,9 @@ function analyseLearningErrors(score){
   };
   for(let start=0;start<N;start++){
     const expected=regionMap[start],actual=actualIds[start];
-    if(visited[start]||expected<=0||!effectiveWeight(start)||actual===expected)continue;
+    // Unowned antialiased wall-edge cells are a stable raster baseline, not a
+    // player-created paint error. Spatial components describe wrong paint only.
+    if(visited[start]||expected<=0||actual<=0||!effectiveWeight(start)||actual===expected)continue;
     let head=0,tail=0,weight=0,cells=0,sumX=0,sumY=0,minX=GW,minY=GH,maxX=0,maxY=0;
     visited[start]=1;queue[tail++]=start;
     while(head<tail){
@@ -484,7 +507,7 @@ function analyseLearningErrors(score){
       if(y>0)tail=addNeighbour(i-GW,expected,actual,tail);
       if(y<GH-1)tail=addNeighbour(i+GW,expected,actual,tail)
     }
-    const regionWeight=regions[expected]?.totalWeight||1;
+    const regionStat=regions[expected],regionWeight=Math.max(1,regionStat.totalWeight-regionStat.unfilledWeight);
     components.push({
       intendedRegionId:expected,
       intendedPaint:activeColors[expected-1]||null,
@@ -492,7 +515,7 @@ function analyseLearningErrors(score){
       invadingPaint:actual>0?(activeColors[actual-1]||null):null,
       kind:actual>0?'wrong-paint':'unfilled',
       rasterCells:cells,
-      percentOfLevel:roundLearningNumber(totalWeight?100*weight/totalWeight:0),
+      percentOfLevel:roundLearningNumber(100*weight/totalFilledWeight),
       percentOfIntendedRegion:roundLearningNumber(100*weight/regionWeight),
       centroid:{
         x:roundLearningNumber((sumX/Math.max(1,weight))*W/GW,2),
@@ -507,26 +530,28 @@ function analyseLearningErrors(score){
     })
   }
   components.sort((a,b)=>b.percentOfLevel-a.percentOfLevel);
+  const meaningfulComponents=components.filter(component=>component.percentOfLevel>=.002);
 
   return{
     scorePercent:Number.isFinite(Number(score))?roundLearningNumber(score):null,
-    wrongPaintPercent:roundLearningNumber(totalWeight?100*(totalWrongWeight-totalUnfilledWeight)/totalWeight:0),
-    unfilledPercent:roundLearningNumber(totalWeight?100*totalUnfilledWeight/totalWeight:0),
+    wrongPaintPercent:roundLearningNumber(100*(totalWrongWeight-totalUnfilledWeight)/totalFilledWeight),
+    structuralUnfilledPercent:roundLearningNumber(totalWeight?100*totalUnfilledWeight/totalWeight:0),
     regions:regions.slice(1).map(stat=>({
       intendedRegionId:stat.id,
       intendedPaint:activeColors[stat.id-1]||null,
-      correctPercent:roundLearningNumber(stat.totalWeight?100*stat.correctWeight/stat.totalWeight:0),
-      wrongPercent:roundLearningNumber(stat.totalWeight?100*(stat.totalWeight-stat.correctWeight-stat.unfilledWeight)/stat.totalWeight:0),
+      correctPercent:roundLearningNumber(100*stat.correctWeight/Math.max(1,stat.totalWeight-stat.unfilledWeight)),
+      wrongPercent:roundLearningNumber(100*(stat.totalWeight-stat.correctWeight-stat.unfilledWeight)/Math.max(1,stat.totalWeight-stat.unfilledWeight)),
       unfilledPercent:roundLearningNumber(stat.totalWeight?100*stat.unfilledWeight/stat.totalWeight:0),
       invaders:[...stat.invaders.entries()].map(([id,w])=>({
         regionId:id,
         paint:activeColors[id-1]||null,
-        percentOfRegion:roundLearningNumber(stat.totalWeight?100*w/stat.totalWeight:0)
+        percentOfRegion:roundLearningNumber(100*w/Math.max(1,stat.totalWeight-stat.unfilledWeight))
       })).sort((a,b)=>b.percentOfRegion-a.percentOfRegion)
     })),
-    errorComponentCount:components.length,
-    errorComponents:components.slice(0,60),
-    omittedSmallComponentCount:Math.max(0,components.length-60)
+    errorComponentCount:meaningfulComponents.length,
+    errorComponents:meaningfulComponents.slice(0,60),
+    omittedSmallComponentCount:Math.max(0,meaningfulComponents.length-60),
+    filteredMicroscopicComponentCount:components.length-meaningfulComponents.length
   }
 }
 function finishLearningAttempt(status,score,finalAnalysis=null){
@@ -548,7 +573,7 @@ function learningExportPackage(){
   return{
     schema:'growing-paint-learning-v1',
     exportedAt:new Date().toISOString(),
-    app:'Growing Paint Error-Region Learning Test v8.3',
+    app:'Growing Paint Strategic Redesign Test v8.4',
     note:'Completed runs include per-region accuracy and connected spatial error components; deliberately restarted runs are retained as player-predicted failures.',
     levels:PLAYER_LEVELS.map((levelData,index)=>{
       const fingerprint=fingerprintLevel(levelData);
