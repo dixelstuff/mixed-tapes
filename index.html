@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Strategic Redesign Test v8.4</title>
+<title>Growing Paint — Bolt Retry + Skewed Prediction Test v8.5</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Strategic Redesign Test v8.4</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Bolt Retry + Skewed Test v8.5</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -364,15 +364,18 @@ Object.assign(LEARNING_LEVEL_STRING_BALL.dividers[2].gates[0],{t:.62,w:34,mode:'
 Object.assign(LEARNING_LEVEL_STRING_BALL.shapes[0].gates[0],{t:.76,w:44,mode:'open'});
 Object.assign(LEARNING_LEVEL_STRING_BALL.shapes[0].gates[1],{t:.44,w:46,mode:'open'});
 
-LEARNING_LEVEL_BOLT.name="bolt (strategic)";
+LEARNING_LEVEL_BOLT.name="bolt (strategic retry)";
 Object.assign(LEARNING_LEVEL_BOLT.portals[0],{radius:18});
-Object.assign(LEARNING_LEVEL_BOLT.portals[0].a,{x:360,y:155});
-Object.assign(LEARNING_LEVEL_BOLT.portals[0].b,{x:385,y:700});
-Object.assign(LEARNING_LEVEL_BOLT.dividers[0].gates[0],{t:.22,w:36,mode:'open',hingeEnd:'start',swingSide:1});
-Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[0],{t:.72,w:38,mode:'open',hingeEnd:'start',swingSide:1});
-Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[1],{t:.46,w:52,mode:'hinge',hingeEnd:'start',swingSide:-1});
+Object.assign(LEARNING_LEVEL_BOLT.portals[0].a,{x:118,y:155});
+Object.assign(LEARNING_LEVEL_BOLT.portals[0].b,{x:686,y:810});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[0].gates[0],{t:.68,w:38,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[0],{t:.24,w:38,mode:'open',hingeEnd:'start',swingSide:1});
+Object.assign(LEARNING_LEVEL_BOLT.dividers[1].gates[1],{t:.52,w:50,mode:'hinge',hingeEnd:'end',swingSide:1});
 
-PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_STRING_BALL,LEARNING_LEVEL_BOLT);
+// Untouched control level: predictions are recorded before any play data is seen.
+const LEARNING_LEVEL_SKEWED={"version":23,"level":1,"name":"skewed $","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":623.6974095710156,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.8072766614986477}},{"x":-2.7202454711748394,"y":287.41030966767374,"smooth":true,"attach":null},{"x":662.5125390924647,"y":611.6349603474321,"smooth":true,"attach":null},{"x":382.19153832536733,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.47553782737001005}}],"gates":[{"t":0.4567423293584265,"w":42,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.7199004603182394,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.12451198237526176,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9478410205776154,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":179.05233964713517,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.1965004665482626}},{"x":548.4628547825574,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7039324928331833}}],"gates":[{"t":0.1143300526796285,"w":50,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120},{"t":0.9264031570959643,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.6272376943898166,"w":46,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":128.80155779784033,"y":592.5226586102718},"b":{"x":688.9124918864696,"y":105.49235271903324},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":144.63312472970566,"y":549.729565748302},"paint":"#f05b4f"},{"seed":{"x":354.64482029598304,"y":82.24249471458774},"paint":"#2456a6"},{"seed":{"x":532.5950279937211,"y":504.64551713055033},"paint":"#65a84d"},{"seed":{"x":270.027585430389,"y":348.6424590440804},"paint":"#f1c84b"},{"seed":{"x":476.50674750196475,"y":636.2408891882789},"paint":"#d35c9a"},{"seed":{"x":474.27938306578534,"y":907.3785332074284},"paint":"#53b8bd"}]};
+
+PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_BOLT,LEARNING_LEVEL_SKEWED);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
@@ -573,7 +576,7 @@ function learningExportPackage(){
   return{
     schema:'growing-paint-learning-v1',
     exportedAt:new Date().toISOString(),
-    app:'Growing Paint Strategic Redesign Test v8.4',
+    app:'Growing Paint Bolt Retry + Skewed Prediction Test v8.5',
     note:'Completed runs include per-region accuracy and connected spatial error components; deliberately restarted runs are retained as player-predicted failures.',
     levels:PLAYER_LEVELS.map((levelData,index)=>{
       const fingerprint=fingerprintLevel(levelData);
