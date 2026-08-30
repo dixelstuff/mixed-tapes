@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Remixed Learning Test v8.2</title>
+<title>Growing Paint — Error-Region Learning Test v8.3</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Remixed Learning Test v8.2</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Error-Region Learning Test v8.3</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -349,37 +349,10 @@ PLAYER_LEVELS.push(NAMED_LEVEL_DOUBLE_DIAMOND,NAMED_LEVEL_TENNIS_BALL,NAMED_LEVE
 const LEARNING_LEVEL_IM_CROSS={"version":23,"level":1,"name":"I'm cross","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":41.045612792824684,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.006930786803330611}},{"x":764,"y":938.4677114803626,"smooth":false,"attach":{"type":"border","edge":"right","t":0.9874920948810875}}],"gates":[{"t":0.3678723306022681,"w":43,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8215815757373628,"w":56,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0}},{"x":764,"y":32.081995845921455,"smooth":false,"attach":{"type":"border","edge":"right","t":0.004427327381693552}}],"gates":[{"t":0.09579103026382516,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.40217404950009344,"w":39,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.6344337167860986,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":92.49424676933971,"y":248.87297016616313},"b":{"x":645.1584351212605,"y":70.8907666163142},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":399.3333333333333,"y":488},"paint":"#e5b43d"},{"seed":{"x":524.7166205627252,"y":327.78812024495704},"paint":"#e4624d"},{"seed":{"x":645.8536677723754,"y":484.7552596900986},"paint":"#496fa5"},{"seed":{"x":423.10283003491435,"y":820.8255397997787},"paint":"#4f918a"}]};
 const LEARNING_LEVEL_NEW_NEW_ONE={"version":23,"level":1,"name":"New new one","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[],"shapes":[{"type":"rectangle","role":"playable","x":401.85180267894026,"y":449.2929097432025,"w":299.02844161208486,"h":185.94731873111778,"rotation":0,"color":"#ffffff","gates":[{"t":0.9117903810878367,"w":45,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1.6081352699927007},{"type":"quarter","role":"playable","x":406.0262878385555,"y":695.8837330060423,"w":277,"h":277,"rotation":-46,"color":"#ffffff","gates":[{"t":0.44947476007372217,"w":48,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.9148271153408276,"w":47,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":true,"aspectRatio":1},{"type":"rectangle","role":"playable","x":402.52614031982057,"y":192.85130287009062,"w":299.02844161208486,"h":185.94731873111778,"rotation":0,"color":"#ffffff","gates":[{"t":0.4199941715957568,"w":44,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1.6081352699927007}],"portals":[{"a":{"x":403.2277099191598,"y":324.4547771903323},"b":{"x":527.8161326488464,"y":691.8192975830816},"radius":18,"color":"#cfcfcf"}],"regionStyles":[{"seed":{"x":406,"y":330},"paint":"#d7a33d"},{"seed":{"x":402,"y":166.66666666666666},"paint":"#c75d45"},{"seed":{"x":351.2857001680008,"y":385.33610040517834},"paint":"#4d86a8"},{"seed":{"x":409.9397324025596,"y":712.3972076788831},"paint":"#78946b"}]};
 const LEARNING_LEVEL_KITE_FLY={"version":23,"level":1,"name":"kite fly","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":36,"y":260.3792956948641,"smooth":false,"attach":{"type":"border","edge":"left","t":0.2520382816647116}},{"x":121.20139257685727,"y":505.08638595166167,"smooth":true,"attach":null},{"x":764,"y":404.88694297583083,"smooth":false,"attach":{"type":"border","edge":"right","t":0.40877108782628074}}],"gates":[{"t":0.7769052903563951,"w":49,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.17142760032845217,"w":43,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":340.83376752169124,"y":463.4994106637605,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.480319974581341}},{"x":437.3694459196318,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5513316564830107}}],"gates":[{"t":0.22815685071481406,"w":51,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.7286057562819791,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"diamond","role":"obstacle","x":342.6849884935388,"y":272.1545033987915,"w":321.8407387738242,"h":393.9226774924473,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":0.8170150061492586}],"portals":[{"a":{"x":546.0022422847701,"y":167.04234327794563},"b":{"x":647.3063079011035,"y":701.1777756797583},"radius":13,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":425.0535245361891,"y":212.99309249024927},"paint":"#f05b4f"},{"seed":{"x":189.46379390703783,"y":700.6709037752638},"paint":"#2456a6"},{"seed":{"x":399.3333333333333,"y":488},"paint":"#65a84d"}]};
-// Substantial remixes: the underlying boards remain recognisable, but portal
-// travel and gate-event schedules are intentionally different.
-LEARNING_LEVEL_IM_CROSS.name="I'm cross (remixed)";
-Object.assign(LEARNING_LEVEL_IM_CROSS.portals[0],{radius:23});
-Object.assign(LEARNING_LEVEL_IM_CROSS.portals[0].a,{x:180,y:320});
-Object.assign(LEARNING_LEVEL_IM_CROSS.portals[0].b,{x:560,y:140});
-Object.assign(LEARNING_LEVEL_IM_CROSS.dividers[0].gates[0],{t:.25,w:50});
-Object.assign(LEARNING_LEVEL_IM_CROSS.dividers[0].gates[1],{t:.70,w:44});
-Object.assign(LEARNING_LEVEL_IM_CROSS.dividers[1].gates[0],{t:.18,w:48});
-Object.assign(LEARNING_LEVEL_IM_CROSS.dividers[1].gates[1],{t:.48,w:54});
-Object.assign(LEARNING_LEVEL_IM_CROSS.dividers[1].gates[2],{t:.74,w:40});
-
-LEARNING_LEVEL_NEW_NEW_ONE.name="New new one (remixed)";
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.portals[0],{radius:24});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.portals[0].a,{x:285,y:440});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.portals[0].b,{x:433,y:735});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.shapes[0].gates[0],{t:.68,w:55});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.shapes[1].gates[0],{t:.30,w:54});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.shapes[1].gates[1],{t:.78,w:40});
-Object.assign(LEARNING_LEVEL_NEW_NEW_ONE.shapes[2].gates[0],{t:.18,w:52});
-
-LEARNING_LEVEL_KITE_FLY.name="kite fly (remixed)";
-Object.assign(LEARNING_LEVEL_KITE_FLY.portals[0],{radius:22});
-Object.assign(LEARNING_LEVEL_KITE_FLY.portals[0].a,{x:650,y:250});
-Object.assign(LEARNING_LEVEL_KITE_FLY.portals[0].b,{x:520,y:820});
-Object.assign(LEARNING_LEVEL_KITE_FLY.dividers[0].gates[0],{t:.62,w:58});
-Object.assign(LEARNING_LEVEL_KITE_FLY.dividers[0].gates[1],{t:.32,w:36});
-Object.assign(LEARNING_LEVEL_KITE_FLY.dividers[1].gates[0],{t:.38,w:58});
-Object.assign(LEARNING_LEVEL_KITE_FLY.dividers[1].gates[1],{t:.82,w:42});
-// This research build deliberately contains only the three remixed test levels.
-PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_IM_CROSS,LEARNING_LEVEL_NEW_NEW_ONE,LEARNING_LEVEL_KITE_FLY);
+// This research build deliberately contains only the three untouched test levels.
+const LEARNING_LEVEL_STRING_BALL={"version":23,"level":1,"name":"string ball","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":764,"y":621.7133213746223,"smooth":false,"attach":{"type":"border","edge":"right","t":0.6439406956340806}},{"x":36,"y":815.2910215256798,"smooth":false,"attach":{"type":"border","edge":"left","t":0.8538948172729716}}],"gates":[{"t":0.11683031689823901,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":705.8181389036408,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.9200798611313747}},{"x":606.0480418667964,"y":328.47902755537615,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.9771016667262235}}],"gates":[{"t":0.39616667451942655,"w":42,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":706.0104324018127,"smooth":false,"attach":{"type":"border","edge":"left","t":0.735369232539927}},{"x":148.418286800302,"y":499.62955778139377,"smooth":false,"attach":{"type":"shape","shape":0,"t":0.4089792074555821}}],"gates":[{"t":0.5,"w":43,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"circle","role":"playable","x":358.6347141086918,"y":364.323121223565,"w":500,"h":500,"rotation":0,"color":"#ffffff","gates":[{"t":0.6501741952627706,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.3404091771508427,"w":50,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}],"starPoints":5,"lockRatio":false,"aspectRatio":1}],"portals":[{"a":{"x":439.9421726559273,"y":244.87820996978851},"b":{"x":253.04183631321177,"y":862.3784459969788},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":281.85249297870405,"y":190.20993555239775},"paint":"#f05b4f"},{"seed":{"x":664.4391868643077,"y":389.66811181303933},"paint":"#2456a6"},{"seed":{"x":281.85249297870405,"y":190.20993555239775},"paint":"#65a84d"},{"seed":{"x":459.67881086465155,"y":810.6674073222745},"paint":"#f1c84b"}]};
+const LEARNING_LEVEL_BOLT={"version":23,"level":1,"name":"bolt","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":383.271375464684,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.4770211201437967}},{"x":202.25998701835132,"y":309.2074206948641,"smooth":false,"attach":null},{"x":423.18404437363546,"y":509.8187311178247,"smooth":false,"attach":null},{"x":231.993863220629,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.2692223395887761}}],"gates":[{"t":0.18597884097275535,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":604.1482268248068,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7804233884956138}},{"x":389.57927656812416,"y":279.24966956193356,"smooth":false,"attach":null},{"x":581.1530064318168,"y":471.57052492447133,"smooth":false,"attach":null},{"x":250.43960582994035,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.29455989811804995}}],"gates":[{"t":0.6761400235818984,"w":28,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.3949793867504144,"w":47,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[],"portals":[{"a":{"x":121.7855667669794,"y":526.8008874622357},"b":{"x":665.8759662477134,"y":560.5350736404833},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":197.09393646282388,"y":479.2173248468492},"paint":"#f05b4f"},{"seed":{"x":425.6278501991464,"y":443.7672615812312},"paint":"#f0de14"},{"seed":{"x":604.362398761044,"y":488.2723635483931},"paint":"#65a84d"}]};
+PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,LEARNING_LEVEL_STRING_BALL,LEARNING_LEVEL_BOLT);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
@@ -468,7 +441,95 @@ function noteLearningTap(gx,gy,regionId,sourceId,seconds,paintColor){
     delayFromPreviousSeconds:roundLearningNumber(previous?seconds-previous.timeSeconds:seconds)
   })
 }
-function finishLearningAttempt(status,score){
+function analyseLearningErrors(score){
+  if(!compiled||!owner||!sources)return null;
+  const{GW,GH,regionMap,visibility,activeCount,activeColors}=compiled,N=GW*GH;
+  const actualIds=new Int16Array(N);
+  const effectiveWeight=i=>(hingeCoverCount?.[i]?0:(visibility[i]||0));
+  const regions=Array.from({length:activeCount+1},(_,id)=>({
+    id,totalWeight:0,correctWeight:0,unfilledWeight:0,invaders:new Map()
+  }));
+  let totalWeight=0,totalWrongWeight=0,totalUnfilledWeight=0;
+
+  for(let i=0;i<N;i++){
+    const expected=regionMap[i],weight=effectiveWeight(i);
+    if(expected<=0||weight<=0)continue;
+    const sid=owner[i],actual=sid>=0?(sources[sid]?.id||0):0;
+    actualIds[i]=actual;
+    const stat=regions[expected];stat.totalWeight+=weight;totalWeight+=weight;
+    if(actual===expected)stat.correctWeight+=weight;
+    else{
+      totalWrongWeight+=weight;
+      if(actual<=0){stat.unfilledWeight+=weight;totalUnfilledWeight+=weight}
+      else stat.invaders.set(actual,(stat.invaders.get(actual)||0)+weight)
+    }
+  }
+
+  const visited=new Uint8Array(N),queue=new Int32Array(N),components=[];
+  const addNeighbour=(ni,expected,actual,tail)=>{
+    if(ni<0||ni>=N||visited[ni]||regionMap[ni]!==expected||actualIds[ni]!==actual||!effectiveWeight(ni))return tail;
+    visited[ni]=1;queue[tail++]=ni;return tail
+  };
+  for(let start=0;start<N;start++){
+    const expected=regionMap[start],actual=actualIds[start];
+    if(visited[start]||expected<=0||!effectiveWeight(start)||actual===expected)continue;
+    let head=0,tail=0,weight=0,cells=0,sumX=0,sumY=0,minX=GW,minY=GH,maxX=0,maxY=0;
+    visited[start]=1;queue[tail++]=start;
+    while(head<tail){
+      const i=queue[head++],x=i%GW,y=(i/GW)|0,w=effectiveWeight(i);
+      weight+=w;cells++;sumX+=(x+.5)*w;sumY+=(y+.5)*w;
+      minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+      if(x>0)tail=addNeighbour(i-1,expected,actual,tail);
+      if(x<GW-1)tail=addNeighbour(i+1,expected,actual,tail);
+      if(y>0)tail=addNeighbour(i-GW,expected,actual,tail);
+      if(y<GH-1)tail=addNeighbour(i+GW,expected,actual,tail)
+    }
+    const regionWeight=regions[expected]?.totalWeight||1;
+    components.push({
+      intendedRegionId:expected,
+      intendedPaint:activeColors[expected-1]||null,
+      invadingRegionId:actual||null,
+      invadingPaint:actual>0?(activeColors[actual-1]||null):null,
+      kind:actual>0?'wrong-paint':'unfilled',
+      rasterCells:cells,
+      percentOfLevel:roundLearningNumber(totalWeight?100*weight/totalWeight:0),
+      percentOfIntendedRegion:roundLearningNumber(100*weight/regionWeight),
+      centroid:{
+        x:roundLearningNumber((sumX/Math.max(1,weight))*W/GW,2),
+        y:roundLearningNumber((sumY/Math.max(1,weight))*H/GH,2)
+      },
+      bounds:{
+        x1:roundLearningNumber(minX*W/GW,2),
+        y1:roundLearningNumber(minY*H/GH,2),
+        x2:roundLearningNumber((maxX+1)*W/GW,2),
+        y2:roundLearningNumber((maxY+1)*H/GH,2)
+      }
+    })
+  }
+  components.sort((a,b)=>b.percentOfLevel-a.percentOfLevel);
+
+  return{
+    scorePercent:Number.isFinite(Number(score))?roundLearningNumber(score):null,
+    wrongPaintPercent:roundLearningNumber(totalWeight?100*(totalWrongWeight-totalUnfilledWeight)/totalWeight:0),
+    unfilledPercent:roundLearningNumber(totalWeight?100*totalUnfilledWeight/totalWeight:0),
+    regions:regions.slice(1).map(stat=>({
+      intendedRegionId:stat.id,
+      intendedPaint:activeColors[stat.id-1]||null,
+      correctPercent:roundLearningNumber(stat.totalWeight?100*stat.correctWeight/stat.totalWeight:0),
+      wrongPercent:roundLearningNumber(stat.totalWeight?100*(stat.totalWeight-stat.correctWeight-stat.unfilledWeight)/stat.totalWeight:0),
+      unfilledPercent:roundLearningNumber(stat.totalWeight?100*stat.unfilledWeight/stat.totalWeight:0),
+      invaders:[...stat.invaders.entries()].map(([id,w])=>({
+        regionId:id,
+        paint:activeColors[id-1]||null,
+        percentOfRegion:roundLearningNumber(stat.totalWeight?100*w/stat.totalWeight:0)
+      })).sort((a,b)=>b.percentOfRegion-a.percentOfRegion)
+    })),
+    errorComponentCount:components.length,
+    errorComponents:components.slice(0,60),
+    omittedSmallComponentCount:Math.max(0,components.length-60)
+  }
+}
+function finishLearningAttempt(status,score,finalAnalysis=null){
   const attempt=learningAttempt;learningAttempt=null;
   if(!attempt?.taps?.length)return;
   const attempts=readLearningAttempts(attempt.levelFingerprint);
@@ -478,6 +539,7 @@ function finishLearningAttempt(status,score){
   attempt.scorePercent=Number.isFinite(numericScore)?roundLearningNumber(numericScore):null;
   attempt.durationSeconds=roundLearningNumber(Math.max(0,performance.now()/1000-clock0));
   attempt.endedAt=new Date().toISOString();
+  if(finalAnalysis)attempt.finalAnalysis=finalAnalysis;
   attempts.push(attempt);
   writeLearningAttempts(attempt.levelFingerprint,attempts);
   renderLearningCounter()
@@ -486,8 +548,8 @@ function learningExportPackage(){
   return{
     schema:'growing-paint-learning-v1',
     exportedAt:new Date().toISOString(),
-    app:'Growing Paint Remixed Learning Test v8.2',
-    note:'Completed runs and deliberately restarted runs are retained in chronological order.',
+    app:'Growing Paint Error-Region Learning Test v8.3',
+    note:'Completed runs include per-region accuracy and connected spatial error components; deliberately restarted runs are retained as player-predicted failures.',
     levels:PLAYER_LEVELS.map((levelData,index)=>{
       const fingerprint=fingerprintLevel(levelData);
       return{
@@ -2454,7 +2516,7 @@ function loop(ms){
     if(paintChanged||hingeDebugEnabled)drawPaint();
     if(ms-lastStats>160){lastStats=ms;accuracy()}
     if(all&&heap.length===0&&!hasPendingPortals()&&!hingesRecentlyMoving()&&!finished){
-      finished=true;const a=accuracy();recordBestAccuracy(a);finishLearningAttempt('completed',a);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
+      finished=true;const a=accuracy(),finalAnalysis=analyseLearningErrors(a);recordBestAccuracy(a);finishLearningAttempt('completed',a,finalAnalysis);$('accuracyLabel').textContent=a>=level.target?'PASSED':'RESULT'
     }
   }
   requestAnimationFrame(loop)
