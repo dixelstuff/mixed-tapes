@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Growing Paint — Ten-Level Causal Geometry Test v9.0</title>
+<title>Growing Paint — Four-Level Threshold Test v9.1</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -102,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
 <body>
 <div id="app">
   <div id="topbar">
-    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Ten-Level Causal Geometry Test v9.0</div></div>
+    <div class="brand"><div class="eyebrow">Growing Paint</div><div class="brandName">Four-Level Threshold Test v9.1</div></div>
     <div class="group">
       <button id="editBtn" class="active">EDIT</button>
       <button id="playBtn">PLAY TEST</button>
@@ -411,13 +411,17 @@ const CAUSAL_LEVEL_8={"version":23,"level":1,"name":"Detour","target":99.2,"pale
 const CAUSAL_LEVEL_9={"version":23,"level":1,"name":"Safe Harbour","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":390,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.4863}},{"x":390,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.4863}}],"gates":[{"t":0.28,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.53,"w":46,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.8,"w":36,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":390,"y":650,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.675}},{"x":764,"y":720,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7505}}],"gates":[{"t":0.48,"w":46,"mode":"hinge","hingeEnd":"end","swingSide":1,"initialAngle":45,"maxAngle":120}]}],"shapes":[{"type":"rectangle","role":"obstacle","x":475,"y":520,"w":120,"h":230,"rotation":0,"color":"#ffffff","gates":[],"starPoints":5,"lockRatio":false,"aspectRatio":0.5217391304347826}],"portals":[{"a":{"x":105,"y":150},"b":{"x":690,"y":850},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":145,"y":480},"paint":"#f05b4f"},{"seed":{"x":650,"y":300},"paint":"#2456a6"},{"seed":{"x":660,"y":810},"paint":"#65a84d"}]};
 const CAUSAL_LEVEL_10={"version":23,"level":1,"name":"Three Acts","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":440,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.5549}},{"x":520,"y":280,"smooth":true,"attach":null},{"x":360,"y":625,"smooth":true,"attach":null},{"x":470,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5962}}],"gates":[{"t":0.22,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.54,"w":48,"mode":"hinge","hingeEnd":"start","swingSide":-1,"initialAngle":45,"maxAngle":120},{"t":0.82,"w":36,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":455,"smooth":false,"attach":{"type":"border","edge":"left","t":0.4631}},{"x":430,"y":455,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.45}}],"gates":[{"t":0.62,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":390,"y":590,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.62}},{"x":764,"y":680,"smooth":false,"attach":{"type":"border","edge":"right","t":0.7072}}],"gates":[{"t":0.4,"w":46,"mode":"hinge","hingeEnd":"end","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":455,"y":405,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.4}},{"x":255,"y":350,"smooth":false,"attach":null}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":105,"y":145},"b":{"x":695,"y":845},"radius":18,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":145,"y":220},"paint":"#f05b4f"},{"seed":{"x":665,"y":190},"paint":"#2456a6"},{"seed":{"x":150,"y":790},"paint":"#65a84d"},{"seed":{"x":660,"y":780},"paint":"#f1c84b"}]};
 
-PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,CAUSAL_LEVEL_1,CAUSAL_LEVEL_2,CAUSAL_LEVEL_3,CAUSAL_LEVEL_4,CAUSAL_LEVEL_5,CAUSAL_LEVEL_6,CAUSAL_LEVEL_7,CAUSAL_LEVEL_8,CAUSAL_LEVEL_9,CAUSAL_LEVEL_10);
+const THRESHOLD_LEVEL_1={"version":23,"level":1,"name":"Threshold Run","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":275,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.3282967032967033}},{"x":275,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.3282967032967033}}],"gates":[{"t":0.31,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.7,"w":46,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":565,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7266483516483516}},{"x":565,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7266483516483516}}],"gates":[{"t":0.47,"w":42,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":300,"y":610,"smooth":false,"attach":null},{"x":375,"y":610,"smooth":false,"attach":null}],"gates":[]},{"color":"#ffffff","points":[{"x":465,"y":610,"smooth":false,"attach":null},{"x":540,"y":610,"smooth":false,"attach":null}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":105,"y":805},"b":{"x":700,"y":165},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":130,"y":480},"paint":"#e4624d"},{"seed":{"x":420,"y":470},"paint":"#e5b43d"},{"seed":{"x":680,"y":485},"paint":"#496fa5"}]};
+const THRESHOLD_LEVEL_2={"version":23,"level":1,"name":"Marked Turn","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":420,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.5274725274725275}},{"x":420,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.5274725274725275}}],"gates":[{"t":0.36,"w":48,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120},{"t":0.77,"w":36,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":36,"y":540,"smooth":false,"attach":{"type":"border","edge":"left","t":0.5553145336225597}},{"x":420,"y":540,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.5553145336225597}}],"gates":[{"t":0.64,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":560,"y":235,"smooth":false,"attach":null},{"x":560,"y":365,"smooth":false,"attach":null}],"gates":[]},{"color":"#ffffff","points":[{"x":560,"y":470,"smooth":false,"attach":null},{"x":560,"y":650,"smooth":false,"attach":null}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":115,"y":185},"b":{"x":675,"y":785},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":155,"y":250},"paint":"#4f918a"},{"seed":{"x":175,"y":760},"paint":"#d1844f"},{"seed":{"x":650,"y":475},"paint":"#496fa5"}]};
+const THRESHOLD_LEVEL_3={"version":23,"level":1,"name":"Four-Way Signal","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":270,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.32142857142857145}},{"x":270,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.32142857142857145}}],"gates":[{"t":0.25,"w":34,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.73,"w":46,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":555,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7129120879120879}},{"x":555,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7129120879120879}}],"gates":[{"t":0.34,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.68,"w":48,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":270,"y":500,"smooth":false,"attach":{"type":"divider","divider":0,"t":0.5119305856832972}},{"x":555,"y":500,"smooth":false,"attach":{"type":"divider","divider":1,"t":0.5119305856832972}}],"gates":[{"t":0.57,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":640,"y":215,"smooth":false,"attach":null},{"x":640,"y":350,"smooth":false,"attach":null}],"gates":[]},{"color":"#ffffff","points":[{"x":640,"y":446,"smooth":false,"attach":null},{"x":640,"y":620,"smooth":false,"attach":null}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":105,"y":820},"b":{"x":690,"y":145},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":130,"y":480},"paint":"#e4624d"},{"seed":{"x":410,"y":260},"paint":"#e5b43d"},{"seed":{"x":410,"y":735},"paint":"#4f918a"},{"seed":{"x":690,"y":500},"paint":"#496fa5"}]};
+const THRESHOLD_LEVEL_4={"version":23,"level":1,"name":"Curve Code","target":99.2,"palette":{"outside":"#10283a","unfilled":"#eee6d8","excluded":"#303234"},"board":{"x":36,"y":28,"w":728,"h":922},"dividers":[{"color":"#ffffff","points":[{"x":245,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.28708791208791207}},{"x":205,"y":300,"smooth":true,"attach":null},{"x":315,"y":610,"smooth":true,"attach":null},{"x":270,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.32142857142857145}}],"gates":[{"t":0.28,"w":38,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.57,"w":46,"mode":"hinge","hingeEnd":"end","swingSide":-1,"initialAngle":45,"maxAngle":120},{"t":0.82,"w":34,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":585,"y":28,"smooth":false,"attach":{"type":"border","edge":"top","t":0.7541208791208791}},{"x":640,"y":315,"smooth":true,"attach":null},{"x":520,"y":625,"smooth":true,"attach":null},{"x":575,"y":950,"smooth":false,"attach":{"type":"border","edge":"bottom","t":0.7403846153846154}}],"gates":[{"t":0.35,"w":44,"mode":"hinge","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120},{"t":0.69,"w":40,"mode":"open","hingeEnd":"start","swingSide":1,"initialAngle":45,"maxAngle":120}]},{"color":"#ffffff","points":[{"x":70,"y":485,"smooth":false,"attach":null},{"x":145,"y":485,"smooth":false,"attach":null}],"gates":[]},{"color":"#ffffff","points":[{"x":245,"y":485,"smooth":false,"attach":null},{"x":320,"y":485,"smooth":false,"attach":null}],"gates":[]}],"shapes":[],"portals":[{"a":{"x":110,"y":160},"b":{"x":690,"y":830},"radius":17,"color":"#ffffff"}],"regionStyles":[{"seed":{"x":115,"y":650},"paint":"#65a84d"},{"seed":{"x":410,"y":470},"paint":"#e5b43d"},{"seed":{"x":690,"y":400},"paint":"#496fa5"}]};
+PLAYER_LEVELS.splice(0,PLAYER_LEVELS.length,THRESHOLD_LEVEL_1,THRESHOLD_LEVEL_2,THRESHOLD_LEVEL_3,THRESHOLD_LEVEL_4);
 let playerIndex=0;
 let currentLevelFingerprint='',currentBestAccuracy=null;
 let orientationPaused=false,orientationBlocked=false,orientationPauseStartedMs=0,settledLayoutRaf=0;
 let learningAttempt=null;
 const BEST_SCORE_PREFIX='growing-paint-best-v1:';
-const LAST_LEVEL_KEY='growing-paint-last-level-v90';
+const LAST_LEVEL_KEY='growing-paint-last-level-v91';
 const LEARNING_DATA_PREFIX='growing-paint-learning-v1:';
 
 function readLastPlayerLevel(){
@@ -612,7 +616,7 @@ function learningExportPackage(){
   return{
     schema:'growing-paint-learning-v1',
     exportedAt:new Date().toISOString(),
-    app:'Growing Paint Ten-Level Causal Geometry Test v9.0',
+    app:'Growing Paint Four-Level Threshold Test v9.1',
     note:'Completed runs include per-region accuracy and connected spatial error components; deliberately restarted runs are retained as player-predicted failures.',
     levels:PLAYER_LEVELS.map((levelData,index)=>{
       const fingerprint=fingerprintLevel(levelData);
@@ -1167,6 +1171,22 @@ function buildPreview(){
 }
 
 /* ---------- render ---------- */
+function gateThresholdMarkup(){
+  let h='';
+  const add=(key,poly,g,closed=false)=>{
+    const points=gateLeafClosedPath(poly,g,closed);if(points.length<2)return;
+    h+=`<path data-gate-threshold="${key}" d="${fullPrecisionPath(points)}" fill="none" stroke="#98a1a6" stroke-width="2.2" stroke-dasharray="5 5" stroke-linecap="butt" stroke-linejoin="round" opacity="0.72" shape-rendering="geometricPrecision"/>`;
+  };
+  for(let di=0;di<level.dividers.length;di++){
+    const d=level.dividers[di],poly=flattenDivider(d,1.25);
+    for(let gi=0;gi<d.gates.length;gi++)add(`d:${di}:${gi}`,poly,d.gates[gi],false);
+  }
+  for(let si=0;si<level.shapes.length;si++){
+    const s=level.shapes[si];if(s.role!=='playable')continue;const poly=shapeLoop(s,260);
+    for(let gi=0;gi<s.gates.length;gi++)add(`s:${si}:${gi}`,poly,s.gates[gi],true);
+  }
+  return h;
+}
 function renderVector(){
   ensureLevel();resolveAttachments();const b=level.board;let lines='',playShapes='',obstacles='',portals='';
   for(const di of dividerRanks()){
@@ -1180,7 +1200,7 @@ function renderVector(){
   for(const p of level.portals)for(const q of[p.a,p.b])portals+=`<circle cx="${q.x}" cy="${q.y}" r="${p.radius||13}" fill="none" stroke="${p.color||'#fff'}" stroke-width="5"/>`;
   // Hinged-door visuals live entirely in this SVG vector layer. Their raster
   // footprints remain simulation-only and are never used to construct visible geometry.
-  vector.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><clipPath id="boardClip"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/></clipPath></defs><g clip-path="url(#boardClip)">${lines}${playShapes}${obstacles}${portals}<g id="hingeDoorLayer">${hingeDoorMarkup()}</g></g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-width="10"/></svg>`;
+  vector.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><clipPath id="boardClip"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/></clipPath></defs><g clip-path="url(#boardClip)">${lines}${playShapes}${obstacles}${portals}<g id="gateThresholdLayer">${gateThresholdMarkup()}</g><g id="hingeDoorLayer">${hingeDoorMarkup()}</g></g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="none" stroke="#fff" stroke-width="10"/></svg>`;
 }
 function svgEl(name,attrs={}){const e=document.createElementNS('http://www.w3.org/2000/svg',name);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e}
 function renderEditor(){
