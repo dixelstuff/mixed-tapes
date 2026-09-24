@@ -1,13 +1,272 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ROSTERED</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#101013;color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial}.app{max-width:480px;margin:auto;padding:calc(14px + env(safe-area-inset-top)) 14px 28px}h1{margin:0;font-size:30px}.ed{color:#ed4d70}.meta{font-size:11px;color:#999;margin:2px 0 10px}.nav{display:flex;gap:6px}.nav button{flex:1;padding:8px;border-radius:9px;border:1px solid #37373e;background:#222228;color:#aaa;font-weight:800}.nav .on{border-color:#ed4d70;color:#fff}.staff{padding:8px 10px;margin:6px 0;background:#1d1d22;border:1px solid #34343b;border-radius:11px}.staff.on{border-color:#ed4d70;box-shadow:inset 0 0 0 1px #ed4d70}.top{display:flex;justify-content:space-between}.nm{font-size:13px;font-weight:800}.dots,.av,.ct{font-size:10px;color:#999}.pref{font-size:12px;margin-top:3px}.ct{float:right}.grid,.ncrow{display:grid;grid-template-columns:42px 1fr 1fr;gap:5px;align-items:center}.grid{margin-top:11px}.head,.day{text-align:center;font-size:10px;color:#999}.slot,.nc{min-height:39px;border:1px solid #393940;background:#242429;color:#fff;border-radius:9px;font-weight:700}.ncrow{margin-top:6px}.actions{display:grid;grid-template-columns:1fr 1.5fr;gap:7px;margin-top:11px}.act{padding:11px;border:0;border-radius:10px;font-weight:900}.clear{background:#2d2d33;color:#ddd}.check{background:#ed4d70;color:#fff}.box{display:none;margin-top:9px;padding:10px;background:#1d1d22;border-radius:10px;font-size:12px;line-height:1.5}.reveal{width:100%;margin-top:8px;padding:9px;background:none;border:1px solid #393940;color:#999;border-radius:9px;font-size:10px;font-weight:800}button{touch-action:manipulation}</style>
-<div class="app"><h1>ROSTER<span class="ed">ED</span></h1><div id="meta" class="meta"></div><div id="nav" class="nav"></div><div id="staff"></div><div id="grid" class="grid"></div><div class="ncrow"><div class="day">NC</div><button class="nc" data-q="0">＋</button><button class="nc" data-q="1">＋</button></div><div class="actions"><button id="clear" class="act clear">CLEAR</button><button id="check" class="act check">CHECK ROSTER</button></div><div id="result" class="box"></div><button id="reveal" class="reveal">SHOW AN OPTIMAL SOLUTION</button><div id="solution" class="box"></div></div>
-<script>const LEVELS=[{"title": "LEVEL 1", "w": [3, 2, 2, 2, 2, 1], "pref": ["PM shifts", "Tuesday double shift", "Tuesday AM \u00b7 Thursday PM", "Thursday PM \u00b7 Friday PM", "Tuesday AM \u00b7 Friday AM", "Wednesday PM"], "kind": ["pm", "exact_double", "exact", "exact", "exact", "exact"], "pd": [null, "Tue", [["Tue", "AM"], ["Thu", "PM"]], [["Thu", "PM"], ["Fri", "PM"]], [["Tue", "AM"], ["Fri", "AM"]], [["Wed", "PM"]]], "nc": [4, 2, 3, 3, 4, 1], "a": [["Mon", "Tue", "Thu", "Fri"], ["Mon", "Tue", "Wed", "Thu"], ["Mon", "Tue", "Thu", "Fri"], ["Mon", "Wed", "Thu", "Fri"], ["Mon", "Tue", "Wed", "Fri"], ["Tue", "Wed", "Thu", "Fri"]], "best": 83.33333333333333, "opts": ["Anna|Anna|Bruno|Bruno|Mark|Eli|Lucy|Lucy|Sara|Mark;0,4", "Bruno|Anna|Lucy|Anna|Bruno|Eli|Lucy|Mark|Sara|Mark;0,4", "Bruno|Anna|Lucy|Anna|Bruno|Eli|Mark|Lucy|Sara|Mark;0,4", "Bruno|Anna|Lucy|Anna|Mark|Eli|Bruno|Lucy|Sara|Mark;0,4", "Lucy|Anna|Bruno|Bruno|Mark|Eli|Anna|Lucy|Sara|Mark;0,4", "Lucy|Anna|Bruno|Bruno|Mark|Eli|Lucy|Anna|Sara|Mark;0,4", "Lucy|Anna|Bruno|Bruno|Mark|Eli|Lucy|Mark|Sara|Anna;0,4", "Lucy|Anna|Bruno|Bruno|Mark|Eli|Mark|Lucy|Sara|Anna;0,4", "Lucy|Anna|Lucy|Anna|Bruno|Eli|Bruno|Mark|Sara|Mark;0,4", "Mark|Anna|Bruno|Bruno|Mark|Eli|Lucy|Lucy|Sara|Anna;0,4", "Mark|Anna|Lucy|Anna|Bruno|Eli|Bruno|Lucy|Sara|Mark;0,4"], "top": 8}, {"title": "LEVEL 2", "w": [3, 3, 2, 2, 1, 1], "pref": ["one double shift", "separate days", "PM shifts", "Monday AM \u00b7 Thursday PM", "Friday AM", "Wednesday PM"], "kind": ["double", "separate", "pm", "exact", "exact", "exact"], "pd": [null, null, null, [["Mon", "AM"], ["Thu", "PM"]], [["Fri", "AM"]], [["Wed", "PM"]]], "nc": [3, 4, 2, 5, 3, 2], "a": [["Mon", "Tue", "Wed", "Thu"], ["Mon", "Tue", "Thu", "Fri"], ["Tue", "Wed", "Thu", "Fri"], ["Mon", "Tue", "Thu", "Fri"], ["Mon", "Wed", "Thu", "Fri"], ["Tue", "Wed", "Thu", "Fri"]], "best": 100.0, "opts": ["Anna|Anna|Bruno|Lucy|Anna|Eli|Bruno|Mark|Sara|Lucy;1,3", "Mark|Bruno|Anna|Anna|Anna|Eli|Bruno|Lucy|Sara|Lucy;1,3", "Mark|Bruno|Bruno|Lucy|Anna|Eli|Anna|Anna|Sara|Lucy;1,3"], "top": 9}, {"title": "LEVEL 3", "w": [4, 2, 2, 2, 1, 1], "pref": ["separate days", "Thursday double shift", "AM shifts", "Tuesday PM \u00b7 Friday PM", "Monday AM", "Wednesday PM"], "kind": ["separate", "exact_double", "am", "exact", "exact", "exact"], "pd": [null, "Thu", null, [["Tue", "PM"], ["Fri", "PM"]], [["Mon", "AM"]], [["Wed", "PM"]]], "nc": [2, 4, 3, 3, 5, 2], "a": [["Mon", "Tue", "Wed", "Thu", "Fri"], ["Mon", "Tue", "Thu", "Fri"], ["Mon", "Tue", "Wed", "Fri"], ["Tue", "Wed", "Thu", "Fri"], ["Mon", "Tue", "Thu", "Fri"], ["Mon", "Wed", "Thu", "Fri"]], "best": 94.73684210526316, "opts": ["Lucy|Anna|Anna|Mark|Anna|Eli|Anna|Bruno|Lucy|Mark;1,4", "Lucy|Anna|Anna|Mark|Anna|Eli|Bruno|Anna|Lucy|Mark;1,4", "Lucy|Anna|Anna|Mark|Lucy|Eli|Anna|Bruno|Anna|Mark;1,4", "Lucy|Anna|Anna|Mark|Lucy|Eli|Bruno|Anna|Anna|Mark;1,4", "Lucy|Anna|Lucy|Mark|Anna|Eli|Anna|Bruno|Anna|Mark;1,4", "Lucy|Anna|Lucy|Mark|Anna|Eli|Bruno|Anna|Anna|Mark;1,4", "Lucy|Anna|Anna|Mark|Anna|Eli|Bruno|Bruno|Anna|Mark;2,4", "Lucy|Anna|Anna|Mark|Anna|Eli|Bruno|Bruno|Lucy|Anna;3,4", "Lucy|Anna|Lucy|Anna|Anna|Eli|Bruno|Bruno|Anna|Mark;3,4"], "top": 9}],N=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"],DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];let li=0,sel=0,R=Array(10).fill(null),NC=[null,null];const $=x=>document.getElementById(x),L=()=>LEVELS[li],cnt=i=>R.filter(x=>x===i).length+NC.filter(x=>x===i).length;
-function reset(){sel=0;R=Array(10).fill(null);NC=[null,null];$("result").style.display=$("solution").style.display="none";render()}
-function render(){$("meta").textContent=L().title+" · TARGET "+L().best.toFixed(1)+"%";$("nav").innerHTML=LEVELS.map((x,i)=>`<button class="${i===li?'on':''}" data-i="${i}">${i+1}</button>`).join("");$("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{li=+b.dataset.i;reset()});
-$("staff").innerHTML=N.map((n,i)=>`<div class="staff ${sel===i?'on':''}" data-i="${i}"><div class="top"><span class="nm">${n} · ${L().w[i]} session${L().w[i]==1?'':'s'}</span><span class="dots">NC ${'●'.repeat(L().nc[i])}${'○'.repeat(5-L().nc[i])}</span></div><div class="pref">Prefers: ${L().pref[i]}</div><div class="av">Available: ${L().a[i].join(' · ')}<span class="ct">${cnt(i)}/${L().w[i]}</span></div></div>`).join("");$("staff").querySelectorAll(".staff").forEach(x=>x.onclick=()=>{sel=+x.dataset.i;render()});
-$("grid").innerHTML='<div></div><div class="head">AM</div><div class="head">PM</div>';DAYS.forEach((d,di)=>{$("grid").insertAdjacentHTML("beforeend",`<div class="day">${d.toUpperCase()}</div>`);for(let p=0;p<2;p++){let k=di*2+p;$("grid").insertAdjacentHTML("beforeend",`<button class="slot" data-k="${k}">${R[k]==null?'＋':N[R[k]]}</button>`)}});$("grid").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{let k=+b.dataset.k,d=DAYS[Math.floor(k/2)];if(R[k]!=null)R[k]=null;else if(cnt(sel)<L().w[sel]&&L().a[sel].includes(d))R[k]=sel;render()});
-document.querySelectorAll(".nc").forEach(b=>{let q=+b.dataset.q;b.textContent=NC[q]==null?'＋':N[NC[q]];b.onclick=()=>{if(NC[q]!=null)NC[q]=null;else if(cnt(sel)<L().w[sel]&&!NC.includes(sel))NC[q]=sel;render()}})}
-function pref(i,A){let k=L().kind[i],d=L().pd[i],n=A.length,S=new Set(A),s=0,den=0;if(k=="pm"){den=n;s=A.filter(x=>x%2).length}else if(k=="am"){den=n;s=A.filter(x=>x%2==0).length}else if(k=="exact"){let e=d.map(x=>DAYS.indexOf(x[0])*2+(x[1]=="PM"));den=Math.min(e.length,n);s=e.filter(x=>S.has(x)).length}else if(k=="double"){den=Math.min(2,n);s=DAYS.some((_,j)=>S.has(j*2)&&S.has(j*2+1))?2:0}else if(k=="exact_double"){den=Math.min(2,n);let j=DAYS.indexOf(d);s=S.has(j*2)&&S.has(j*2+1)?2:0}else if(k=="separate"){den=n;s=n;for(let j=0;j<5;j++)if(S.has(j*2)&&S.has(j*2+1))s-=2}return[s,den]}
-function sig(){return R.map(x=>N[x]).join("|")+";"+NC.slice().sort((a,b)=>a-b).join(",")}
-$("check").onclick=()=>{let z=$("result");z.style.display="block";if(R.some(x=>x==null)||NC.some(x=>x==null)){z.innerHTML="<b>Roster incomplete.</b> Fill all shifts and both NC spots.";return}for(let i=0;i<6;i++)if(cnt(i)!=L().w[i]){z.innerHTML=`<b>Workload mismatch.</b> ${N[i]} has ${cnt(i)}/${L().w[i]} sessions.`;return}let s=0,d=0,lines=[];for(let i=0;i<6;i++){let A=[];R.forEach((x,k)=>{if(x===i)A.push(k)});let q=pref(i,A);s+=q[0];d+=q[1];lines.push(`${N[i]} ${q[0]}/${q[1]}`)}let bonus=NC.reduce((a,i)=>a+L().nc[i],0),pct=100*(s+bonus)/(d+L().top),ok=L().opts.includes(sig());z.innerHTML=`<b>HAPPINESS ${pct.toFixed(1)}%</b> · target ${L().best.toFixed(1)}%<br>${lines.join(" · ")}<br>NC bonus +${bonus}`+(ok?"<br><b>OPTIMAL ROSTER ✓</b>":"")}
-$("clear").onclick=reset;$("reveal").onclick=()=>{let [rr,nn]=L().opts[0].split(";"),a=rr.split("|"),ni=nn.split(",").map(Number),z=$("solution");z.style.display="block";z.innerHTML="<b>AN OPTIMAL SOLUTION</b><br>"+DAYS.map((d,i)=>`${d}: ${a[i*2]} AM · ${a[i*2+1]} PM`).join("<br>")+`<br>NC: ${N[ni[0]]} · ${N[ni[1]]}`};render();</script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#101013">
+<title>ROSTERED — Three Levels</title>
+<style>
+:root{--bg:#101013;--panel:#1d1d22;--panel2:#242429;--line:#36363d;--muted:#96969f;--text:#f5f5f7;--pink:#ed4d70;--blocked:#16161a;--blockedLine:#27272d}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{max-width:500px;margin:0 auto;min-height:100vh;padding:calc(14px + env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.25px;font-weight:900}
+.ed{color:var(--pink)}
+.target{font-size:11px;font-weight:800;color:#b7b7be;letter-spacing:.04em}
+.meta{font-size:10px;color:#777780;margin:4px 0 10px}
+.levelnav{display:flex;gap:6px;margin-bottom:10px}
+.levelnav button{flex:1;padding:8px 4px;border:1px solid var(--line);border-radius:9px;background:#202025;color:#8e8e97;font-size:11px;font-weight:850}
+.levelnav button.on{color:#fff;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.staff{padding:8px 9px;margin:5px 0;border:1px solid #33333a;background:var(--panel);border-radius:11px;transition:border-color .12s,box-shadow .12s}
+.staff.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.stafftop{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.name{font-size:13px;font-weight:820}
+.dots{font-size:10px;color:#b2b2ba;white-space:nowrap}
+.pref{font-size:12px;margin-top:2px;line-height:1.25}
+.bottom{display:flex;justify-content:space-between;gap:8px;min-height:14px;margin-top:2px}
+.unavail,.count{font-size:10px;color:#82828b}
+.count{white-space:nowrap}
+.count.done{color:#c8c8ce;font-weight:800}
+.board{margin-top:11px}
+.rostergrid{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));gap:5px;align-items:center}
+.corner{height:16px}
+.dayhead{font-size:9px;color:#96969f;text-align:center;font-weight:750;letter-spacing:.02em}
+.rowhead{font-size:10px;color:#96969f;text-align:center;font-weight:750}
+.slot{height:42px;min-width:0;border:1px solid #3a3a41;background:var(--panel2);color:#fff;border-radius:8px;font-size:10.5px;font-weight:760;padding:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot.empty{color:#a9a9b1;font-size:17px;font-weight:400}
+.slot.blocked{background:var(--blocked);border-color:var(--blockedLine);color:#44444b}
+.slot.blocked.empty{color:#34343a}
+.ncwrap{display:grid;grid-template-columns:34px 1fr 1fr;gap:5px;align-items:center;margin-top:6px}
+.nc{height:40px;border:1px dashed #494950;background:#202025;color:#ddd;border-radius:8px;font-size:11px;font-weight:760}
+.nc.empty{font-size:17px;font-weight:400;color:#9d9da5}
+.nc.blocked{background:var(--blocked);border-color:var(--blockedLine);color:#3f3f46}
+.actions{display:grid;grid-template-columns:1fr 1.45fr;gap:7px;margin-top:11px}
+.action{border:0;border-radius:10px;padding:11px 8px;font-size:11px;font-weight:900;letter-spacing:.02em}
+.clear{background:#2c2c32;color:#d0d0d5}
+.check{background:var(--pink);color:#fff}
+.result{display:none;background:var(--panel);border:1px solid #303036;border-radius:10px;padding:10px;margin-top:8px;font-size:11px;line-height:1.45}
+.score{font-size:14px;font-weight:900}
+.optimal{color:#fff;font-weight:900}
+.reveal{width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid #35353c;color:#85858e;border-radius:9px;font-size:9.5px;font-weight:850;letter-spacing:.04em}
+.solution-title{font-size:10px;font-weight:900;margin-bottom:7px}
+.solutiongrid{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));gap:4px;align-items:center}
+.solhead{font-size:8px;color:#888891;text-align:center;font-weight:800}
+.solcell{min-height:30px;border:1px solid #34343b;background:#222227;border-radius:7px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9.5px;font-weight:760;padding:2px}
+.solnc{display:grid;grid-template-columns:34px 1fr 1fr;gap:4px;margin-top:4px;align-items:center}
+.hint{font-size:9px;color:#66666e;margin-top:5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand"><h1>ROSTER<span class="ed">ED</span></h1><div class="target" id="target"></div></div>
+  <div class="meta">Select a staff member, then tap an empty shift.</div>
+  <div class="levelnav" id="levelnav"></div>
+  <div id="staff"></div>
+
+  <div class="board">
+    <div class="rostergrid" id="rostergrid"></div>
+    <div class="ncwrap">
+      <div class="rowhead">NC</div>
+      <button class="nc empty" data-nc="0">＋</button>
+      <button class="nc empty" data-nc="1">＋</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="action clear" id="clearBtn">CLEAR</button>
+    <button class="action check" id="checkBtn">CHECK ROSTER</button>
+  </div>
+  <div class="result" id="result"></div>
+  <button class="reveal" id="revealBtn">SHOW AN OPTIMAL SOLUTION</button>
+  <div class="result" id="solution"></div>
+</div>
+
+<script>
+const LEVELS=[{"title":"LEVEL 1","workloads":[3,3,2,2,1,1],"prefText":["Mon PM \u00b7 Tue AM \u00b7 Thu AM","Mon PM \u00b7 Thu AM","Thu AM","Mon double shift","Mon or Tue","Fri PM"],"prefKind":["exact","exact","exact","exact_double","day_or","exact"],"prefData":[[1,2,6],[1,6],[6],0,[0,1],[9]],"nc":[1,3,5,3,3,2],"available":[["Mon","Tue","Thu","Fri"],["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Fri"],["Tue","Wed","Thu","Fri"]],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Wed","Thu"],["Mon"]],"best":77.77777777777777,"opts":["Mark|Mark|Anna|Sara|Bruno|Bruno|Anna|Anna|Lucy|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Bruno|Anna|Lucy|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Bruno|Lucy|Anna|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Lucy|Anna|Bruno|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Lucy|Bruno|Anna|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Lucy|Bruno|Anna|Bruno|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Lucy|Bruno|Bruno|Anna|Anna|Eli;1,2"],"legal":133380,"topNc":8,"optCount":7},{"title":"LEVEL 2","workloads":[4,2,2,2,1,1],"prefText":["Mon PM \u00b7 Tue AM \u00b7 Tue PM","Tue AM \u00b7 Thu AM","Mon AM \u00b7 Thu PM","Tue double shift","Thu or Fri","Mon or Wed"],"prefKind":["exact","exact","exact","exact_double","day_or","day_or"],"prefData":[[1,2,3],[2,6],[0,7],1,[3,4],[0,2]],"nc":[3,2,3,2,4,4],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":77.77777777777777,"opts":["Lucy|Anna|Mark|Mark|Anna|Anna|Bruno|Lucy|Bruno|Sara;0,5","Lucy|Anna|Mark|Mark|Anna|Anna|Bruno|Lucy|Sara|Bruno;0,5"],"legal":60361,"topNc":8,"optCount":2},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"prefText":["Mon PM \u00b7 Tue PM \u00b7 Thu AM","Thu double shift","Tue AM \u00b7 Thu AM","Tue AM \u00b7 Tue PM","Mon or Thu","Mon or Fri"],"prefKind":["exact","exact_double","exact","exact","day_or","day_or"],"prefData":[[1,3,6],3,[2,6],[2,3],[0,3],[0,4]],"nc":[2,3,3,2,4,4],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":76.47058823529412,"opts":["Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Eli|Lucy;2,4","Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Lucy|Eli;2,4","Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Lucy|Lucy;4,5","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Eli|Lucy;2,4","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Lucy|Eli;2,4","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Lucy|Lucy;4,5"],"legal":60361,"topNc":8,"optCount":6}];
+const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"];
+const DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+let levelIndex=0;
+let selected=0;
+let roster=Array(10).fill(null); // day-major: Mon AM, Mon PM, Tue AM...
+let nc=[null,null];
+
+const $=id=>document.getElementById(id);
+const L=()=>LEVELS[levelIndex];
+const countFor=i=>roster.filter(x=>x===i).length+nc.filter(x=>x===i).length;
+const slotIndex=(dayIndex,period)=>dayIndex*2+(period==="PM"?1:0);
+
+function resetLevel(){
+  selected=0; roster=Array(10).fill(null); nc=[null,null];
+  $("result").style.display="none"; $("solution").style.display="none";
+  render();
+}
+
+function canAddClinical(person,k){
+  if(roster[k]!==null) return false;
+  if(countFor(person)>=L().workloads[person]) return false;
+  const d=DAYS[Math.floor(k/2)];
+  return L().available[person].includes(d);
+}
+function canAddNc(person,q){
+  if(nc[q]!==null) return false;
+  if(countFor(person)>=L().workloads[person]) return false;
+  if(nc.includes(person)) return false;
+  return true;
+}
+
+function render(){
+  $("target").textContent=`TARGET ${L().best.toFixed(1)}%`;
+  $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button data-i="${i}" class="${i===levelIndex?"on":""}">LEVEL ${i+1}</button>`).join("");
+  $("levelnav").querySelectorAll("button").forEach(b=>b.onclick=()=>{levelIndex=+b.dataset.i;resetLevel();});
+
+  $("staff").innerHTML=NAMES.map((n,i)=>{
+    const dots="●".repeat(L().nc[i])+"○".repeat(5-L().nc[i]);
+    const unavailable=L().unavailable[i].length ? `Unavailable: ${L().unavailable[i].join(" · ")}` : "";
+    const c=countFor(i), done=c===L().workloads[i];
+    return `<div class="staff ${selected===i?"on":""}" data-i="${i}">
+      <div class="stafftop"><span class="name">${n} · ${L().workloads[i]} session${L().workloads[i]===1?"":"s"}</span><span class="dots">NC ${dots}</span></div>
+      <div class="pref">Prefers: ${L().prefText[i]}</div>
+      <div class="bottom"><span class="unavail">${unavailable}</span><span class="count ${done?"done":""}">${done?"✓ ":""}${c}/${L().workloads[i]}</span></div>
+    </div>`;
+  }).join("");
+  $("staff").querySelectorAll(".staff").forEach(card=>card.onclick=()=>{selected=+card.dataset.i;render();});
+
+  let g=`<div class="corner"></div>${DAYS.map(d=>`<div class="dayhead">${d.toUpperCase()}</div>`).join("")}`;
+  ["AM","PM"].forEach(period=>{
+    g+=`<div class="rowhead">${period}</div>`;
+    DAYS.forEach((d,di)=>{
+      const k=slotIndex(di,period), who=roster[k];
+      const blocked=who===null && !canAddClinical(selected,k);
+      const cls=`slot ${who===null?"empty":""} ${blocked?"blocked":""}`;
+      g+=`<button class="${cls}" data-k="${k}">${who===null?"＋":NAMES[who]}</button>`;
+    });
+  });
+  $("rostergrid").innerHTML=g;
+  $("rostergrid").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k;
+    if(roster[k]!==null){roster[k]=null;render();return;}
+    if(!canAddClinical(selected,k)) return;
+    roster[k]=selected; render();
+  });
+
+  document.querySelectorAll(".nc").forEach(b=>{
+    const q=+b.dataset.nc, who=nc[q], blocked=who===null&&!canAddNc(selected,q);
+    b.textContent=who===null?"＋":NAMES[who];
+    b.className=`nc ${who===null?"empty":""} ${blocked?"blocked":""}`;
+    b.onclick=()=>{
+      if(nc[q]!==null){nc[q]=null;render();return;}
+      if(!canAddNc(selected,q)) return;
+      nc[q]=selected; render();
+    };
+  });
+}
+
+function prefScore(i,assigned){
+  const kind=L().prefKind[i], data=L().prefData[i], n=assigned.length, S=new Set(assigned);
+  let score=0,den=0;
+  if(kind==="pm"){den=n;score=assigned.filter(k=>k%2===1).length;}
+  else if(kind==="am"){den=n;score=assigned.filter(k=>k%2===0).length;}
+  else if(kind==="exact"){
+    const ex=data;
+    den=Math.min(ex.length,n); score=ex.filter(k=>S.has(k)).length;
+  }
+  else if(kind==="double"){
+    den=Math.min(2,n); score=DAYS.some((_,j)=>S.has(j*2)&&S.has(j*2+1))?2:0;
+  }
+  else if(kind==="exact_double"){
+    den=Math.min(2,n); const j=data; score=(S.has(j*2)&&S.has(j*2+1))?2:0;
+  }
+  else if(kind==="separate"){
+    den=n; score=n;
+    for(let j=0;j<5;j++) if(S.has(j*2)&&S.has(j*2+1)) score-=2;
+  }
+  else if(kind==="spaced"){
+    den=n;
+    score=assigned.filter(k=>assigned.every(q=>q===k || Math.abs(Math.floor(k/2)-Math.floor(q/2))>=2)).length;
+  }
+  else if(kind==="day_or"){
+    den=n>0?1:0;
+    score=assigned.some(k=>data.includes(Math.floor(k/2)))?1:0;
+  }
+  else if(kind==="day"){
+    den=n>0?1:0;
+    score=assigned.some(k=>Math.floor(k/2)===data)?1:0;
+  }
+  else if(kind==="two_doubles"){
+    den=Math.min(4,n); let pairs=0;
+    for(let j=0;j<5;j++) if(S.has(j*2)&&S.has(j*2+1)) pairs++;
+    score=Math.min(4,pairs*2);
+  }
+  else if(kind==="double_third_gap"){
+    den=n; let best=0;
+    for(let j=0;j<5;j++){
+      if(S.has(j*2)&&S.has(j*2+1)){
+        let v=2;
+        if(n>=3){
+          const rem=assigned.filter(k=>Math.floor(k/2)!==j).map(k=>Math.floor(k/2));
+          if(rem.length && rem.every(rd=>rd!==j+1)) v++;
+        }
+        best=Math.max(best,v);
+      }
+    }
+    score=Math.min(best,n);
+  }
+  return [score,den];
+}
+
+function signature(){
+  return roster.map(x=>NAMES[x]).join("|")+";"+nc.slice().sort((a,b)=>a-b).join(",");
+}
+
+function checkRoster(){
+  const box=$("result"); box.style.display="block";
+  if(roster.some(x=>x===null)||nc.some(x=>x===null)){
+    box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots.";
+    return;
+  }
+  for(let i=0;i<6;i++){
+    if(countFor(i)!==L().workloads[i]){
+      box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${countFor(i)}/${L().workloads[i]} sessions.`;
+      return;
+    }
+  }
+  let ordinary=0,den=0,lines=[];
+  for(let i=0;i<6;i++){
+    const a=[]; roster.forEach((x,k)=>{if(x===i)a.push(k);});
+    const [s,d]=prefScore(i,a); ordinary+=s; den+=d;
+    lines.push(`${NAMES[i]} ${s}/${d}`);
+  }
+  const bonus=nc.reduce((sum,i)=>sum+L().nc[i],0);
+  const pct=100*(ordinary+bonus)/(den+L().topNc);
+  const exact=L().opts.includes(signature());
+  let msg=`<div class="score">HAPPINESS ${pct.toFixed(1)}%</div><div>Target ${L().best.toFixed(1)}%</div><div style="margin-top:5px">${lines.join(" · ")}</div><div>NC bonus +${bonus}</div>`;
+  if(exact) msg+=`<div class="optimal" style="margin-top:5px">OPTIMAL ROSTER ✓</div>`;
+  else if(Math.abs(pct-L().best)<0.051) msg+=`<div style="color:var(--pink);font-weight:900;margin-top:5px">SCORING MISMATCH</div>`;
+  box.innerHTML=msg;
+}
+
+function renderSolution(){
+  const sig=L().opts[0], parts=sig.split(";"), rr=parts[0].split("|"), ni=parts[1].split(",").map(Number);
+  let h=`<div class="solution-title">AN OPTIMAL SOLUTION</div><div class="solutiongrid"><div></div>${DAYS.map(d=>`<div class="solhead">${d.toUpperCase()}</div>`).join("")}`;
+  ["AM","PM"].forEach(period=>{
+    h+=`<div class="solhead">${period}</div>`;
+    DAYS.forEach((d,di)=>{
+      const k=slotIndex(di,period);
+      h+=`<div class="solcell">${rr[k]}</div>`;
+    });
+  });
+  h+=`</div><div class="solnc"><div class="solhead">NC</div><div class="solcell">${NAMES[ni[0]]}</div><div class="solcell">${NAMES[ni[1]]}</div></div>`;
+  const box=$("solution"); box.innerHTML=h; box.style.display="block";
+}
+
+$("clearBtn").onclick=resetLevel;
+$("checkBtn").onclick=checkRoster;
+$("revealBtn").onclick=renderSolution;
+render();
+</script>
+</body>
+</html>
