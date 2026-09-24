@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ROSTERED — Five Levels</title>
+<title>ROSTERED — Six Levels</title>
 <style>
 *{box-sizing:border-box}
 :root{--pink:#ed4d70;--bg:#101013;--card:#1d1d22;--slot:#242429;--line:#37373e}
@@ -12,11 +12,11 @@ html,body{margin:0;background:var(--bg);color:#f5f5f7;font-family:-apple-system,
 h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.2px;font-weight:900}.ed{color:var(--pink)}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 3px;font-size:11px;color:#a0a0a8}.best{color:#ddd;font-weight:800}
 .rules{font-size:10px;color:#777780;margin-bottom:10px}
-.levelnav{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px}.levelnav button{min-width:0;border:1px solid var(--line);background:#222228;color:#9a9aa2;border-radius:9px;padding:8px 2px;font-weight:850}.levelnav button.on{color:white;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.levelnav{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:10px}.levelnav button{min-width:0;border:1px solid var(--line);background:#222228;color:#9a9aa2;border-radius:9px;padding:8px 2px;font-weight:850}.levelnav button.on{color:white;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
 .staff{padding:8px 10px;margin:6px 0;border:1px solid #34343b;border-radius:11px;background:var(--card)}.staff.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
-.stafftop{display:flex;justify-content:space-between;gap:8px}.nm{font-size:13px;font-weight:800}.ncpri{font-size:10px;color:#b8b8be;white-space:nowrap}
+.stafftop{display:flex;justify-content:space-between;gap:8px}.nm{font-size:13px;font-weight:800}.ncpri{font-size:10px;color:#b8b8be;white-space:nowrap}.ncdots.assigned{color:var(--pink)}
 .pref{font-size:12px;margin-top:3px;line-height:1.25}.strong{text-decoration-line:underline;text-decoration-color:var(--pink);text-decoration-thickness:2px;text-underline-offset:2px}
-.unavail{font-size:10px;color:#83838d;min-height:13px;margin-top:2px}.count{float:right;color:#999}
+.unavail{font-size:10px;color:#83838d;min-height:13px;margin-top:2px}.count{float:right;color:#777780;font-weight:500}.count.complete{color:#f5f5f7;font-weight:850}
 .board{display:grid;grid-template-columns:36px repeat(5,minmax(0,1fr));gap:5px;align-items:center;margin-top:12px}.corner,.day,.half{text-align:center;font-size:10px;color:#999}.day,.half{font-weight:750}
 .slot{height:42px;min-width:0;border:1px solid #3b3b42;background:var(--slot);color:#fff;border-radius:8px;padding:2px;font-size:10.5px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .slot.blocked{background:#16161a;border-color:#24242a;color:#4f4f57}
@@ -26,13 +26,14 @@ h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.2px;font-weight:900}.
 .resultline{display:flex;justify-content:space-between;gap:8px}.good{font-weight:850}.warn{color:var(--pink);font-weight:850}
 .solutionboard{display:grid;grid-template-columns:36px repeat(5,minmax(0,1fr));gap:4px;margin-top:7px;align-items:center}.solcell{background:#26262b;border-radius:7px;padding:7px 2px;text-align:center;font-size:10px;font-weight:700}.solhead{font-size:9px;color:#999;text-align:center}.solnc{margin-top:6px;font-size:11px}
 button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.footer-note{text-align:center;margin-top:18px;font-size:9px;color:#55555d;letter-spacing:.02em}
 </style>
 </head>
 <body>
 <div class="app">
 <h1>ROSTER<span class="ed">ED</span></h1>
 <div class="meta"><span id="levelmeta"></span><span id="bestmeta" class="best"></span></div>
-<div class="rules">Match = +2 · pink underline = +3 · NC adds its 1–5 priority</div>
+<div class="rules">Preference +2 · Underlined preference +3 · Non-clinical (NC) +1–5</div>
 <div id="levelnav" class="levelnav"></div>
 <div id="staff"></div>
 
@@ -51,9 +52,10 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <button id="reveal" class="reveal">SHOW AN OPTIMAL SOLUTION</button>
 <div id="solution" class="box"></div>
 </div>
+<div class="footer-note">Inspired by an actual roster incident</div>
 
 <script>
-const LEVELS=[{"title":"LEVEL 1","workloads":[3,2,2,2,2,1],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[4,1,2,3,4,3],"reqs":[{"kind":"am"},{"kind":"day","a":"Tue"},{"kind":"exact_or","a":["Fri","AM"],"b":["Fri","PM"],"strong":"b"},{"kind":"days","a":"Thu","b":"Fri","strong":"b"},{"kind":"same","target":1,"strong":"all"},{"kind":"day","a":"Fri"}],"legal":262542,"target":78.78787878787878,"opts":["Anna|Anna|Bruno|Sara|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Bruno|Sara|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5"],"labels":["AM shifts","Tuesday","Friday AM or <span class=\"strong\">Friday PM</span>","Thursday or <span class=\"strong\">Friday</span>","<span class=\"strong\">same day as Bruno</span>","Friday"]},{"title":"LEVEL 2","workloads":[3,3,2,2,1,1],"unavailable":[["Fri"],["Wed"],["Thu"],["Mon"],["Tue"],["Fri"]],"nc":[4,1,2,3,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Wed","strong":"b"},{"kind":"am"},{"kind":"same","target":3},{"kind":"day","a":"Wed","strong":"a"},{"kind":"days","a":"Wed","b":"Thu","strong":"b"},{"kind":"am"}],"legal":164850,"target":79.41176470588235,"opts":["Bruno|Lucy|Anna|Anna|Mark|Mark|Bruno|Sara|Bruno|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Mark|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Mark|Lucy;0,5"],"labels":["Tuesday or <span class=\"strong\">Wednesday</span>","AM shifts","same day as Mark","<span class=\"strong\">Wednesday</span>","Wednesday or <span class=\"strong\">Thursday</span>","AM shifts"]},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[1,3,3,2,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Fri","strong":"b"},{"kind":"days","a":"Tue","b":"Fri"},{"kind":"exact_or","a":["Mon","AM"],"b":["Thu","PM"]},{"kind":"same","target":1},{"kind":"pm","strong":"all"},{"kind":"not","target":1}],"legal":264572,"target":78.125,"opts":["Lucy|Eli|Anna|Anna|Mark|Sara|Bruno|Mark|Anna|Anna;1,2","Lucy|Eli|Anna|Anna|Mark|Sara|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Mark|Bruno|Anna|Anna;1,2"],"labels":["Tuesday or <span class=\"strong\">Friday</span>","Tuesday or Friday","Monday AM or Thursday PM","same day as Bruno","<span class=\"strong\">PM shifts</span>","not same day as Bruno"]},{"title":"LEVEL 4","workloads":[3,2,2,2,2,1],"unavailable":[["Fri"],["Wed"],["Mon"],["Tue"],["Fri"],["Mon"]],"nc":[4,2,3,5,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Wed","strong":"b"},{"kind":"days","a":"Mon","b":"Wed"},{"kind":"days","a":"Mon","b":"Wed","strong":"a"},{"kind":"not","target":0},{"kind":"same","target":3},{"kind":"exact_or","a":["Tue","AM"],"b":["Fri","PM"],"strong":"b"}],"legal":230180,"target":78.78787878787878,"opts":["Bruno|Bruno|Lucy|Sara|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Lucy|Sara|Anna|Anna|Sara|Mark|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Sara|Mark|Mark|Eli;0,2"],"labels":["Monday or <span class=\"strong\">Wednesday</span>","Monday or Wednesday","<span class=\"strong\">Monday</span> or Wednesday","not same day as Anna","same day as Mark","Tuesday AM or <span class=\"strong\">Friday PM</span>"]},{"title":"LEVEL 5","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[3,5,2,4,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Thu","strong":"b"},{"kind":"days","a":"Mon","b":"Thu"},{"kind":"same","target":1,"strong":"all"},{"kind":"days","a":"Tue","b":"Fri","strong":"a"},{"kind":"exact_or","a":["Mon","AM"],"b":["Wed","PM"],"strong":"a"},{"kind":"not","target":0}],"legal":264572,"target":80.0,"opts":["Anna|Anna|Bruno|Lucy|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Anna|Anna|Lucy|Bruno|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Bruno|Lucy|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2","Lucy|Bruno|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2"],"labels":["Monday or <span class=\"strong\">Thursday</span>","Monday or Thursday","<span class=\"strong\">same day as Bruno</span>","<span class=\"strong\">Tuesday</span> or Friday","<span class=\"strong\">Monday AM</span> or Wednesday PM","not same day as Anna"]}];
+const LEVELS=[{"title":"LEVEL 1","workloads":[3,2,2,2,2,1],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[4,1,2,3,4,3],"reqs":[{"kind":"am"},{"kind":"day","a":"Tue"},{"kind":"exact_or","a":["Fri","AM"],"b":["Fri","PM"],"strong":"b"},{"kind":"days","a":"Thu","b":"Fri","strong":"b"},{"kind":"same","target":1,"strong":"all"},{"kind":"day","a":"Fri"}],"legal":262542,"target":78.78787878787878,"opts":["Anna|Anna|Bruno|Sara|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Bruno|Sara|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5"],"labels":["AM shifts","Tuesday","Friday AM or <span class=\"strong\">Friday PM</span>","Thursday or <span class=\"strong\">Friday</span>","<span class=\"strong\">same day as Bruno</span>","Friday"]},{"title":"LEVEL 2","workloads":[3,3,2,2,1,1],"unavailable":[["Fri"],["Wed"],["Thu"],["Mon"],["Tue"],["Fri"]],"nc":[4,1,2,3,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Wed","strong":"b"},{"kind":"am"},{"kind":"same","target":3},{"kind":"day","a":"Wed","strong":"a"},{"kind":"days","a":"Wed","b":"Thu","strong":"b"},{"kind":"am"}],"legal":164850,"target":79.41176470588235,"opts":["Bruno|Lucy|Anna|Anna|Mark|Mark|Bruno|Sara|Bruno|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Mark|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Mark|Lucy;0,5"],"labels":["Tuesday or <span class=\"strong\">Wednesday</span>","AM shifts","same day as Mark","<span class=\"strong\">Wednesday</span>","Wednesday or <span class=\"strong\">Thursday</span>","AM shifts"]},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[1,3,3,2,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Fri","strong":"b"},{"kind":"days","a":"Tue","b":"Fri"},{"kind":"exact_or","a":["Mon","AM"],"b":["Thu","PM"]},{"kind":"same","target":1},{"kind":"pm","strong":"all"},{"kind":"not","target":1}],"legal":264572,"target":78.125,"opts":["Lucy|Eli|Anna|Anna|Mark|Sara|Bruno|Mark|Anna|Anna;1,2","Lucy|Eli|Anna|Anna|Mark|Sara|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Mark|Bruno|Anna|Anna;1,2"],"labels":["Tuesday or <span class=\"strong\">Friday</span>","Tuesday or Friday","Monday AM or Thursday PM","same day as Bruno","<span class=\"strong\">PM shifts</span>","not same day as Bruno"]},{"title":"LEVEL 4","workloads":[3,2,2,2,2,1],"unavailable":[["Fri"],["Wed"],["Mon"],["Tue"],["Fri"],["Mon"]],"nc":[4,2,3,5,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Wed","strong":"b"},{"kind":"days","a":"Mon","b":"Wed"},{"kind":"days","a":"Mon","b":"Wed","strong":"a"},{"kind":"not","target":0},{"kind":"same","target":3},{"kind":"exact_or","a":["Tue","AM"],"b":["Fri","PM"],"strong":"b"}],"legal":230180,"target":78.78787878787878,"opts":["Bruno|Bruno|Lucy|Sara|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Lucy|Sara|Anna|Anna|Sara|Mark|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Sara|Mark|Mark|Eli;0,2"],"labels":["Monday or <span class=\"strong\">Wednesday</span>","Monday or Wednesday","<span class=\"strong\">Monday</span> or Wednesday","not same day as Anna","same day as Mark","Tuesday AM or <span class=\"strong\">Friday PM</span>"]},{"title":"LEVEL 5","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[3,5,2,4,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Thu","strong":"b"},{"kind":"days","a":"Mon","b":"Thu"},{"kind":"same","target":1,"strong":"all"},{"kind":"days","a":"Tue","b":"Fri","strong":"a"},{"kind":"exact_or","a":["Mon","AM"],"b":["Wed","PM"],"strong":"a"},{"kind":"not","target":0}],"legal":264572,"target":80.0,"opts":["Anna|Anna|Bruno|Lucy|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Anna|Anna|Lucy|Bruno|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Bruno|Lucy|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2","Lucy|Bruno|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2"],"labels":["Monday or <span class=\"strong\">Thursday</span>","Monday or Thursday","<span class=\"strong\">same day as Bruno</span>","<span class=\"strong\">Tuesday</span> or Friday","<span class=\"strong\">Monday AM</span> or Wednesday PM","not same day as Anna"]},{"title":"LEVEL 6","workloads":[2,2,2,2,2,2],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[3,4,2,5,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Tue","strong":"b"},{"kind":"days","a":"Mon","b":"Tue"},{"kind":"days","a":"Tue","b":"Wed","strong":"a"},{"kind":"same","target":0},{"kind":"same","target":1,"strong":"all"},{"kind":"exact_or","a":["Thu","AM"],"b":["Fri","PM"]}],"legal":390896,"target":80.0,"opts":["Bruno|Sara|Anna|Anna|Lucy|Lucy|Eli|Mark|Sara|Eli;1,3","Sara|Bruno|Anna|Anna|Lucy|Lucy|Eli|Mark|Sara|Eli;1,3"],"labels":["Monday or <span class=\"strong\">Tuesday</span>","Monday or Tuesday","<span class=\"strong\">Tuesday</span> or Wednesday","same day as Anna","<span class=\"strong\">same day as Bruno</span>","Thursday AM or Friday PM"]}];
 const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"], DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
 const STORAGE_KEY="rostered_five_levels_v1";
 
@@ -126,16 +128,18 @@ function render(){
   const best=STORE.levels[li].best;
   $("bestmeta").textContent=`YOUR BEST ${best===null?"—":best.toFixed(1)+"%"}`;
 
-  $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button class="${i===li?'on':''}" data-i="${i}">${i+1}</button>`).join("");
+  $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button class="${i===li?'on':''}" data-i="${i}">L${i+1}</button>`).join("");
   $("levelnav").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>loadLevel(+b.dataset.i)));
 
   $("staff").innerHTML=NAMES.map((n,i)=>{
     const dots="●".repeat(L().nc[i])+"○".repeat(5-L().nc[i]);
     const u=L().unavailable[i].length?`Unavailable: ${L().unavailable[i].join(" · ")}`:"&nbsp;";
+    const isNc=NC.includes(i);
+    const complete=count(i)===L().workloads[i];
     return `<div class="staff ${selected===i?'on':''}" data-i="${i}">
-      <div class="stafftop"><span class="nm">${n} · ${L().workloads[i]} session${L().workloads[i]===1?'':'s'}</span><span class="ncpri">NC ${dots}</span></div>
+      <div class="stafftop"><span class="nm">${n} · ${L().workloads[i]} session${L().workloads[i]===1?'':'s'}</span><span class="ncpri">NC <span class="ncdots ${isNc?'assigned':''}">${dots}</span></span></div>
       <div class="pref">Prefers: ${L().labels[i]}</div>
-      <div class="unavail">${u}<span class="count">${count(i)}/${L().workloads[i]}</span></div>
+      <div class="unavail">${u}<span class="count ${complete?'complete':''}">${count(i)}/${L().workloads[i]}</span></div>
     </div>`;
   }).join("");
   $("staff").querySelectorAll(".staff").forEach(x=>x.addEventListener("click",()=>{selected=+x.dataset.i;safeSave();render()}));
@@ -216,12 +220,20 @@ function currentDenominator(){
   return den;
 }
 function signature(){return R.map(x=>NAMES[x]).join("|")+";"+NC.slice().sort((a,b)=>a-b).join(",")}
+function ensureResultVisible(){
+  requestAnimationFrame(()=>{
+    const el=$("result"),r=el.getBoundingClientRect();
+    const vh=window.innerHeight||document.documentElement.clientHeight;
+    if(r.bottom>vh-12)el.scrollIntoView({behavior:"smooth",block:"end"});
+    else if(r.top<12)el.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+}
 
 $("check").addEventListener("click",()=>{
   const box=$("result");box.style.display="block";
-  if(R.some(x=>x===null)||NC.some(x=>x===null)){box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots.";return}
+  if(R.some(x=>x===null)||NC.some(x=>x===null)){box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots.";ensureResultVisible();return}
   for(let i=0;i<6;i++){
-    if(count(i)!==L().workloads[i]){box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${count(i)}/${L().workloads[i]} sessions.`;return}
+    if(count(i)!==L().workloads[i]){box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${count(i)}/${L().workloads[i]} sessions.`;ensureResultVisible();return}
   }
 
   const ps=NAMES.map((_,i)=>scoreReq(L().reqs[i],i));
@@ -242,10 +254,10 @@ $("check").addEventListener("click",()=>{
     const ncTag=NC.includes(i)?`+${L().nc[i]} NC&nbsp;&nbsp;`:"";
     return `<div class="resultline"><span>${n}</span><span>${ncTag}${ps[i]}/${pm[i]}</span></div>`;
   }).join("");
-  box.innerHTML=`<div class="good">HAPPINESS ${pct.toFixed(1)}% · target ${L().target.toFixed(1)}%</div>${lines}
-  <div class="resultline"><span>NC bonus total</span><span>+${ncBonus}</span></div>`;
+  box.innerHTML=`<div class="good">HAPPINESS ${pct.toFixed(1)}% · target ${L().target.toFixed(1)}%</div>${lines}`;
   if(Math.abs(pct-L().target)<0.051&&!exact)box.innerHTML+='<div class="warn">SCORING MISMATCH — target score but roster not in verified optimum set.</div>';
   else if(exact)box.innerHTML+='<div class="good">OPTIMAL ROSTER ✓</div>';
+  ensureResultVisible();
 });
 
 $("clear").addEventListener("click",resetCurrent);
