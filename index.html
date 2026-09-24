@@ -238,9 +238,12 @@ $("check").addEventListener("click",()=>{
     $("bestmeta").textContent=`YOUR BEST ${pct.toFixed(1)}%`;
   }
 
-  const lines=NAMES.map((n,i)=>`<div class="resultline"><span>${n}</span><span>${ps[i]}/${pm[i]}</span></div>`).join("");
+  const lines=NAMES.map((n,i)=>{
+    const ncTag=NC.includes(i)?`+${L().nc[i]} NC&nbsp;&nbsp;`:"";
+    return `<div class="resultline"><span>${n}</span><span>${ncTag}${ps[i]}/${pm[i]}</span></div>`;
+  }).join("");
   box.innerHTML=`<div class="good">HAPPINESS ${pct.toFixed(1)}% · target ${L().target.toFixed(1)}%</div>${lines}
-  <div class="resultline"><span>NC bonus</span><span>+${ncBonus}</span></div>`;
+  <div class="resultline"><span>NC bonus total</span><span>+${ncBonus}</span></div>`;
   if(Math.abs(pct-L().target)<0.051&&!exact)box.innerHTML+='<div class="warn">SCORING MISMATCH — target score but roster not in verified optimum set.</div>';
   else if(exact)box.innerHTML+='<div class="good">OPTIMAL ROSTER ✓</div>';
 });
