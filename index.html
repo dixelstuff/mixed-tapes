@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ROSTERED — Three Levels</title>
+<title>ROSTERED — Five Levels</title>
 <style>
 *{box-sizing:border-box}
-:root{--pink:#ed4d70;--bg:#101013;--card:#1d1d22;--slot:#242429;--line:#37373e;--muted:#92929b}
+:root{--pink:#ed4d70;--bg:#101013;--card:#1d1d22;--slot:#242429;--line:#37373e}
 html,body{margin:0;background:var(--bg);color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
 .app{max-width:500px;margin:auto;min-height:100vh;padding:calc(14px + env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom))}
 h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.2px;font-weight:900}.ed{color:var(--pink)}
-.meta{margin:4px 0 4px;font-size:11px;color:#a0a0a8}.rules{font-size:10px;color:#777780;margin-bottom:10px}
-.levelnav{display:flex;gap:6px;margin-bottom:10px}.levelnav button{flex:1;border:1px solid var(--line);background:#222228;color:#9a9aa2;border-radius:9px;padding:8px;font-weight:850}.levelnav button.on{color:white;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
-.staff{padding:8px 10px;margin:6px 0;border:1px solid #34343b;border-radius:11px;background:var(--card);transition:.08s ease}.staff.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 3px;font-size:11px;color:#a0a0a8}.best{color:#ddd;font-weight:800}
+.rules{font-size:10px;color:#777780;margin-bottom:10px}
+.levelnav{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px}.levelnav button{min-width:0;border:1px solid var(--line);background:#222228;color:#9a9aa2;border-radius:9px;padding:8px 2px;font-weight:850}.levelnav button.on{color:white;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.staff{padding:8px 10px;margin:6px 0;border:1px solid #34343b;border-radius:11px;background:var(--card)}.staff.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
 .stafftop{display:flex;justify-content:space-between;gap:8px}.nm{font-size:13px;font-weight:800}.ncpri{font-size:10px;color:#b8b8be;white-space:nowrap}
 .pref{font-size:12px;margin-top:3px;line-height:1.25}.strong{text-decoration-line:underline;text-decoration-color:var(--pink);text-decoration-thickness:2px;text-underline-offset:2px}
 .unavail{font-size:10px;color:#83838d;min-height:13px;margin-top:2px}.count{float:right;color:#999}
@@ -30,7 +31,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 <body>
 <div class="app">
 <h1>ROSTER<span class="ed">ED</span></h1>
-<div id="meta" class="meta"></div>
+<div class="meta"><span id="levelmeta"></span><span id="bestmeta" class="best"></span></div>
 <div class="rules">Match = +2 · pink underline = +3 · NC adds its 1–5 priority</div>
 <div id="levelnav" class="levelnav"></div>
 <div id="staff"></div>
@@ -52,21 +53,81 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 </div>
 
 <script>
-const LEVELS=[{"title":"LEVEL 1","workloads":[3,2,2,2,2,1],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[4,1,2,3,4,3],"reqs":[{"kind":"am"},{"kind":"day","a":"Tue"},{"kind":"exact_or","a":["Fri","AM"],"b":["Fri","PM"],"strong":"b"},{"kind":"days","a":"Thu","b":"Fri","strong":"b"},{"kind":"same","target":1,"strong":"all"},{"kind":"day","a":"Fri"}],"legal":262542,"target":78.78787878787878,"opts":["Anna|Anna|Bruno|Sara|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Bruno|Sara|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5"],"labels":["AM shifts","Tuesday","Friday AM or <span class=\"strong\">Friday PM</span>","Thursday or <span class=\"strong\">Friday</span>","<span class=\"strong\">same day as Bruno</span>","Friday"]},{"title":"LEVEL 2","workloads":[3,3,2,2,1,1],"unavailable":[["Fri"],["Wed"],["Thu"],["Mon"],["Tue"],["Fri"]],"nc":[4,1,2,3,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Wed","strong":"b"},{"kind":"am"},{"kind":"same","target":3},{"kind":"day","a":"Wed","strong":"a"},{"kind":"days","a":"Wed","b":"Thu","strong":"b"},{"kind":"am"}],"legal":164850,"target":79.41176470588235,"opts":["Bruno|Lucy|Anna|Anna|Mark|Mark|Bruno|Sara|Bruno|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Mark|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Mark|Lucy;0,5"],"labels":["Tuesday or <span class=\"strong\">Wednesday</span>","AM shifts","same day as Mark","<span class=\"strong\">Wednesday</span>","Wednesday or <span class=\"strong\">Thursday</span>","AM shifts"]},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[1,3,3,2,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Fri","strong":"b"},{"kind":"days","a":"Tue","b":"Fri"},{"kind":"exact_or","a":["Mon","AM"],"b":["Thu","PM"]},{"kind":"same","target":1},{"kind":"pm","strong":"all"},{"kind":"not","target":1}],"legal":264572,"target":78.125,"opts":["Lucy|Eli|Anna|Anna|Mark|Sara|Bruno|Mark|Anna|Anna;1,2","Lucy|Eli|Anna|Anna|Mark|Sara|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Mark|Bruno|Anna|Anna;1,2"],"labels":["Tuesday or <span class=\"strong\">Friday</span>","Tuesday or Friday","Monday AM or Thursday PM","same day as Bruno","<span class=\"strong\">PM shifts</span>","not same day as Bruno"]}];
+const LEVELS=[{"title":"LEVEL 1","workloads":[3,2,2,2,2,1],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[4,1,2,3,4,3],"reqs":[{"kind":"am"},{"kind":"day","a":"Tue"},{"kind":"exact_or","a":["Fri","AM"],"b":["Fri","PM"],"strong":"b"},{"kind":"days","a":"Thu","b":"Fri","strong":"b"},{"kind":"same","target":1,"strong":"all"},{"kind":"day","a":"Fri"}],"legal":262542,"target":78.78787878787878,"opts":["Anna|Anna|Bruno|Sara|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Bruno|Sara|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Bruno|Sara|Mark|Mark|Lucy|Lucy;0,5","Anna|Anna|Sara|Bruno|Sara|Bruno|Mark|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Bruno|Sara|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Bruno|Sara|Anna|Mark|Lucy|Lucy;0,5","Anna|Mark|Sara|Bruno|Sara|Bruno|Anna|Mark|Lucy|Lucy;0,5"],"labels":["AM shifts","Tuesday","Friday AM or <span class=\"strong\">Friday PM</span>","Thursday or <span class=\"strong\">Friday</span>","<span class=\"strong\">same day as Bruno</span>","Friday"]},{"title":"LEVEL 2","workloads":[3,3,2,2,1,1],"unavailable":[["Fri"],["Wed"],["Thu"],["Mon"],["Tue"],["Fri"]],"nc":[4,1,2,3,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Wed","strong":"b"},{"kind":"am"},{"kind":"same","target":3},{"kind":"day","a":"Wed","strong":"a"},{"kind":"days","a":"Wed","b":"Thu","strong":"b"},{"kind":"am"}],"legal":164850,"target":79.41176470588235,"opts":["Bruno|Lucy|Anna|Anna|Mark|Mark|Bruno|Sara|Bruno|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Anna|Mark|Bruno|Sara|Mark|Lucy;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Lucy|Mark;0,5","Bruno|Lucy|Bruno|Anna|Mark|Anna|Bruno|Sara|Mark|Lucy;0,5"],"labels":["Tuesday or <span class=\"strong\">Wednesday</span>","AM shifts","same day as Mark","<span class=\"strong\">Wednesday</span>","Wednesday or <span class=\"strong\">Thursday</span>","AM shifts"]},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[1,3,3,2,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Fri","strong":"b"},{"kind":"days","a":"Tue","b":"Fri"},{"kind":"exact_or","a":["Mon","AM"],"b":["Thu","PM"]},{"kind":"same","target":1},{"kind":"pm","strong":"all"},{"kind":"not","target":1}],"legal":264572,"target":78.125,"opts":["Lucy|Eli|Anna|Anna|Mark|Sara|Bruno|Mark|Anna|Anna;1,2","Lucy|Eli|Anna|Anna|Mark|Sara|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Eli|Mark|Mark|Bruno|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Bruno|Mark|Anna|Anna;1,2","Lucy|Sara|Anna|Anna|Mark|Eli|Mark|Bruno|Anna|Anna;1,2"],"labels":["Tuesday or <span class=\"strong\">Friday</span>","Tuesday or Friday","Monday AM or Thursday PM","same day as Bruno","<span class=\"strong\">PM shifts</span>","not same day as Bruno"]},{"title":"LEVEL 4","workloads":[3,2,2,2,2,1],"unavailable":[["Fri"],["Wed"],["Mon"],["Tue"],["Fri"],["Mon"]],"nc":[4,2,3,5,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Wed","strong":"b"},{"kind":"days","a":"Mon","b":"Wed"},{"kind":"days","a":"Mon","b":"Wed","strong":"a"},{"kind":"not","target":0},{"kind":"same","target":3},{"kind":"exact_or","a":["Tue","AM"],"b":["Fri","PM"],"strong":"b"}],"legal":230180,"target":78.78787878787878,"opts":["Bruno|Bruno|Lucy|Sara|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Lucy|Sara|Anna|Anna|Sara|Mark|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Mark|Sara|Mark|Eli;0,2","Bruno|Bruno|Sara|Lucy|Anna|Anna|Sara|Mark|Mark|Eli;0,2"],"labels":["Monday or <span class=\"strong\">Wednesday</span>","Monday or Wednesday","<span class=\"strong\">Monday</span> or Wednesday","not same day as Anna","same day as Mark","Tuesday AM or <span class=\"strong\">Friday PM</span>"]},{"title":"LEVEL 5","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[3,5,2,4,1,4],"reqs":[{"kind":"days","a":"Mon","b":"Thu","strong":"b"},{"kind":"days","a":"Mon","b":"Thu"},{"kind":"same","target":1,"strong":"all"},{"kind":"days","a":"Tue","b":"Fri","strong":"a"},{"kind":"exact_or","a":["Mon","AM"],"b":["Wed","PM"],"strong":"a"},{"kind":"not","target":0}],"legal":264572,"target":80.0,"opts":["Anna|Anna|Bruno|Lucy|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Bruno|Lucy|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Anna|Anna|Lucy|Bruno|Eli|Sara|Anna|Anna|Mark|Mark;1,2","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Eli|Mark;1,3","Anna|Anna|Lucy|Bruno|Lucy|Sara|Anna|Anna|Mark|Eli;1,3","Bruno|Lucy|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2","Lucy|Bruno|Mark|Mark|Eli|Sara|Anna|Anna|Anna|Anna;1,2"],"labels":["Monday or <span class=\"strong\">Thursday</span>","Monday or Thursday","<span class=\"strong\">same day as Bruno</span>","<span class=\"strong\">Tuesday</span> or Friday","<span class=\"strong\">Monday AM</span> or Wednesday PM","not same day as Anna"]}];
 const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"], DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
-let li=0, selected=0, R=Array(10).fill(null), NC=[null,null];
-const $=id=>document.getElementById(id), L=()=>LEVELS[li];
+const STORAGE_KEY="rostered_five_levels_v1";
 
+function blankState(){return {R:Array(10).fill(null),NC:[null,null],selected:0,best:null}}
+function defaultStore(){return {activeLevel:0,levels:LEVELS.map(()=>blankState())}}
+function safeLoad(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return defaultStore();
+    const obj=JSON.parse(raw);
+    if(!obj||!Array.isArray(obj.levels))return defaultStore();
+    const out=defaultStore();
+    out.activeLevel=Number.isInteger(obj.activeLevel)&&obj.activeLevel>=0&&obj.activeLevel<LEVELS.length?obj.activeLevel:0;
+    for(let i=0;i<LEVELS.length;i++){
+      const s=obj.levels[i];
+      if(!s)continue;
+      if(Array.isArray(s.R)&&s.R.length===10)out.levels[i].R=s.R.map(x=>(x===null||Number.isInteger(x)&&x>=0&&x<6)?x:null);
+      if(Array.isArray(s.NC)&&s.NC.length===2)out.levels[i].NC=s.NC.map(x=>(x===null||Number.isInteger(x)&&x>=0&&x<6)?x:null);
+      if(Number.isInteger(s.selected)&&s.selected>=0&&s.selected<6)out.levels[i].selected=s.selected;
+      if(typeof s.best==="number"&&isFinite(s.best)&&s.best>=0)out.levels[i].best=s.best;
+    }
+    return out;
+  }catch(e){return defaultStore()}
+}
+let STORE=safeLoad();
+let li=STORE.activeLevel;
+let R=STORE.levels[li].R.slice(),NC=STORE.levels[li].NC.slice(),selected=STORE.levels[li].selected;
+let solutionVisible=false;
+const $=id=>document.getElementById(id),L=()=>LEVELS[li];
+
+function safeSave(){
+  STORE.activeLevel=li;
+  STORE.levels[li]={R:R.slice(),NC:NC.slice(),selected,best:STORE.levels[li].best};
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(STORE))}catch(e){}
+}
+function loadLevel(i){
+  safeSave();
+  li=i;STORE.activeLevel=i;
+  const s=STORE.levels[i];
+  R=s.R.slice();NC=s.NC.slice();selected=s.selected;
+  solutionVisible=false;
+  $("solution").style.display="none";
+  $("reveal").textContent="SHOW AN OPTIMAL SOLUTION";
+  $("result").style.display="none";
+  safeSave();render();
+}
 function count(i){return R.filter(x=>x===i).length+NC.filter(x=>x===i).length}
 function clinicalCount(i){return R.filter(x=>x===i).length}
-function reset(){selected=0;R=Array(10).fill(null);NC=[null,null];$("result").style.display="none";$("solution").style.display="none";render()}
-function canClinical(i,k){if(R[k]!==null)return true;if(count(i)>=L().workloads[i])return false;const d=DAYS[Math.floor(k/2)];return !L().unavailable[i].includes(d)}
-function canNC(i,q){if(NC[q]!==null)return true;return count(i)<L().workloads[i]&&!NC.includes(i)}
+function canClinical(i,k){
+  if(R[k]!==null)return true;
+  if(count(i)>=L().workloads[i])return false;
+  const d=DAYS[Math.floor(k/2)];
+  return !L().unavailable[i].includes(d);
+}
+function canNC(i,q){
+  if(NC[q]!==null)return true;
+  return count(i)<L().workloads[i]&&!NC.includes(i);
+}
+function resetCurrent(){
+  R=Array(10).fill(null);NC=[null,null];selected=0;
+  solutionVisible=false;
+  $("solution").style.display="none";
+  $("reveal").textContent="SHOW AN OPTIMAL SOLUTION";
+  $("result").style.display="none";
+  safeSave();render();
+}
 
 function render(){
-  $("meta").textContent=`${L().title} · TARGET ${L().target.toFixed(1)}%`;
+  $("levelmeta").textContent=`${L().title} · TARGET ${L().target.toFixed(1)}%`;
+  const best=STORE.levels[li].best;
+  $("bestmeta").textContent=`YOUR BEST ${best===null?"—":best.toFixed(1)+"%"}`;
+
   $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button class="${i===li?'on':''}" data-i="${i}">${i+1}</button>`).join("");
-  $("levelnav").querySelectorAll("button").forEach(b=>b.onclick=()=>{li=+b.dataset.i;reset()});
+  $("levelnav").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>loadLevel(+b.dataset.i)));
 
   $("staff").innerHTML=NAMES.map((n,i)=>{
     const dots="●".repeat(L().nc[i])+"○".repeat(5-L().nc[i]);
@@ -77,28 +138,31 @@ function render(){
       <div class="unavail">${u}<span class="count">${count(i)}/${L().workloads[i]}</span></div>
     </div>`;
   }).join("");
-  $("staff").querySelectorAll(".staff").forEach(x=>x.onclick=()=>{selected=+x.dataset.i;render()});
+  $("staff").querySelectorAll(".staff").forEach(x=>x.addEventListener("click",()=>{selected=+x.dataset.i;safeSave();render()}));
 
   let h='<div class="corner"></div>'+DAYS.map(d=>`<div class="day">${d.toUpperCase()}</div>`).join("");
   for(const half of ["AM","PM"]){
     h+=`<div class="half">${half}</div>`;
     for(let di=0;di<5;di++){
-      const k=di*2+(half==="PM"?1:0), who=R[k], blocked=who===null&&!canClinical(selected,k);
+      const k=di*2+(half==="PM"?1:0),who=R[k],blocked=who===null&&!canClinical(selected,k);
       h+=`<button class="slot ${blocked?'blocked':''}" data-k="${k}">${who===null?'＋':NAMES[who]}</button>`;
     }
   }
   $("board").innerHTML=h;
-  $("board").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
+  $("board").querySelectorAll(".slot").forEach(b=>b.addEventListener("click",()=>{
     const k=+b.dataset.k;
-    if(R[k]!==null){R[k]=null;render();return}
-    if(canClinical(selected,k)){R[k]=selected;render()}
-  });
+    if(R[k]!==null){R[k]=null;safeSave();render();return}
+    if(canClinical(selected,k)){R[k]=selected;safeSave();render()}
+  }));
 
   document.querySelectorAll(".ncslot").forEach(b=>{
-    const q=+b.dataset.q, who=NC[q], blocked=who===null&&!canNC(selected,q);
+    const q=+b.dataset.q,who=NC[q],blocked=who===null&&!canNC(selected,q);
     b.textContent=who===null?"＋":NAMES[who];
     b.classList.toggle("blocked",blocked);
-    b.onclick=()=>{if(NC[q]!==null){NC[q]=null;render();return}if(canNC(selected,q)){NC[q]=selected;render()}};
+    b.onclick=()=>{
+      if(NC[q]!==null){NC[q]=null;safeSave();render();return}
+      if(canNC(selected,q)){NC[q]=selected;safeSave();render()}
+    };
   });
 }
 
@@ -119,7 +183,6 @@ function prefMaxForCount(r,c){
   if(r.kind==="same"||r.kind==="not")return c*(st==="all"?3:2);
   return 0;
 }
-
 function scoreReq(r,i){
   let score=0,targetDays=null;
   if(r.kind==="same"||r.kind==="not"){
@@ -128,7 +191,7 @@ function scoreReq(r,i){
   }
   R.forEach((p,k)=>{
     if(p!==i)return;
-    const d=DAYS[Math.floor(k/2)], half=(k%2===0?"AM":"PM");
+    const d=DAYS[Math.floor(k/2)],half=(k%2===0?"AM":"PM");
     let v=0;
     if(r.kind==="am"&&half==="AM")v=r.strong==="all"?3:2;
     else if(r.kind==="pm"&&half==="PM")v=r.strong==="all"?3:2;
@@ -146,7 +209,6 @@ function scoreReq(r,i){
   });
   return score;
 }
-
 function currentDenominator(){
   const top=L().nc.slice().sort((a,b)=>b-a).slice(0,2).reduce((a,b)=>a+b,0);
   let den=top;
@@ -155,29 +217,37 @@ function currentDenominator(){
 }
 function signature(){return R.map(x=>NAMES[x]).join("|")+";"+NC.slice().sort((a,b)=>a-b).join(",")}
 
-$("check").onclick=()=>{
+$("check").addEventListener("click",()=>{
   const box=$("result");box.style.display="block";
   if(R.some(x=>x===null)||NC.some(x=>x===null)){box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots.";return}
-  for(let i=0;i<6;i++)if(count(i)!==L().workloads[i]){box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${count(i)}/${L().workloads[i]} sessions.`;return}
+  for(let i=0;i<6;i++){
+    if(count(i)!==L().workloads[i]){box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${count(i)}/${L().workloads[i]} sessions.`;return}
+  }
 
   const ps=NAMES.map((_,i)=>scoreReq(L().reqs[i],i));
   const pm=NAMES.map((_,i)=>prefMaxForCount(L().reqs[i],clinicalCount(i)));
   const clinical=ps.reduce((a,b)=>a+b,0);
   const ncBonus=NC.reduce((a,i)=>a+L().nc[i],0);
   const den=currentDenominator();
-  const raw=clinical+ncBonus, pct=100*raw/den;
+  const raw=clinical+ncBonus,pct=100*raw/den;
   const exact=L().opts.includes(signature());
 
-  let lines=NAMES.map((n,i)=>`<div class="resultline"><span>${n}</span><span>${ps[i]}/${pm[i]}</span></div>`).join("");
+  if(STORE.levels[li].best===null||pct>STORE.levels[li].best){
+    STORE.levels[li].best=pct;
+    safeSave();
+    $("bestmeta").textContent=`YOUR BEST ${pct.toFixed(1)}%`;
+  }
+
+  const lines=NAMES.map((n,i)=>`<div class="resultline"><span>${n}</span><span>${ps[i]}/${pm[i]}</span></div>`).join("");
   box.innerHTML=`<div class="good">HAPPINESS ${pct.toFixed(1)}% · target ${L().target.toFixed(1)}%</div>${lines}
   <div class="resultline"><span>NC bonus</span><span>+${ncBonus}</span></div>`;
-
   if(Math.abs(pct-L().target)<0.051&&!exact)box.innerHTML+='<div class="warn">SCORING MISMATCH — target score but roster not in verified optimum set.</div>';
   else if(exact)box.innerHTML+='<div class="good">OPTIMAL ROSTER ✓</div>';
-};
+});
 
-$("clear").onclick=reset;
-$("reveal").onclick=()=>{
+$("clear").addEventListener("click",resetCurrent);
+
+function drawSolution(){
   const [rr,nn]=L().opts[0].split(";"),a=rr.split("|"),nc=nn.split(",").map(Number);
   let h='<b>AN OPTIMAL SOLUTION</b><div class="solutionboard"><div></div>'+DAYS.map(d=>`<div class="solhead">${d.toUpperCase()}</div>`).join("");
   for(const half of ["AM","PM"]){
@@ -188,9 +258,21 @@ $("reveal").onclick=()=>{
     }
   }
   h+='</div><div class="solnc"><b>NC:</b> '+NAMES[nc[0]]+' · '+NAMES[nc[1]]+'</div>';
-  $("solution").style.display="block";$("solution").innerHTML=h;
-};
+  $("solution").innerHTML=h;
+}
+$("reveal").addEventListener("click",()=>{
+  solutionVisible=!solutionVisible;
+  if(solutionVisible){
+    drawSolution();
+    $("solution").style.display="block";
+    $("reveal").textContent="HIDE OPTIMAL SOLUTION";
+  }else{
+    $("solution").style.display="none";
+    $("reveal").textContent="SHOW AN OPTIMAL SOLUTION";
+  }
+});
 
+safeSave();
 render();
 </script>
 </body>
