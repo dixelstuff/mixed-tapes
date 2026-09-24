@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#101013">
-<title>ROSTERED — Three Levels</title>
+<title>ROSTERED — Three Levels v3</title>
 <style>
 :root{--bg:#101013;--panel:#1d1d22;--panel2:#242429;--line:#36363d;--muted:#96969f;--text:#f5f5f7;--pink:#ed4d70;--blocked:#16161a;--blockedLine:#27272d}
 *{box-sizing:border-box}
@@ -85,7 +85,7 @@ h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.25px;font-weight:900}
 </div>
 
 <script>
-const LEVELS=[{"title":"LEVEL 1","workloads":[3,3,2,2,1,1],"prefText":["Mon PM \u00b7 Tue AM \u00b7 Thu AM","Mon PM \u00b7 Thu AM","Thu AM","Mon double shift","Mon or Tue","Fri PM"],"prefKind":["exact","exact","exact","exact_double","day_or","exact"],"prefData":[[1,2,6],[1,6],[6],0,[0,1],[9]],"nc":[1,3,5,3,3,2],"available":[["Mon","Tue","Thu","Fri"],["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Fri"],["Tue","Wed","Thu","Fri"]],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Wed","Thu"],["Mon"]],"best":77.77777777777777,"opts":["Mark|Mark|Anna|Sara|Bruno|Bruno|Anna|Anna|Lucy|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Bruno|Anna|Lucy|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Bruno|Lucy|Anna|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Lucy|Anna|Bruno|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Bruno|Lucy|Bruno|Anna|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Lucy|Bruno|Anna|Bruno|Anna|Eli;1,2","Mark|Mark|Anna|Sara|Lucy|Bruno|Bruno|Anna|Anna|Eli;1,2"],"legal":133380,"topNc":8,"optCount":7},{"title":"LEVEL 2","workloads":[4,2,2,2,1,1],"prefText":["Mon PM \u00b7 Tue AM \u00b7 Tue PM","Tue AM \u00b7 Thu AM","Mon AM \u00b7 Thu PM","Tue double shift","Thu or Fri","Mon or Wed"],"prefKind":["exact","exact","exact","exact_double","day_or","day_or"],"prefData":[[1,2,3],[2,6],[0,7],1,[3,4],[0,2]],"nc":[3,2,3,2,4,4],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":77.77777777777777,"opts":["Lucy|Anna|Mark|Mark|Anna|Anna|Bruno|Lucy|Bruno|Sara;0,5","Lucy|Anna|Mark|Mark|Anna|Anna|Bruno|Lucy|Sara|Bruno;0,5"],"legal":60361,"topNc":8,"optCount":2},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"prefText":["Mon PM \u00b7 Tue PM \u00b7 Thu AM","Thu double shift","Tue AM \u00b7 Thu AM","Tue AM \u00b7 Tue PM","Mon or Thu","Mon or Fri"],"prefKind":["exact","exact_double","exact","exact","day_or","day_or"],"prefData":[[1,3,6],3,[2,6],[2,3],[0,3],[0,4]],"nc":[2,3,3,2,4,4],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":76.47058823529412,"opts":["Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Eli|Lucy;2,4","Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Lucy|Eli;2,4","Anna|Anna|Mark|Mark|Anna|Anna|Bruno|Bruno|Lucy|Lucy;4,5","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Eli|Lucy;2,4","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Lucy|Eli;2,4","Mark|Anna|Mark|Anna|Anna|Anna|Bruno|Bruno|Lucy|Lucy;4,5"],"legal":60361,"topNc":8,"optCount":6}];
+const LEVELS=[{"title":"LEVEL 1","workloads":[3,3,2,2,1,1],"prefText":["Mon PM · Tue PM · Thu AM","Mon PM · Tue PM","not same day as Mark","Mon double shift","Tue PM","Wed AM"],"prefKind":["exact","exact","avoid_same","exact_double","exact","exact"],"prefData":[[1,3,6],[1,3],3,0,[3],[4]],"nc":[1,2,3,1,2,2],"available":[["Mon","Tue","Thu","Fri"],["Mon","Tue","Wed"],["Tue","Wed","Thu","Fri"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Fri"],["Tue","Wed","Thu","Fri"]],"unavailable":[["Wed"],["Thu","Fri"],["Mon"],["Tue"],["Wed","Thu"],["Mon"]],"best":78.57142857142857,"opts":["Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Anna|Anna|Lucy;2,4","Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Anna|Lucy|Anna;2,4","Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Lucy|Anna|Anna;2,4"],"legal":67360,"topNc":5,"optCount":3},{"title":"LEVEL 2","workloads":[4,2,2,2,1,1],"prefText":["Mon PM · Thu AM · Thu PM","not same day as Mark","Mon double shift","Mon PM · Tue AM","Thu AM","Tue or Fri"],"prefKind":["exact","avoid_same","exact_double","exact","exact","day_or"],"prefData":[[1,6,7],3,0,[1,2],[6],[1,4]],"nc":[2,3,2,1,1,2],"available":[["Mon","Tue","Wed","Thu"],["Tue","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon","Wed"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":80.0,"opts":["Lucy|Lucy|Mark|Mark|Anna|Anna|Sara|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Anna|Anna|Sara|Anna|Eli|Bruno;0,1","Lucy|Lucy|Mark|Mark|Anna|Sara|Anna|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Anna|Sara|Anna|Anna|Eli|Bruno;0,1","Lucy|Lucy|Mark|Mark|Sara|Anna|Anna|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Sara|Anna|Anna|Anna|Eli|Bruno;0,1"],"legal":35150,"topNc":5,"optCount":6},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"prefText":["Mon AM · Tue PM · Thu PM","not same day as Anna","Thu double shift","single shifts separated by a day","Thu PM","Tue PM"],"prefKind":["exact","avoid_same","exact_double","spaced2","exact","exact"],"prefData":[[0,3,7],0,3,null,[7],[3]],"nc":[2,3,1,2,1,2],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon","Fri"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":78.57142857142857,"opts":["Anna|Anna|Mark|Anna|Bruno|Sara|Mark|Anna|Lucy|Lucy;1,5","Anna|Anna|Mark|Anna|Sara|Bruno|Mark|Anna|Lucy|Lucy;1,5","Anna|Mark|Anna|Anna|Bruno|Sara|Mark|Anna|Lucy|Lucy;1,5","Anna|Mark|Anna|Anna|Sara|Bruno|Mark|Anna|Lucy|Lucy;1,5"],"legal":24375,"topNc":5,"optCount":4}];
 const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"];
 const DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
 
@@ -124,7 +124,7 @@ function render(){
   $("levelnav").querySelectorAll("button").forEach(b=>b.onclick=()=>{levelIndex=+b.dataset.i;resetLevel();});
 
   $("staff").innerHTML=NAMES.map((n,i)=>{
-    const dots="●".repeat(L().nc[i])+"○".repeat(5-L().nc[i]);
+    const dots="●".repeat(L().nc[i])+"○".repeat(3-L().nc[i]);
     const unavailable=L().unavailable[i].length ? `Unavailable: ${L().unavailable[i].join(" · ")}` : "";
     const c=countFor(i), done=c===L().workloads[i];
     return `<div class="staff ${selected===i?"on":""}" data-i="${i}">
@@ -184,9 +184,21 @@ function prefScore(i,assigned){
     den=n; score=n;
     for(let j=0;j<5;j++) if(S.has(j*2)&&S.has(j*2+1)) score-=2;
   }
-  else if(kind==="spaced"){
+  else if(kind==="spaced" || kind==="spaced2"){
     den=n;
-    score=assigned.filter(k=>assigned.every(q=>q===k || Math.abs(Math.floor(k/2)-Math.floor(q/2))>=2)).length;
+    if(n<=1) score=n;
+    else {
+      const ds=assigned.map(k=>Math.floor(k/2)).sort((a,b)=>a-b);
+      const ok=(ds.length===2 && Math.abs(ds[1]-ds[0])>=2);
+      score=ok?n:0;
+    }
+  }
+  else if(kind==="avoid_same"){
+    den=n;
+    const target=data;
+    const targetDays=new Set();
+    roster.forEach((person,k)=>{if(person===target) targetDays.add(Math.floor(k/2));});
+    score=assigned.filter(k=>!targetDays.has(Math.floor(k/2))).length;
   }
   else if(kind==="day_or"){
     den=n>0?1:0;
