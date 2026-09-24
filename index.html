@@ -1,283 +1,188 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#101013">
-<title>ROSTERED — Three Levels v3</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ROSTERED — Three Levels</title>
 <style>
-:root{--bg:#101013;--panel:#1d1d22;--panel2:#242429;--line:#36363d;--muted:#96969f;--text:#f5f5f7;--pink:#ed4d70;--blocked:#16161a;--blockedLine:#27272d}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
-button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.app{max-width:500px;margin:0 auto;min-height:100vh;padding:calc(14px + env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom))}
-.brand{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
-h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.25px;font-weight:900}
-.ed{color:var(--pink)}
-.target{font-size:11px;font-weight:800;color:#b7b7be;letter-spacing:.04em}
-.meta{font-size:10px;color:#777780;margin:4px 0 10px}
-.levelnav{display:flex;gap:6px;margin-bottom:10px}
-.levelnav button{flex:1;padding:8px 4px;border:1px solid var(--line);border-radius:9px;background:#202025;color:#8e8e97;font-size:11px;font-weight:850}
-.levelnav button.on{color:#fff;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
-.staff{padding:8px 9px;margin:5px 0;border:1px solid #33333a;background:var(--panel);border-radius:11px;transition:border-color .12s,box-shadow .12s}
+:root{--pink:#ed4d70;--bg:#101013;--card:#1d1d22;--slot:#242429;--line:#37373e;--muted:#92929b;--dim:#18181c}
+html,body{margin:0;background:var(--bg);color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.app{max-width:500px;margin:auto;min-height:100vh;padding:calc(14px + env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom))}
+h1{margin:0;font-size:30px;line-height:1;letter-spacing:-1.2px;font-weight:900}.ed{color:var(--pink)}
+.meta{margin:4px 0 4px;font-size:11px;color:#a0a0a8}.rules{font-size:10px;color:#777780;margin-bottom:10px}
+.levelnav{display:flex;gap:6px;margin-bottom:10px}.levelnav button{flex:1;border:1px solid var(--line);background:#222228;color:#9a9aa2;border-radius:9px;padding:8px;font-weight:850}.levelnav button.on{color:white;border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.staff{padding:8px 10px;margin:6px 0;border:1px solid #34343b;border-radius:11px;background:var(--card);transition:.08s ease}
 .staff.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
-.stafftop{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.name{font-size:13px;font-weight:820}
-.dots{font-size:10px;color:#b2b2ba;white-space:nowrap}
-.pref{font-size:12px;margin-top:2px;line-height:1.25}
-.bottom{display:flex;justify-content:space-between;gap:8px;min-height:14px;margin-top:2px}
-.unavail,.count{font-size:10px;color:#82828b}
-.count{white-space:nowrap}
-.count.done{color:#c8c8ce;font-weight:800}
-.board{margin-top:11px}
-.rostergrid{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));gap:5px;align-items:center}
-.corner{height:16px}
-.dayhead{font-size:9px;color:#96969f;text-align:center;font-weight:750;letter-spacing:.02em}
-.rowhead{font-size:10px;color:#96969f;text-align:center;font-weight:750}
-.slot{height:42px;min-width:0;border:1px solid #3a3a41;background:var(--panel2);color:#fff;border-radius:8px;font-size:10.5px;font-weight:760;padding:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.slot.empty{color:#a9a9b1;font-size:17px;font-weight:400}
-.slot.blocked{background:var(--blocked);border-color:var(--blockedLine);color:#44444b}
-.slot.blocked.empty{color:#34343a}
-.ncwrap{display:grid;grid-template-columns:34px 1fr 1fr;gap:5px;align-items:center;margin-top:6px}
-.nc{height:40px;border:1px dashed #494950;background:#202025;color:#ddd;border-radius:8px;font-size:11px;font-weight:760}
-.nc.empty{font-size:17px;font-weight:400;color:#9d9da5}
-.nc.blocked{background:var(--blocked);border-color:var(--blockedLine);color:#3f3f46}
-.actions{display:grid;grid-template-columns:1fr 1.45fr;gap:7px;margin-top:11px}
-.action{border:0;border-radius:10px;padding:11px 8px;font-size:11px;font-weight:900;letter-spacing:.02em}
-.clear{background:#2c2c32;color:#d0d0d5}
-.check{background:var(--pink);color:#fff}
-.result{display:none;background:var(--panel);border:1px solid #303036;border-radius:10px;padding:10px;margin-top:8px;font-size:11px;line-height:1.45}
-.score{font-size:14px;font-weight:900}
-.optimal{color:#fff;font-weight:900}
-.reveal{width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid #35353c;color:#85858e;border-radius:9px;font-size:9.5px;font-weight:850;letter-spacing:.04em}
-.solution-title{font-size:10px;font-weight:900;margin-bottom:7px}
-.solutiongrid{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));gap:4px;align-items:center}
-.solhead{font-size:8px;color:#888891;text-align:center;font-weight:800}
-.solcell{min-height:30px;border:1px solid #34343b;background:#222227;border-radius:7px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9.5px;font-weight:760;padding:2px}
-.solnc{display:grid;grid-template-columns:34px 1fr 1fr;gap:4px;margin-top:4px;align-items:center}
-.hint{font-size:9px;color:#66666e;margin-top:5px;text-align:center}
+.stafftop{display:flex;justify-content:space-between;gap:8px}.nm{font-size:13px;font-weight:800}.ncpri{font-size:10px;color:#b8b8be;white-space:nowrap}
+.pref{font-size:12px;margin-top:3px;line-height:1.25}.strong{text-decoration-line:underline;text-decoration-color:var(--pink);text-decoration-thickness:2px;text-underline-offset:2px}
+.unavail{font-size:10px;color:#83838d;min-height:13px;margin-top:2px}.count{float:right;color:#999}
+.board{display:grid;grid-template-columns:36px repeat(5,minmax(0,1fr));gap:5px;align-items:center;margin-top:12px}
+.corner,.day,.half{text-align:center;font-size:10px;color:#999}.day{font-weight:750}.half{font-weight:750}
+.slot{height:42px;min-width:0;border:1px solid #3b3b42;background:var(--slot);color:#fff;border-radius:8px;padding:2px;font-size:10.5px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot.blocked{background:#16161a;border-color:#24242a;color:#4f4f57}
+.ncrow{display:grid;grid-template-columns:36px 1fr 1fr;gap:5px;align-items:center;margin-top:7px}
+.ncslot{height:40px;border:1px dashed #4a4a52;background:#202025;color:white;border-radius:8px;font-size:11px;font-weight:750}.ncslot.blocked{background:#16161a;border-color:#24242a;color:#4f4f57}
+.actions{display:grid;grid-template-columns:1fr 1.45fr;gap:7px;margin-top:11px}.action{border:0;border-radius:10px;padding:11px;font-weight:900}.clear{background:#2d2d33;color:#ddd}.check{background:var(--pink);color:white}
+.box{display:none;margin-top:9px;padding:10px;background:var(--card);border-radius:10px;font-size:12px;line-height:1.45}
+.reveal{width:100%;margin-top:8px;padding:9px;background:none;border:1px solid #393940;color:#96969e;border-radius:9px;font-size:10px;font-weight:850}
+.resultline{display:flex;justify-content:space-between;gap:8px}.muted{color:#8f8f98}.good{font-weight:850}.warn{color:var(--pink);font-weight:850}
+.solutionboard{display:grid;grid-template-columns:36px repeat(5,minmax(0,1fr));gap:4px;margin-top:7px;align-items:center}
+.solcell{background:#26262b;border-radius:7px;padding:7px 2px;text-align:center;font-size:10px;font-weight:700}.solhead{font-size:9px;color:#999;text-align:center}.solnc{margin-top:6px;font-size:11px}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="brand"><h1>ROSTER<span class="ed">ED</span></h1><div class="target" id="target"></div></div>
-  <div class="meta">Select a staff member, then tap an empty shift.</div>
-  <div class="levelnav" id="levelnav"></div>
-  <div id="staff"></div>
+<h1>ROSTER<span class="ed">ED</span></h1>
+<div id="meta" class="meta"></div>
+<div class="rules">Match = +2 · pink underline = +3 · NC adds its 1–5 priority</div>
+<div id="levelnav" class="levelnav"></div>
+<div id="staff"></div>
 
-  <div class="board">
-    <div class="rostergrid" id="rostergrid"></div>
-    <div class="ncwrap">
-      <div class="rowhead">NC</div>
-      <button class="nc empty" data-nc="0">＋</button>
-      <button class="nc empty" data-nc="1">＋</button>
-    </div>
-  </div>
+<div id="board" class="board"></div>
+<div class="ncrow">
+  <div class="half">NC</div>
+  <button class="ncslot" data-q="0">＋</button>
+  <button class="ncslot" data-q="1">＋</button>
+</div>
 
-  <div class="actions">
-    <button class="action clear" id="clearBtn">CLEAR</button>
-    <button class="action check" id="checkBtn">CHECK ROSTER</button>
-  </div>
-  <div class="result" id="result"></div>
-  <button class="reveal" id="revealBtn">SHOW AN OPTIMAL SOLUTION</button>
-  <div class="result" id="solution"></div>
+<div class="actions">
+  <button id="clear" class="action clear">CLEAR</button>
+  <button id="check" class="action check">CHECK ROSTER</button>
+</div>
+<div id="result" class="box"></div>
+<button id="reveal" class="reveal">SHOW AN OPTIMAL SOLUTION</button>
+<div id="solution" class="box"></div>
 </div>
 
 <script>
-const LEVELS=[{"title":"LEVEL 1","workloads":[3,3,2,2,1,1],"prefText":["Mon PM · Tue PM · Thu AM","Mon PM · Tue PM","not same day as Mark","Mon double shift","Tue PM","Wed AM"],"prefKind":["exact","exact","avoid_same","exact_double","exact","exact"],"prefData":[[1,3,6],[1,3],3,0,[3],[4]],"nc":[1,2,3,1,2,2],"available":[["Mon","Tue","Thu","Fri"],["Mon","Tue","Wed"],["Tue","Wed","Thu","Fri"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Fri"],["Tue","Wed","Thu","Fri"]],"unavailable":[["Wed"],["Thu","Fri"],["Mon"],["Tue"],["Wed","Thu"],["Mon"]],"best":78.57142857142857,"opts":["Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Anna|Anna|Lucy;2,4","Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Anna|Lucy|Anna;2,4","Mark|Mark|Bruno|Bruno|Eli|Bruno|Anna|Lucy|Anna|Anna;2,4"],"legal":67360,"topNc":5,"optCount":3},{"title":"LEVEL 2","workloads":[4,2,2,2,1,1],"prefText":["Mon PM · Thu AM · Thu PM","not same day as Mark","Mon double shift","Mon PM · Tue AM","Thu AM","Tue or Fri"],"prefKind":["exact","avoid_same","exact_double","exact","exact","day_or"],"prefData":[[1,6,7],3,0,[1,2],[6],[1,4]],"nc":[2,3,2,1,1,2],"available":[["Mon","Tue","Wed","Thu"],["Tue","Thu","Fri"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon","Wed"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":80.0,"opts":["Lucy|Lucy|Mark|Mark|Anna|Anna|Sara|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Anna|Anna|Sara|Anna|Eli|Bruno;0,1","Lucy|Lucy|Mark|Mark|Anna|Sara|Anna|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Anna|Sara|Anna|Anna|Eli|Bruno;0,1","Lucy|Lucy|Mark|Mark|Sara|Anna|Anna|Anna|Bruno|Eli;0,1","Lucy|Lucy|Mark|Mark|Sara|Anna|Anna|Anna|Eli|Bruno;0,1"],"legal":35150,"topNc":5,"optCount":6},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"prefText":["Mon AM · Tue PM · Thu PM","not same day as Anna","Thu double shift","single shifts separated by a day","Thu PM","Tue PM"],"prefKind":["exact","avoid_same","exact_double","spaced2","exact","exact"],"prefData":[[0,3,7],0,3,null,[7],[3]],"nc":[2,3,1,2,1,2],"available":[["Mon","Tue","Wed","Thu"],["Tue","Wed","Thu"],["Mon","Tue","Thu","Fri"],["Mon","Tue","Thu"],["Mon","Wed","Thu","Fri"],["Mon","Tue","Wed","Fri"]],"unavailable":[["Fri"],["Mon","Fri"],["Wed"],["Wed","Fri"],["Tue"],["Thu"]],"best":78.57142857142857,"opts":["Anna|Anna|Mark|Anna|Bruno|Sara|Mark|Anna|Lucy|Lucy;1,5","Anna|Anna|Mark|Anna|Sara|Bruno|Mark|Anna|Lucy|Lucy;1,5","Anna|Mark|Anna|Anna|Bruno|Sara|Mark|Anna|Lucy|Lucy;1,5","Anna|Mark|Anna|Anna|Sara|Bruno|Mark|Anna|Lucy|Lucy;1,5"],"legal":24375,"topNc":5,"optCount":4}];
-const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"];
-const DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
+const LEVELS=[{"title":"LEVEL 1","workloads":[3,2,2,2,2,1],"unavailable":[["Wed"],["Fri"],["Mon"],["Tue"],["Thu"],["Mon"]],"nc":[3,1,3,2,4,4],"reqs":[{"kind":"pm"},{"kind":"day","a":"Mon"},{"kind":"same","target":1,"strong":"all"},{"kind":"days","a":"Mon","b":"Thu","strong":"b"},{"kind":"not","target":3},{"kind":"exact_or","a":["Tue","AM"],"b":["Tue","PM"],"strong":"a"}],"legal":262542,"maxRaw":29,"opts":["Bruno|Anna|Eli|Anna|Bruno|Lucy|Mark|Mark|Sara|Anna;2,4","Bruno|Anna|Eli|Anna|Lucy|Bruno|Mark|Mark|Sara|Anna;2,4"],"denom":37,"target":78.37837837837837,"prefMax":[6,4,6,6,4,3],"labels":["PM shifts","Monday","<span class=\"strong\">same day as Bruno</span>","Monday or <span class=\"strong\">Thursday</span>","not same day as Mark","<span class=\"strong\">Tuesday AM</span> or Tuesday PM"]},{"title":"LEVEL 2","workloads":[3,3,2,2,1,1],"unavailable":[["Fri"],["Wed"],["Thu"],["Mon"],["Tue"],["Fri"]],"nc":[3,3,5,3,1,2],"reqs":[{"kind":"days","a":"Mon","b":"Wed"},{"kind":"days","a":"Mon","b":"Thu"},{"kind":"not","target":1},{"kind":"days","a":"Tue","b":"Wed","strong":"b"},{"kind":"exact","a":["Thu","AM"],"strong":"a"},{"kind":"exact_or","a":["Mon","AM"],"b":["Tue","AM"],"strong":"a"}],"legal":164850,"maxRaw":28,"opts":["Anna|Bruno|Eli|Mark|Anna|Mark|Sara|Bruno|Lucy|Lucy;0,1","Anna|Bruno|Eli|Mark|Mark|Anna|Sara|Bruno|Lucy|Lucy;0,1","Bruno|Anna|Eli|Mark|Anna|Mark|Sara|Bruno|Lucy|Lucy;0,1","Bruno|Anna|Eli|Mark|Mark|Anna|Sara|Bruno|Lucy|Lucy;0,1","Eli|Bruno|Mark|Mark|Anna|Anna|Sara|Bruno|Lucy|Lucy;0,1"],"denom":36,"target":77.77777777777777,"prefMax":[6,6,4,6,3,3],"labels":["Monday or Wednesday","Monday or Thursday","not same day as Bruno","Tuesday or <span class=\"strong\">Wednesday</span>","<span class=\"strong\">Thursday AM</span>","<span class=\"strong\">Monday AM</span> or Tuesday AM"]},{"title":"LEVEL 3","workloads":[4,2,2,2,1,1],"unavailable":[[],["Wed"],["Fri"],["Mon"],["Thu"],["Tue"]],"nc":[1,3,2,3,5,4],"reqs":[{"kind":"days","a":"Tue","b":"Wed"},{"kind":"same","target":0},{"kind":"pm"},{"kind":"not","target":0},{"kind":"exact_or","a":["Mon","AM"],"b":["Wed","PM"],"strong":"a"},{"kind":"exact_or","a":["Fri","AM"],"b":["Fri","PM"],"strong":"a"}],"legal":264572,"maxRaw":27,"opts":["Anna|Bruno|Anna|Anna|Anna|Lucy|Mark|Lucy|Eli|Mark;1,4","Anna|Bruno|Anna|Lucy|Anna|Anna|Mark|Lucy|Eli|Mark;1,4","Anna|Lucy|Anna|Bruno|Anna|Anna|Mark|Lucy|Eli|Mark;1,4","Anna|Lucy|Bruno|Anna|Anna|Anna|Mark|Lucy|Eli|Mark;1,4","Bruno|Anna|Anna|Anna|Anna|Lucy|Mark|Lucy|Eli|Mark;1,4","Bruno|Anna|Anna|Lucy|Anna|Anna|Mark|Lucy|Eli|Mark;1,4","Bruno|Lucy|Anna|Anna|Anna|Anna|Mark|Lucy|Eli|Mark;1,4"],"denom":35,"target":77.14285714285714,"prefMax":[8,4,4,4,3,3],"labels":["Tuesday or Wednesday","same day as Anna","PM shifts","not same day as Anna","<span class=\"strong\">Monday AM</span> or Wednesday PM","<span class=\"strong\">Friday AM</span> or Friday PM"]}];
+const NAMES=["Anna", "Bruno", "Lucy", "Mark", "Sara", "Eli"], DAYS=["Mon", "Tue", "Wed", "Thu", "Fri"];
+let li=0, selected=0, R=Array(10).fill(null), NC=[null,null];
+const $=id=>document.getElementById(id), L=()=>LEVELS[li];
 
-let levelIndex=0;
-let selected=0;
-let roster=Array(10).fill(null); // day-major: Mon AM, Mon PM, Tue AM...
-let nc=[null,null];
-
-const $=id=>document.getElementById(id);
-const L=()=>LEVELS[levelIndex];
-const countFor=i=>roster.filter(x=>x===i).length+nc.filter(x=>x===i).length;
-const slotIndex=(dayIndex,period)=>dayIndex*2+(period==="PM"?1:0);
-
-function resetLevel(){
-  selected=0; roster=Array(10).fill(null); nc=[null,null];
-  $("result").style.display="none"; $("solution").style.display="none";
-  render();
+function count(i){return R.filter(x=>x===i).length+NC.filter(x=>x===i).length}
+function reset(){
+  selected=0; R=Array(10).fill(null); NC=[null,null];
+  $("result").style.display="none"; $("solution").style.display="none"; render();
 }
-
-function canAddClinical(person,k){
-  if(roster[k]!==null) return false;
-  if(countFor(person)>=L().workloads[person]) return false;
+function canClinical(i,k){
+  if(R[k]!==null) return true;
+  if(count(i)>=L().workloads[i]) return false;
   const d=DAYS[Math.floor(k/2)];
-  return L().available[person].includes(d);
+  return !L().unavailable[i].includes(d);
 }
-function canAddNc(person,q){
-  if(nc[q]!==null) return false;
-  if(countFor(person)>=L().workloads[person]) return false;
-  if(nc.includes(person)) return false;
-  return true;
+function canNC(i,q){
+  if(NC[q]!==null) return true;
+  return count(i)<L().workloads[i] && !NC.includes(i);
 }
-
 function render(){
-  $("target").textContent=`TARGET ${L().best.toFixed(1)}%`;
-  $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button data-i="${i}" class="${i===levelIndex?"on":""}">LEVEL ${i+1}</button>`).join("");
-  $("levelnav").querySelectorAll("button").forEach(b=>b.onclick=()=>{levelIndex=+b.dataset.i;resetLevel();});
+  $("meta").textContent=`${L().title} · TARGET ${L().target.toFixed(1)}%`;
+  $("levelnav").innerHTML=LEVELS.map((x,i)=>`<button class="${i===li?'on':''}" data-i="${i}">${i+1}</button>`).join("");
+  $("levelnav").querySelectorAll("button").forEach(b=>b.onclick=()=>{li=+b.dataset.i;reset()});
 
   $("staff").innerHTML=NAMES.map((n,i)=>{
-    const dots="●".repeat(L().nc[i])+"○".repeat(3-L().nc[i]);
-    const unavailable=L().unavailable[i].length ? `Unavailable: ${L().unavailable[i].join(" · ")}` : "";
-    const c=countFor(i), done=c===L().workloads[i];
-    return `<div class="staff ${selected===i?"on":""}" data-i="${i}">
-      <div class="stafftop"><span class="name">${n} · ${L().workloads[i]} session${L().workloads[i]===1?"":"s"}</span><span class="dots">NC ${dots}</span></div>
-      <div class="pref">Prefers: ${L().prefText[i]}</div>
-      <div class="bottom"><span class="unavail">${unavailable}</span><span class="count ${done?"done":""}">${done?"✓ ":""}${c}/${L().workloads[i]}</span></div>
+    const dots="●".repeat(L().nc[i])+"○".repeat(5-L().nc[i]);
+    const u=L().unavailable[i].length ? `Unavailable: ${L().unavailable[i].join(" · ")}` : "&nbsp;";
+    return `<div class="staff ${selected===i?'on':''}" data-i="${i}">
+      <div class="stafftop"><span class="nm">${n} · ${L().workloads[i]} session${L().workloads[i]===1?'':'s'}</span><span class="ncpri">NC ${dots}</span></div>
+      <div class="pref">Prefers: ${L().labels[i]}</div>
+      <div class="unavail">${u}<span class="count">${count(i)}/${L().workloads[i]}</span></div>
     </div>`;
   }).join("");
-  $("staff").querySelectorAll(".staff").forEach(card=>card.onclick=()=>{selected=+card.dataset.i;render();});
+  $("staff").querySelectorAll(".staff").forEach(x=>x.onclick=()=>{selected=+x.dataset.i;render()});
 
-  let g=`<div class="corner"></div>${DAYS.map(d=>`<div class="dayhead">${d.toUpperCase()}</div>`).join("")}`;
-  ["AM","PM"].forEach(period=>{
-    g+=`<div class="rowhead">${period}</div>`;
-    DAYS.forEach((d,di)=>{
-      const k=slotIndex(di,period), who=roster[k];
-      const blocked=who===null && !canAddClinical(selected,k);
-      const cls=`slot ${who===null?"empty":""} ${blocked?"blocked":""}`;
-      g+=`<button class="${cls}" data-k="${k}">${who===null?"＋":NAMES[who]}</button>`;
-    });
-  });
-  $("rostergrid").innerHTML=g;
-  $("rostergrid").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
+  let h='<div class="corner"></div>'+DAYS.map(d=>`<div class="day">${d.toUpperCase()}</div>`).join("");
+  for(const half of ["AM","PM"]){
+    h+=`<div class="half">${half}</div>`;
+    for(let di=0;di<5;di++){
+      const k=di*2+(half==="PM"?1:0), who=R[k];
+      const blocked=who===null&&!canClinical(selected,k);
+      h+=`<button class="slot ${blocked?'blocked':''}" data-k="${k}">${who===null?'＋':NAMES[who]}</button>`;
+    }
+  }
+  $("board").innerHTML=h;
+  $("board").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
     const k=+b.dataset.k;
-    if(roster[k]!==null){roster[k]=null;render();return;}
-    if(!canAddClinical(selected,k)) return;
-    roster[k]=selected; render();
+    if(R[k]!==null){R[k]=null;render();return}
+    if(canClinical(selected,k)){R[k]=selected;render()}
   });
 
-  document.querySelectorAll(".nc").forEach(b=>{
-    const q=+b.dataset.nc, who=nc[q], blocked=who===null&&!canAddNc(selected,q);
+  document.querySelectorAll(".ncslot").forEach(b=>{
+    const q=+b.dataset.q, who=NC[q], blocked=who===null&&!canNC(selected,q);
     b.textContent=who===null?"＋":NAMES[who];
-    b.className=`nc ${who===null?"empty":""} ${blocked?"blocked":""}`;
+    b.classList.toggle("blocked",blocked);
     b.onclick=()=>{
-      if(nc[q]!==null){nc[q]=null;render();return;}
-      if(!canAddNc(selected,q)) return;
-      nc[q]=selected; render();
+      if(NC[q]!==null){NC[q]=null;render();return}
+      if(canNC(selected,q)){NC[q]=selected;render()}
     };
   });
 }
 
-function prefScore(i,assigned){
-  const kind=L().prefKind[i], data=L().prefData[i], n=assigned.length, S=new Set(assigned);
-  let score=0,den=0;
-  if(kind==="pm"){den=n;score=assigned.filter(k=>k%2===1).length;}
-  else if(kind==="am"){den=n;score=assigned.filter(k=>k%2===0).length;}
-  else if(kind==="exact"){
-    const ex=data;
-    den=Math.min(ex.length,n); score=ex.filter(k=>S.has(k)).length;
+function scoreReq(r,i){
+  let score=0, targetDays=null;
+  if(r.kind==="same"||r.kind==="not"){
+    targetDays=new Set();
+    R.forEach((p,k)=>{if(p===r.target)targetDays.add(DAYS[Math.floor(k/2)])});
   }
-  else if(kind==="double"){
-    den=Math.min(2,n); score=DAYS.some((_,j)=>S.has(j*2)&&S.has(j*2+1))?2:0;
-  }
-  else if(kind==="exact_double"){
-    den=Math.min(2,n); const j=data; score=(S.has(j*2)&&S.has(j*2+1))?2:0;
-  }
-  else if(kind==="separate"){
-    den=n; score=n;
-    for(let j=0;j<5;j++) if(S.has(j*2)&&S.has(j*2+1)) score-=2;
-  }
-  else if(kind==="spaced" || kind==="spaced2"){
-    den=n;
-    if(n<=1) score=n;
-    else {
-      const ds=assigned.map(k=>Math.floor(k/2)).sort((a,b)=>a-b);
-      const ok=(ds.length===2 && Math.abs(ds[1]-ds[0])>=2);
-      score=ok?n:0;
-    }
-  }
-  else if(kind==="avoid_same"){
-    den=n;
-    const target=data;
-    const targetDays=new Set();
-    roster.forEach((person,k)=>{if(person===target) targetDays.add(Math.floor(k/2));});
-    score=assigned.filter(k=>!targetDays.has(Math.floor(k/2))).length;
-  }
-  else if(kind==="day_or"){
-    den=n>0?1:0;
-    score=assigned.some(k=>data.includes(Math.floor(k/2)))?1:0;
-  }
-  else if(kind==="day"){
-    den=n>0?1:0;
-    score=assigned.some(k=>Math.floor(k/2)===data)?1:0;
-  }
-  else if(kind==="two_doubles"){
-    den=Math.min(4,n); let pairs=0;
-    for(let j=0;j<5;j++) if(S.has(j*2)&&S.has(j*2+1)) pairs++;
-    score=Math.min(4,pairs*2);
-  }
-  else if(kind==="double_third_gap"){
-    den=n; let best=0;
-    for(let j=0;j<5;j++){
-      if(S.has(j*2)&&S.has(j*2+1)){
-        let v=2;
-        if(n>=3){
-          const rem=assigned.filter(k=>Math.floor(k/2)!==j).map(k=>Math.floor(k/2));
-          if(rem.length && rem.every(rd=>rd!==j+1)) v++;
-        }
-        best=Math.max(best,v);
-      }
-    }
-    score=Math.min(best,n);
-  }
-  return [score,den];
-}
-
-function signature(){
-  return roster.map(x=>NAMES[x]).join("|")+";"+nc.slice().sort((a,b)=>a-b).join(",");
-}
-
-function checkRoster(){
-  const box=$("result"); box.style.display="block";
-  if(roster.some(x=>x===null)||nc.some(x=>x===null)){
-    box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots.";
-    return;
-  }
-  for(let i=0;i<6;i++){
-    if(countFor(i)!==L().workloads[i]){
-      box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${countFor(i)}/${L().workloads[i]} sessions.`;
-      return;
-    }
-  }
-  let ordinary=0,den=0,lines=[];
-  for(let i=0;i<6;i++){
-    const a=[]; roster.forEach((x,k)=>{if(x===i)a.push(k);});
-    const [s,d]=prefScore(i,a); ordinary+=s; den+=d;
-    lines.push(`${NAMES[i]} ${s}/${d}`);
-  }
-  const bonus=nc.reduce((sum,i)=>sum+L().nc[i],0);
-  const pct=100*(ordinary+bonus)/(den+L().topNc);
-  const exact=L().opts.includes(signature());
-  let msg=`<div class="score">HAPPINESS ${pct.toFixed(1)}%</div><div>Target ${L().best.toFixed(1)}%</div><div style="margin-top:5px">${lines.join(" · ")}</div><div>NC bonus +${bonus}</div>`;
-  if(exact) msg+=`<div class="optimal" style="margin-top:5px">OPTIMAL ROSTER ✓</div>`;
-  else if(Math.abs(pct-L().best)<0.051) msg+=`<div style="color:var(--pink);font-weight:900;margin-top:5px">SCORING MISMATCH</div>`;
-  box.innerHTML=msg;
-}
-
-function renderSolution(){
-  const sig=L().opts[0], parts=sig.split(";"), rr=parts[0].split("|"), ni=parts[1].split(",").map(Number);
-  let h=`<div class="solution-title">AN OPTIMAL SOLUTION</div><div class="solutiongrid"><div></div>${DAYS.map(d=>`<div class="solhead">${d.toUpperCase()}</div>`).join("")}`;
-  ["AM","PM"].forEach(period=>{
-    h+=`<div class="solhead">${period}</div>`;
-    DAYS.forEach((d,di)=>{
-      const k=slotIndex(di,period);
-      h+=`<div class="solcell">${rr[k]}</div>`;
-    });
+  R.forEach((p,k)=>{
+    if(p!==i)return;
+    const d=DAYS[Math.floor(k/2)], half=(k%2===0?"AM":"PM");
+    let v=0;
+    if(r.kind==="am"&&half==="AM")v=r.strong==="all"?3:2;
+    else if(r.kind==="pm"&&half==="PM")v=r.strong==="all"?3:2;
+    else if(r.kind==="day"&&d===r.a)v=r.strong==="a"?3:2;
+    else if(r.kind==="days"){
+      if(d===r.a)v=r.strong==="a"?3:2;
+      else if(d===r.b)v=r.strong==="b"?3:2;
+    }else if(r.kind==="exact"&&d===r.a[0]&&half===r.a[1])v=r.strong==="a"?3:2;
+    else if(r.kind==="exact_or"){
+      if(d===r.a[0]&&half===r.a[1])v=r.strong==="a"?3:2;
+      else if(d===r.b[0]&&half===r.b[1])v=r.strong==="b"?3:2;
+    }else if(r.kind==="same"&&targetDays.has(d))v=r.strong==="all"?3:2;
+    else if(r.kind==="not"&&!targetDays.has(d))v=r.strong==="all"?3:2;
+    score+=v;
   });
-  h+=`</div><div class="solnc"><div class="solhead">NC</div><div class="solcell">${NAMES[ni[0]]}</div><div class="solcell">${NAMES[ni[1]]}</div></div>`;
-  const box=$("solution"); box.innerHTML=h; box.style.display="block";
+  return score;
 }
+function signature(){return R.map(x=>NAMES[x]).join("|")+";"+NC.slice().sort((a,b)=>a-b).join(",")}
+$("check").onclick=()=>{
+  const box=$("result"); box.style.display="block";
+  if(R.some(x=>x===null)||NC.some(x=>x===null)){
+    box.innerHTML="<b>Roster incomplete.</b> Fill all 10 clinical shifts and both NC spots."; return;
+  }
+  for(let i=0;i<6;i++){
+    if(count(i)!==L().workloads[i]){
+      box.innerHTML=`<b>Workload mismatch.</b> ${NAMES[i]} has ${count(i)}/${L().workloads[i]} sessions.`; return;
+    }
+  }
+  const personScores=NAMES.map((_,i)=>scoreReq(L().reqs[i],i));
+  const clinical=personScores.reduce((a,b)=>a+b,0);
+  const ncBonus=NC.reduce((a,i)=>a+L().nc[i],0);
+  const raw=clinical+ncBonus, pct=100*raw/L().denom;
+  const exact=L().opts.includes(signature());
+  let lines=NAMES.map((n,i)=>`<div class="resultline"><span>${n}</span><span>${personScores[i]}/${L().prefMax[i]}</span></div>`).join("");
+  box.innerHTML=`<div class="good">HAPPINESS ${pct.toFixed(1)}% · target ${L().target.toFixed(1)}%</div>${lines}
+  <div class="resultline"><span>NC bonus</span><span>+${ncBonus}</span></div>`;
+  if(raw===L().maxRaw&&!exact) box.innerHTML+='<div class="warn">SCORING MISMATCH — optimal score but roster not in verified optimum set.</div>';
+  else if(exact) box.innerHTML+='<div class="good">OPTIMAL ROSTER ✓</div>';
+};
 
-$("clearBtn").onclick=resetLevel;
-$("checkBtn").onclick=checkRoster;
-$("revealBtn").onclick=renderSolution;
+$("clear").onclick=reset;
+$("reveal").onclick=()=>{
+  const [rr,nn]=L().opts[0].split(";"), a=rr.split("|"), nc=nn.split(",").map(Number);
+  let h='<b>AN OPTIMAL SOLUTION</b><div class="solutionboard"><div></div>'+DAYS.map(d=>`<div class="solhead">${d.toUpperCase()}</div>`).join("");
+  for(const half of ["AM","PM"]){
+    h+=`<div class="solhead">${half}</div>`;
+    for(let di=0;di<5;di++){
+      const k=di*2+(half==="PM"?1:0);
+      h+=`<div class="solcell">${a[k]}</div>`;
+    }
+  }
+  h+='</div><div class="solnc"><b>NC:</b> '+NAMES[nc[0]]+' · '+NAMES[nc[1]]+'</div>';
+  $("solution").style.display="block"; $("solution").innerHTML=h;
+};
 render();
 </script>
 </body>
